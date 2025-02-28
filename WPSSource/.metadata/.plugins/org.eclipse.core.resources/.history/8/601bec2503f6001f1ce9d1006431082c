@@ -1,0 +1,80 @@
+/*
+ * BOARD.c
+ *
+ *  Created on: Feb 28, 2025
+ *      Author: stipi
+ */
+
+#include "BOARD.h"
+
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+int SystemClock_Config(void)
+{
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the SYSCLKSource and SYSCLKDivider
+  */
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKDivider = RCC_RC64MPLL_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_WAIT_STATES_1) != HAL_OK)
+  {
+	  return INIT_ERROR;
+  }
+  return INIT_OK;
+}
+
+/**
+  * @brief Peripherals Common Clock Configuration
+  * @retval None
+  */
+int PeriphCommonClock_Config(void)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+
+  /** Initializes the peripherals clock
+  */
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SMPS;
+  PeriphClkInitStruct.SmpsDivSelection = RCC_SMPSCLK_DIV4;
+
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+  {
+	  return INIT_ERROR;
+  }
+  return INIT_OK;
+}
+
+
+//Initializes the board
+int BOARD_Init(void){
+	if(PeriiphCommonClock_Config() == INIT_ERROR){
+		BOARD_CrashHandler();
+	}
+	if(SystemClock_Config() == INIT_ERROR){
+		BOARD_CrashHandler();
+	}
+	return INIT_OK;
+}
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void BOARD_CrashHandler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */
+}
+
+
+
+

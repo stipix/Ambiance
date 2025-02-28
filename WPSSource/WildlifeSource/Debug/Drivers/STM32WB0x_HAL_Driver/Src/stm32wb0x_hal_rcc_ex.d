@@ -20,6 +20,8 @@ Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_rcc_ex.o: \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_flash_ex.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_gpio.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_gpio_ex.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_i2c.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_i2c_ex.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_pwr.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_pwr.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_system.h \
@@ -50,6 +52,8 @@ Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_rcc_ex.o: \
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_flash_ex.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_gpio.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_gpio_ex.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_i2c.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_i2c_ex.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_pwr.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_pwr.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_system.h:

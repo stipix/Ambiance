@@ -25,6 +25,5 @@ C_DEPS :=
 SUBDIRS := \
 Core/Src \
 Core/Startup \
-Drivers/BSP/STM32WB0x-nucleo \
 Drivers/STM32WB0x_HAL_Driver/Src \
 

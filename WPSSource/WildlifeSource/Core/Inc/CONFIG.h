@@ -8,18 +8,19 @@
 #ifndef INC_CONFIG_H_
 #define INC_CONFIG_H_
 
-typedef struct UpdateReturntype{
+typedef struct EventReturntype{
 	uint16_t data;
 	uint8_t status;
-}Update_t;
+}Event_t;
 #define ERROR -1
 
-//Include Update module header files here
+//Include event module header files here
+#include "GPIO.h"
 
 //Add the initialization, Updater, and handler functions to these lists
-#define EVENTLISTSIZE 0
-uint8_t (*InitList[EVENTLISTSIZE])(void) = {};
-Update_t (*UpdateList[EVENTLISTSIZE])(void) = {};
-uint8_t (*HandlerList[EVENTLISTSIZE])(Update_t update) = {};
+#define EVENTLISTSIZE 1
+uint8_t (*InitList[EVENTLISTSIZE])(void) = 					{&GPIO_Event_Init()		};
+Event_t (*UpdateList[EVENTLISTSIZE])(void) = 				{&GPIO_Event_Updater()	};
+uint8_t (*HandlerList[EVENTLISTSIZE])(Update_t update) = 	{&GPIO_Event_Handler()	};
 
 #endif /* INC_CONFIG_H_ */

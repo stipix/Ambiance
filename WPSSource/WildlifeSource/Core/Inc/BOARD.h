@@ -2,15 +2,21 @@
  * BOARD.h
  *
  *  Created on: Feb 7, 2025
- *      Author: stipi
+ *  Author: Caitlin Bonesio
  */
 
-#ifndef INC_BOARD_H_
-#define INC_BOARD_H_
+#ifndef BOARD_H
+#define BOARD_H
+
+
+#include "stm32wb0x_hal.h"
+
+#define INIT_ERROR 0
+#define INIT_OK 1
 
 //Initializes the board
 int BOARD_Init(void);
 
-void BOARD_CrashHandler(*CrashedUpdater(void));
+void BOARD_CrashHandler(void);
 
-#endif /* INC_BOARD_H_ */
+#endif /* BOARD_H */

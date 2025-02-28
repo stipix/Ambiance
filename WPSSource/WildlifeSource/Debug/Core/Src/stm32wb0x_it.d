@@ -1,4 +1,4 @@
-Core/Src/stm32wb0x_it.o: ../Core/Src/stm32wb0x_it.c ../Core/Inc/main.h \
+Core/Src/stm32wb0x_it.o: ../Core/Src/stm32wb0x_it.c ../Core/Inc/BOARD.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal.h \
  ../Core/Inc/stm32wb0x_hal_conf.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_dma.h \
@@ -19,6 +19,8 @@ Core/Src/stm32wb0x_it.o: ../Core/Src/stm32wb0x_it.c ../Core/Inc/main.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_flash_ex.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_gpio.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_gpio_ex.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_i2c.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_i2c_ex.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_pwr.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_pwr.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_system.h \
@@ -29,11 +31,8 @@ Core/Src/stm32wb0x_it.o: ../Core/Src/stm32wb0x_it.c ../Core/Inc/main.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_rcc_ex.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h \
- ../Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.h \
- ../Core/Inc/stm32wb0x_nucleo_conf.h \
- ../Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h \
  ../Core/Inc/stm32wb0x_it.h
-../Core/Inc/main.h:
+../Core/Inc/BOARD.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal.h:
 ../Core/Inc/stm32wb0x_hal_conf.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_dma.h:
@@ -54,6 +53,8 @@ Core/Src/stm32wb0x_it.o: ../Core/Src/stm32wb0x_it.c ../Core/Inc/main.h \
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_flash_ex.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_gpio.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_gpio_ex.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_i2c.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_i2c_ex.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_pwr.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_pwr.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_system.h:
@@ -64,7 +65,4 @@ Core/Src/stm32wb0x_it.o: ../Core/Src/stm32wb0x_it.c ../Core/Inc/main.h \
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_rcc_ex.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h:
-../Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.h:
-../Core/Inc/stm32wb0x_nucleo_conf.h:
-../Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h:
 ../Core/Inc/stm32wb0x_it.h:

@@ -1,0 +1,7 @@
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_lpuart.h:1660:26:LL_LPUART_IsActiveFlag_RXNE_RXFNE	16	static
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_lpuart.h:1684:26:LL_LPUART_IsActiveFlag_TXE_TXFNF	16	static
+../Core/Src/UART.c:11:12:MX_LPUART1_UART_Init	8	static
+../Core/Src/UART.c:47:5:UART_Init	8	static
+../Core/Src/UART.c:52:6:UART_ReadRx	8	static
+../Core/Src/UART.c:61:6:UART_WriteTx	16	static
+../Core/Src/UART.c:71:5:main	24	static
