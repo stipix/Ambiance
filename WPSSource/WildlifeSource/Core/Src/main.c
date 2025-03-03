@@ -145,6 +145,8 @@ int main(void)
     BSP_LED_Toggle(LED_RED);
     HAL_Delay(delay);
 
+    printf("testing\r\n");
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
