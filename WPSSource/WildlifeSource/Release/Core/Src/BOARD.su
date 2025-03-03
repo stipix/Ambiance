@@ -1,0 +1,4 @@
+../Core/Src/BOARD.c:15:5:SystemClock_Config	16	static
+../Core/Src/BOARD.c:35:5:PeriphCommonClock_Config	32	static
+../Core/Src/BOARD.c:53:5:BOARD_Init	8	static
+../Core/Src/BOARD.c:68:6:BOARD_CrashHandler	0	static,ignoring_inline_asm

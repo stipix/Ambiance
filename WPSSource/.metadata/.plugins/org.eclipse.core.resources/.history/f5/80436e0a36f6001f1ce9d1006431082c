@@ -1,0 +1,93 @@
+#include "UART.h"
+#include "BOARD.h"
+
+#include "stm32wb05.h"
+#include "stm32wb0x_ll_lpuart.h"
+
+
+UART_HandleTypeDef hlpuart1;
+
+/**
+  * @brief LPUART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static int MX_LPUART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN LPUART1_Init 0 */
+
+  /* USER CODE END LPUART1_Init 0 */
+
+  /* USER CODE BEGIN LPUART1_Init 1 */
+
+  /* USER CODE END LPUART1_Init 1 */
+  hlpuart1.Instance = LPUART1;
+  hlpuart1.Init.BaudRate = 9600;
+  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
+  hlpuart1.Init.StopBits = UART_STOPBITS_1;
+  hlpuart1.Init.Parity = UART_PARITY_NONE;
+  hlpuart1.Init.Mode = UART_MODE_TX_RX;
+  hlpuart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&hlpuart1) != HAL_OK)
+  {
+    return INIT_ERROR;
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&hlpuart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+	  return INIT_ERROR;
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&hlpuart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+	  return INIT_ERROR;
+  }
+  return INIT_OK;
+
+}
+
+int UART_Init(void){
+	return MX_LPUART1_UART_Init();
+}
+
+
+char UART_ReadRx(void){
+	if(LL_LPUART_IsActiveFlag_RXNE_RXFNE(LPUART1)){
+		return LL_LPUART_ReadReg(LPUART1, RDR);
+	}else {
+		return 0;
+	}
+
+}
+
+void UART_WriteTx(char input){
+	if (LL_LPUART_IsActiveFlag_TXE_TXFNF(LPUART1)){
+		LL_LPUART_WriteReg(LPUART1, RDR, input);
+	}
+}
+
+
+#define UARTTESTHARNESS
+
+#ifdef UARTTESTHARNESS
+#include "BOARD.h"
+#include "CONFIG.h"
+
+int main(){
+	BOARD_Init();
+	UART_Init();
+	while (1){
+		char Rx = UART_ReadRx();
+		if(Rx){
+			UART_WriteTx(Rx);
+		}
+	}
+
+}
+#endif
+
+
+
+

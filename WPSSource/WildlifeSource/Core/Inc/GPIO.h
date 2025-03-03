@@ -1,6 +1,10 @@
-#include "CONFIG.h"
 #ifndef GPIO_H
 #define GPIO_H
+
+
+
+#include "CONFIG.h"
+
 int GPIO_Init(void);
 
 uint8_t GPIO_ReadButtons(void);

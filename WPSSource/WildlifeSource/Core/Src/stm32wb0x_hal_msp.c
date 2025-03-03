@@ -98,7 +98,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     PeriphClkInitStruct.LPUART1ClockSelection = RCC_LPUART1_CLKSOURCE_16M;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
     {
-      Error_Handler();
+      BOARD_CrashHandler();
     }
 
     /* Peripheral clock enable */
