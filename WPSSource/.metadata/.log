@@ -70,3 +70,33 @@ Command-line arguments:  -os win32 -ws win32 -arch x86_64
 
 !ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-02-28 16:44:05.601
 !MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2025-03-03 11:59:48.576 -----------------------------------------------
+eclipse.buildId=Version 1.17.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -data file:/C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-03 12:00:51.014
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-03 12:00:51.127
+!MESSAGE Log4j2 initialized with config file C:\Users\stipi\Desktop\HWstuff\ECE129\WildlifeSource\WPSSource\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-03 12:01:26.040
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2025-03-03 12:02:25.739 -----------------------------------------------
+eclipse.buildId=Version 1.17.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -data file:/C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-03 12:02:35.685
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-03 12:02:35.690
+!MESSAGE Log4j2 initialized with config file C:\Users\stipi\Desktop\HWstuff\ECE129\WildlifeSource\WPSSource\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-03 12:02:56.480
+!MESSAGE Started RMI Server, listening on port 41337

@@ -64,24 +64,33 @@ char UART_ReadRx(void){
 
 void UART_WriteTx(char input){
 	if (LL_LPUART_IsActiveFlag_TXE_TXFNF(LPUART1)){
-		LL_LPUART_WriteReg(LPUART1, RDR, input);
+		LL_LPUART_WriteReg(LPUART1, TDR, input);
 	}
 }
 
 
-#define UARTTESTHARNESS
+//#define UARTTESTHARNESS
 
 #ifdef UARTTESTHARNESS
 #include "BOARD.h"
+#include "stm32wb0x_nucleo.h"
+
 
 int main(){
+	HAL_Init();
 	BOARD_Init();
+	BSP_LED_Init(LED_BLUE);
 	UART_Init();
 	while (1){
 		char Rx = 'H';
 		if(Rx){
 			UART_WriteTx(Rx);
 		}
+
+	    BSP_LED_Toggle(LED_BLUE);
+
+		HAL_Delay(500);
+
 	}
 
 }

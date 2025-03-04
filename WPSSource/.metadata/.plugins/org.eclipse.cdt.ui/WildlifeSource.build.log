@@ -1,39 +1,20 @@
-10:22:51 **** Incremental Build of configuration Release for project WildlifeSource ****
+12:32:52 **** Incremental Build of configuration Debug for project WildlifeSource ****
 make -j12 all 
-arm-none-eabi-gcc "../Core/Src/UART.c" -mcpu=cortex-m0plus -std=gnu11 -DUSE_HAL_DRIVER -DSTM32WB05 -c -I../Core/Inc -I../Drivers/STM32WB0x_HAL_Driver/Inc -I../Drivers/STM32WB0x_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32WB0X/Include -I../Drivers/CMSIS/Include -Os -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/UART.d" -MT"Core/Src/UART.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/UART.o"
-../Core/Src/UART.c: In function 'main':
-../Core/Src/UART.c:81:11: error: 'BspCOMInit' undeclared (first use in this function)
-   81 |           BspCOMInit.BaudRate   = 115200;
-      |           ^~~~~~~~~~
-../Core/Src/UART.c:81:11: note: each undeclared identifier is reported only once for each function it appears in
-../Core/Src/UART.c:82:35: error: 'COM_WORDLENGTH_8B' undeclared (first use in this function); did you mean 'UART_WORDLENGTH_8B'?
-   82 |           BspCOMInit.WordLength = COM_WORDLENGTH_8B;
-      |                                   ^~~~~~~~~~~~~~~~~
-      |                                   UART_WORDLENGTH_8B
-../Core/Src/UART.c:83:35: error: 'COM_STOPBITS_1' undeclared (first use in this function); did you mean 'UART_STOPBITS_1'?
-   83 |           BspCOMInit.StopBits   = COM_STOPBITS_1;
-      |                                   ^~~~~~~~~~~~~~
-      |                                   UART_STOPBITS_1
-../Core/Src/UART.c:84:35: error: 'COM_PARITY_NONE' undeclared (first use in this function); did you mean 'UART_PARITY_NONE'?
-   84 |           BspCOMInit.Parity     = COM_PARITY_NONE;
-      |                                   ^~~~~~~~~~~~~~~
-      |                                   UART_PARITY_NONE
-../Core/Src/UART.c:85:35: error: 'COM_HWCONTROL_NONE' undeclared (first use in this function); did you mean 'UART_HWCONTROL_NONE'?
-   85 |           BspCOMInit.HwFlowCtl  = COM_HWCONTROL_NONE;
-      |                                   ^~~~~~~~~~~~~~~~~~
-      |                                   UART_HWCONTROL_NONE
-../Core/Src/UART.c:86:15: warning: implicit declaration of function 'BSP_COM_Init' [-Wimplicit-function-declaration]
-   86 |           if (BSP_COM_Init(COM1, &BspCOMInit) != BSP_ERROR_NONE)
-      |               ^~~~~~~~~~~~
-../Core/Src/UART.c:86:28: error: 'COM1' undeclared (first use in this function)
-   86 |           if (BSP_COM_Init(COM1, &BspCOMInit) != BSP_ERROR_NONE)
-      |                            ^~~~
-../Core/Src/UART.c:86:50: error: 'BSP_ERROR_NONE' undeclared (first use in this function); did you mean 'FLASH_ERROR_NONE'?
-   86 |           if (BSP_COM_Init(COM1, &BspCOMInit) != BSP_ERROR_NONE)
-      |                                                  ^~~~~~~~~~~~~~
-      |                                                  FLASH_ERROR_NONE
-make: *** [Core/Src/subdir.mk:46: Core/Src/UART.o] Error 1
-"make -j12 all" terminated with exit code 2. Build might be incomplete.
+arm-none-eabi-gcc "../Core/Src/UART.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32WB05 -c -I../Core/Inc -I../Drivers/STM32WB0x_HAL_Driver/Inc -I../Drivers/STM32WB0x_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32WB0X/Include -I../Drivers/CMSIS/Include -I"C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/UART.d" -MT"Core/Src/UART.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/UART.o"
+arm-none-eabi-gcc -o "WildlifeSource.elf" @"objects.list"   -mcpu=cortex-m0plus -T"C:\Users\stipi\Desktop\HWstuff\ECE129\WildlifeSource\WPSSource\WildlifeSource\STM32WB05KZVX_FLASH.ld" --specs=nosys.specs -Wl,-Map="WildlifeSource.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: WildlifeSource.elf
+ 
+arm-none-eabi-size  WildlifeSource.elf 
+arm-none-eabi-objdump -h -S WildlifeSource.elf  > "WildlifeSource.list"
+arm-none-eabi-objcopy  -O ihex WildlifeSource.elf  "WildlifeSource.hex"
+   text	   data	    bss	    dec	    hex	filename
+   9664	     32	   3268	  12964	   32a4	WildlifeSource.elf
+Finished building: default.size.stdout
+ 
+Finished building: WildlifeSource.hex
+ 
+Finished building: WildlifeSource.list
+ 
 
-10:22:55 Build Failed. 8 errors, 1 warnings. (took 4s.26ms)
+12:32:53 Build Finished. 0 errors, 0 warnings. (took 1s.361ms)
 
