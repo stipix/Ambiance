@@ -4,4 +4,3 @@
 ../Core/Src/UART.c:51:5:UART_Init	8	static
 ../Core/Src/UART.c:56:6:UART_ReadRx	8	static
 ../Core/Src/UART.c:65:6:UART_WriteTx	16	static
-../Core/Src/UART.c:79:5:main	16	static

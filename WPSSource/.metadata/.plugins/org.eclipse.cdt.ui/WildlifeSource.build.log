@@ -1,6 +1,6 @@
-12:32:52 **** Incremental Build of configuration Debug for project WildlifeSource ****
+16:44:06 **** Incremental Build of configuration Debug for project WildlifeSource ****
 make -j12 all 
-arm-none-eabi-gcc "../Core/Src/UART.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32WB05 -c -I../Core/Inc -I../Drivers/STM32WB0x_HAL_Driver/Inc -I../Drivers/STM32WB0x_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32WB0X/Include -I../Drivers/CMSIS/Include -I"C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/UART.d" -MT"Core/Src/UART.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/UART.o"
+arm-none-eabi-gcc "../Core/Src/GPIO.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32WB05 -DUSE_NUCLEO_64 -c -I../Core/Inc -I../Drivers/STM32WB0x_HAL_Driver/Inc -I../Drivers/STM32WB0x_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32WB0X/Include -I../Drivers/CMSIS/Include -I"C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo" -I../Drivers/BSP/STM32WB0x-nucleo -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/GPIO.d" -MT"Core/Src/GPIO.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/GPIO.o"
 arm-none-eabi-gcc -o "WildlifeSource.elf" @"objects.list"   -mcpu=cortex-m0plus -T"C:\Users\stipi\Desktop\HWstuff\ECE129\WildlifeSource\WPSSource\WildlifeSource\STM32WB05KZVX_FLASH.ld" --specs=nosys.specs -Wl,-Map="WildlifeSource.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 Finished building target: WildlifeSource.elf
  
@@ -8,7 +8,7 @@ arm-none-eabi-size  WildlifeSource.elf
 arm-none-eabi-objdump -h -S WildlifeSource.elf  > "WildlifeSource.list"
 arm-none-eabi-objcopy  -O ihex WildlifeSource.elf  "WildlifeSource.hex"
    text	   data	    bss	    dec	    hex	filename
-   9664	     32	   3268	  12964	   32a4	WildlifeSource.elf
+  21964	     68	   3796	  25828	   64e4	WildlifeSource.elf
 Finished building: default.size.stdout
  
 Finished building: WildlifeSource.hex
@@ -16,5 +16,5 @@ Finished building: WildlifeSource.hex
 Finished building: WildlifeSource.list
  
 
-12:32:53 Build Finished. 0 errors, 0 warnings. (took 1s.361ms)
+16:44:07 Build Finished. 0 errors, 0 warnings. (took 1s.71ms)
 

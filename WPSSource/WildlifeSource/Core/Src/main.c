@@ -21,27 +21,28 @@
 // Includes ------------------------------------------------------------------
 //#include "BOARD.h"
 //
-//#include "stm32wb0x_hal.h"
-//#include "CONFIG.h"
-//#include "UART.h"
-//#include "GPIO.h"
+#include "BOARD.h"
+#include "CONFIG.h"
+#include "UART.h"
+#include "GPIO.h"
 
 // Private includes ----------------------------------------------------------
 
 // Private typedef -----------------------------------------------------------
 
 // Private define ------------------------------------------------------------
-#define TESTHARNESSACTIVE
+//#define TESTHARNESSACTIVE
 // Private macro -------------------------------------------------------------
 
 // Private variables ---------------------------------------------------------
 
+uint8_t (*InitList[EVENTLISTSIZE])(void) = EVENT_INITLIST;
+Event_t (*UpdateList[EVENTLISTSIZE])(void) = EVENT_UPDATELIST;
+uint8_t (*HandlerList[EVENTLISTSIZE])(Event_t update) = EVENT_HANDLERLIST;
 //I2C_HandleTypeDef hi2c1;
 
 #ifndef TESTHARNESSACTIVE
 // Private function prototypes -----------------------------------------------
-static void MX_GPIO_Init(void);
-static void MX_I2C1_Init(void);
 
 /**
   * @brief  The application entry point.
@@ -62,8 +63,6 @@ int main(void)
 	}
 
 	// Initialize all configured peripherals
-	MX_GPIO_Init();
-	MX_I2C1_Init();
 	if(UART_Init() != INIT_OK){
 		BOARD_CrashHandler();
 	}
@@ -71,7 +70,7 @@ int main(void)
 	Event_t updates[EVENTLISTSIZE];
 	//Initialize all modules
 	for(int i = 0; i < EVENTLISTSIZE; i++){
-		if ((*InitList[i])() == ERROR){
+		if ((*InitList[i])() == EVENT_ERROR){
 			return 0;//We've crashed
 		}
 	}
@@ -79,57 +78,23 @@ int main(void)
 		//run all module event checkers
 		for(int i = 0; i < EVENTLISTSIZE; i++){
 			updates[i] = (*UpdateList[i])();
-			if (updates[i].status == ERROR){
+			if (updates[i].status == EVENT_ERROR){
 				return 0;//We've crashed
 			}
 		}
 		//run all module event handlers
 		for(int i = 0; i < EVENTLISTSIZE; i++){
-			if(updates[i].status == 1){
-				if ((*HandlerList[i])(updates[i]) == ERROR){
+			if(updates[i].status != EVENT_NONE){
+				if ((*HandlerList[i])(updates[i]) == EVENT_ERROR){
 					BOARD_CrashHandler();
 				}
 			}
 		}
+
 	}
 }
 #endif
-///**
-//  * @brief I2C1 Initialization Function
-//  * @param None
-//  * @return None
-//  */
-//static void MX_I2C1_Init(void)
-//{
-//  hi2c1.Instance = I2C1;
-//  hi2c1.Init.Timing = 0x00303D5B;
-//  hi2c1.Init.OwnAddress1 = 0;
-//  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-//  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-//  hi2c1.Init.OwnAddress2 = 0;
-//  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-//  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-//  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-//  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-//  {
-//		BOARD_CrashHandler();
-//  }
-//
-//  /** Configure Analogue filter
-//  */
-//  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
-//  {
-//		BOARD_CrashHandler();
-//  }
-//
-//  /** Configure Digital filter
-//  */
-//  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
-//  {
-//		BOARD_CrashHandler();
-//  }
-//
-//}
+
 
 
 

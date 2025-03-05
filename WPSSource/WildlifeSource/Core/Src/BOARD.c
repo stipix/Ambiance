@@ -14,18 +14,30 @@
   */
 int SystemClock_Config(void)
 {
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /** Configure the SYSCLKSource and SYSCLKDivider
-  */
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
-  RCC_ClkInitStruct.SYSCLKDivider = RCC_RC64MPLL_DIV1;
+	/** Initializes the RCC Oscillators according to the specified parameters
+	* in the RCC_OscInitTypeDef structure.
+	*/
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+	RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+	{
+		return INIT_ERROR;
+	}
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_WAIT_STATES_1) != HAL_OK)
-  {
-	  return INIT_ERROR;
-  }
-  return INIT_OK;
+	/** Configure the SYSCLKSource and SYSCLKDivider
+	*/
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_RC64MPLL;
+	RCC_ClkInitStruct.SYSCLKDivider = RCC_RC64MPLL_DIV1;
+
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_WAIT_STATES_1) != HAL_OK)
+	{
+		return INIT_ERROR;
+	}
+	return INIT_OK;
 }
 
 /**
@@ -34,18 +46,18 @@ int SystemClock_Config(void)
   */
 int PeriphCommonClock_Config(void)
 {
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+	RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
-  /** Initializes the peripherals clock
-  */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SMPS;
-  PeriphClkInitStruct.SmpsDivSelection = RCC_SMPSCLK_DIV4;
+	/** Initializes the peripherals clock
+	*/
+	PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SMPS;
+	PeriphClkInitStruct.SmpsDivSelection = RCC_SMPSCLK_DIV4;
 
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-  {
-	  return INIT_ERROR;
-  }
-  return INIT_OK;
+	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+	{
+		return INIT_ERROR;
+	}
+	return INIT_OK;
 }
 
 
@@ -67,15 +79,17 @@ int BOARD_Init(void){
   */
 void BOARD_CrashHandler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
-  while (1)
-  {
+  while (1){
+
   }
-  /* USER CODE END Error_Handler_Debug */
 }
 
+void Error_Handler(void)
+{
+  __disable_irq();
+  while (1);
+}
 
 
 
