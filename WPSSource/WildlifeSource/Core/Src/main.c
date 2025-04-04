@@ -31,11 +31,11 @@
 // Private typedef -----------------------------------------------------------
 
 // Private define ------------------------------------------------------------
-//#define TESTHARNESSACTIVE
+//#define TESTHARNESSACTIVE// Define this when you are using a test harness for a module, disables main
 // Private macro -------------------------------------------------------------
 
 // Private variables ---------------------------------------------------------
-
+//Provides a list of all initialization, updater, and handler functions for each modules, functions are defined in CONFIG.h
 uint8_t (*InitList[EVENTLISTSIZE])(void) = EVENT_INITLIST;
 Event_t (*UpdateList[EVENTLISTSIZE])(void) = EVENT_UPDATELIST;
 uint8_t (*HandlerList[EVENTLISTSIZE])(Event_t update) = EVENT_HANDLERLIST;
@@ -45,19 +45,17 @@ uint8_t (*HandlerList[EVENTLISTSIZE])(Event_t update) = EVENT_HANDLERLIST;
 // Private function prototypes -----------------------------------------------
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ *
+ * @brief  The application entry point. Implements a simple events and services routine. the event checkers are called updaters
+ * `	   the services are called handlers
+ * @author Caitlin Bonesio
+ *
+ */
 
 int main(void)
 {
 
 	//MCU Configuration--------------------------------------------------------
-
-	//Reset of all peripherals, Initializes the Flash interface and the Systick.
-	HAL_Init();
-
-	// Configure the system clock
 	if( BOARD_Init() != INIT_OK){
 		BOARD_CrashHandler();
 	}
@@ -66,7 +64,7 @@ int main(void)
 	if(UART_Init() != INIT_OK){
 		BOARD_CrashHandler();
 	}
-	//uint8_t updateFlags[EVENTLISTSIZE];
+	//list of all updates from the updaters to be passed to handlers
 	Event_t updates[EVENTLISTSIZE];
 	//Initialize all modules
 	for(int i = 0; i < EVENTLISTSIZE; i++){
@@ -77,16 +75,16 @@ int main(void)
 	while(1){
 		//run all module event checkers
 		for(int i = 0; i < EVENTLISTSIZE; i++){
-			updates[i] = (*UpdateList[i])();
+			updates[i] = (*UpdateList[i])();//collect updates from the updaters
 			if (updates[i].status == EVENT_ERROR){
-				return 0;//We've crashed
+				BOARD_CrashHandler();//We've crashed
 			}
 		}
 		//run all module event handlers
 		for(int i = 0; i < EVENTLISTSIZE; i++){
-			if(updates[i].status != EVENT_NONE){
-				if ((*HandlerList[i])(updates[i]) == EVENT_ERROR){
-					BOARD_CrashHandler();
+			if(updates[i].status != EVENT_NONE){//If there is an update
+				if ((*HandlerList[i])(updates[i]) == EVENT_ERROR){//pass the updates to the handlers
+					BOARD_CrashHandler();//We've crashed
 				}
 			}
 		}

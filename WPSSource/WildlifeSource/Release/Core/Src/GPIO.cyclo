@@ -1,6 +1,5 @@
-../Core/Src/GPIO.c:10:13:MX_GPIO_Init	1
-../Core/Src/GPIO.c:36:5:GPIO_Init	1
-../Core/Src/GPIO.c:54:9:GPIO_ReadButtons	1
-../Core/Src/GPIO.c:60:9:GPIO_Event_Init	1
-../Core/Src/GPIO.c:75:9:GPIO_Event_Updater	2
-../Core/Src/GPIO.c:86:9:GPIO_Event_Handler	5
+../Core/Src/GPIO.c:40:5:GPIO_Init	1
+../Core/Src/GPIO.c:84:9:GPIO_ReadButtons	1
+../Core/Src/GPIO.c:96:9:GPIO_Event_Init	1
+../Core/Src/GPIO.c:118:9:GPIO_Event_Updater	2
+../Core/Src/GPIO.c:135:9:GPIO_Event_Handler	5

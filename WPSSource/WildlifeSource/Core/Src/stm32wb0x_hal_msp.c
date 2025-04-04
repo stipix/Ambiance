@@ -92,24 +92,31 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c)
   /* USER CODE END I2C1_MspInit 0 */
 
     __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
     /**I2C1 GPIO Configuration
     PA1     ------> I2C1_SDA
-    PA0     ------> I2C1_SCL
+    PB6     ------> I2C1_SCL
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_0;
+    GPIO_InitStruct.Pin = GPIO_PIN_1;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF0_I2C1;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    LL_PWR_SetNoPullA(LL_PWR_GPIO_BIT_1|LL_PWR_GPIO_BIT_0);
+    GPIO_InitStruct.Pin = GPIO_PIN_6;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF0_I2C1;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    LL_PWR_SetNoPullA(LL_PWR_GPIO_BIT_1);
+
+    LL_PWR_SetNoPullB(LL_PWR_GPIO_BIT_6);
 
     /* Peripheral clock enable */
     __HAL_RCC_I2C1_CLK_ENABLE();
-    /* I2C1 interrupt Init */
-    HAL_NVIC_SetPriority(I2C1_IRQn, 1, 0);
-    HAL_NVIC_EnableIRQ(I2C1_IRQn);
   /* USER CODE BEGIN I2C1_MspInit 1 */
 
   /* USER CODE END I2C1_MspInit 1 */
@@ -136,14 +143,12 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* hi2c)
 
     /**I2C1 GPIO Configuration
     PA1     ------> I2C1_SDA
-    PA0     ------> I2C1_SCL
+    PB6     ------> I2C1_SCL
     */
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_1);
 
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0);
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6);
 
-    /* I2C1 interrupt DeInit */
-    HAL_NVIC_DisableIRQ(I2C1_IRQn);
   /* USER CODE BEGIN I2C1_MspDeInit 1 */
 
   /* USER CODE END I2C1_MspDeInit 1 */
@@ -261,7 +266,7 @@ void HAL_RADIO_MspInit(RADIO_HandleTypeDef* hradio)
   /** Initializes the peripherals clock
   */
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RF;
-    PeriphClkInitStruct.RFClockSelection = RCC_RF_CLK_32M;
+    PeriphClkInitStruct.RFClockSelection = RCC_RF_CLK_16M;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
     {
       Error_Handler();

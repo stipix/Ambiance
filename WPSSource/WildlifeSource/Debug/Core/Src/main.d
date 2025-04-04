@@ -42,10 +42,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/BOARD.h \
  ../Core/Inc/stm32wb0x_nucleo_conf.h \
  C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h \
  ../Core/Inc/CONFIG.h ../Core/Inc/BOARD.h ../Core/Inc/GPIO.h \
- ../Core/Inc/CONFIG.h ../Core/Inc/UART.h \
- ../Drivers/CMSIS/Device/ST/STM32WB0X/Include/stm32wb05.h \
- ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_lpuart.h \
- ../Core/Inc/GPIO.h
+ ../Core/Inc/CONFIG.h ../Core/Inc/UART.h ../Core/Inc/GPIO.h
 ../Core/Inc/BOARD.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal.h:
 ../Core/Inc/stm32wb0x_hal_conf.h:
@@ -94,6 +91,4 @@ C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Dr
 ../Core/Inc/GPIO.h:
 ../Core/Inc/CONFIG.h:
 ../Core/Inc/UART.h:
-../Drivers/CMSIS/Device/ST/STM32WB0X/Include/stm32wb05.h:
-../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_lpuart.h:
 ../Core/Inc/GPIO.h:

@@ -1,7 +1,6 @@
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_bus.h:229:22:LL_AHB1_GRP1_EnableClock	24	static
-../Core/Src/GPIO.c:10:13:MX_GPIO_Init	32	static
-../Core/Src/GPIO.c:36:5:GPIO_Init	8	static
-../Core/Src/GPIO.c:54:9:GPIO_ReadButtons	16	static
-../Core/Src/GPIO.c:60:9:GPIO_Event_Init	8	static
-../Core/Src/GPIO.c:75:9:GPIO_Event_Updater	32	static
-../Core/Src/GPIO.c:86:9:GPIO_Event_Handler	16	static
+../Core/Src/GPIO.c:40:5:GPIO_Init	32	static
+../Core/Src/GPIO.c:84:9:GPIO_ReadButtons	16	static
+../Core/Src/GPIO.c:96:9:GPIO_Event_Init	8	static
+../Core/Src/GPIO.c:118:9:GPIO_Event_Updater	32	static
+../Core/Src/GPIO.c:135:9:GPIO_Event_Handler	16	static

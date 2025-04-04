@@ -1,5 +1,5 @@
-Core/Src/I2C.o: ../Core/Src/I2C.c ../Core/Inc/I2C.h ../Core/Inc/BOARD.h \
- ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal.h \
+Core/Src/I2C.o: ../Core/Src/I2C.c ../Core/Inc/I2C.h ../Core/Inc/CONFIG.h \
+ ../Core/Inc/BOARD.h ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal.h \
  ../Core/Inc/stm32wb0x_hal_conf.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_dma.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_def.h \
@@ -40,8 +40,10 @@ Core/Src/I2C.o: ../Core/Src/I2C.c ../Core/Inc/I2C.h ../Core/Inc/BOARD.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h \
  C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.h \
  ../Core/Inc/stm32wb0x_nucleo_conf.h \
- C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h
+ C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h \
+ ../Core/Inc/GPIO.h ../Core/Inc/BOARD.h
 ../Core/Inc/I2C.h:
+../Core/Inc/CONFIG.h:
 ../Core/Inc/BOARD.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal.h:
 ../Core/Inc/stm32wb0x_hal_conf.h:
@@ -85,3 +87,5 @@ Core/Src/I2C.o: ../Core/Src/I2C.c ../Core/Inc/I2C.h ../Core/Inc/BOARD.h \
 C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.h:
 ../Core/Inc/stm32wb0x_nucleo_conf.h:
 C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h:
+../Core/Inc/GPIO.h:
+../Core/Inc/BOARD.h:

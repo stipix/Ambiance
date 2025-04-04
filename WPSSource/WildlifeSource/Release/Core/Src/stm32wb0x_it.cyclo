@@ -3,10 +3,8 @@
 ../Core/Src/stm32wb0x_it.c:101:6:SVC_Handler	1
 ../Core/Src/stm32wb0x_it.c:114:6:PendSV_Handler	1
 ../Core/Src/stm32wb0x_it.c:127:6:SysTick_Handler	1
-../Core/Src/stm32wb0x_it.c:148:6:I2C1_IRQHandler	2
-../Core/Src/stm32wb0x_it.c:169:6:LPUART1_IRQHandler	1
-../Core/Src/stm32wb0x_it.c:183:6:TIM2_IRQHandler	1
-../Core/Src/stm32wb0x_it.c:197:6:RADIO_TIMER_CPU_WKUP_IRQHandler	1
-../Core/Src/stm32wb0x_it.c:211:6:RADIO_TIMER_ERROR_IRQHandler	1
-../Core/Src/stm32wb0x_it.c:225:6:RADIO_TXRX_IRQHandler	1
-../Core/Src/stm32wb0x_it.c:239:6:RADIO_TXRX_SEQ_IRQHandler	1
+../Core/Src/stm32wb0x_it.c:153:6:LPUART1_IRQHandler	1
+../Core/Src/stm32wb0x_it.c:169:6:RADIO_TIMER_CPU_WKUP_IRQHandler	1
+../Core/Src/stm32wb0x_it.c:183:6:RADIO_TIMER_ERROR_IRQHandler	1
+../Core/Src/stm32wb0x_it.c:197:6:RADIO_TXRX_IRQHandler	1
+../Core/Src/stm32wb0x_it.c:211:6:RADIO_TXRX_SEQ_IRQHandler	1
