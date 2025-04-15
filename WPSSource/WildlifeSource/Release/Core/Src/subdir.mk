@@ -10,6 +10,7 @@ S_SRCS += \
 C_SRCS += \
 ../Core/Src/BLUETOOTH.c \
 ../Core/Src/BOARD.c \
+../Core/Src/FLASH.c \
 ../Core/Src/GPIO.c \
 ../Core/Src/I2C.c \
 ../Core/Src/Main.c \
@@ -25,6 +26,7 @@ C_SRCS += \
 OBJS += \
 ./Core/Src/BLUETOOTH.o \
 ./Core/Src/BOARD.o \
+./Core/Src/FLASH.o \
 ./Core/Src/GPIO.o \
 ./Core/Src/I2C.o \
 ./Core/Src/Main.o \
@@ -44,6 +46,7 @@ S_DEPS += \
 C_DEPS += \
 ./Core/Src/BLUETOOTH.d \
 ./Core/Src/BOARD.d \
+./Core/Src/FLASH.d \
 ./Core/Src/GPIO.d \
 ./Core/Src/I2C.d \
 ./Core/Src/Main.d \
@@ -66,7 +69,7 @@ Core/Src/%.o: ../Core/Src/%.s Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/BLUETOOTH.cyclo ./Core/Src/BLUETOOTH.d ./Core/Src/BLUETOOTH.o ./Core/Src/BLUETOOTH.su ./Core/Src/BOARD.cyclo ./Core/Src/BOARD.d ./Core/Src/BOARD.o ./Core/Src/BOARD.su ./Core/Src/GPIO.cyclo ./Core/Src/GPIO.d ./Core/Src/GPIO.o ./Core/Src/GPIO.su ./Core/Src/I2C.cyclo ./Core/Src/I2C.d ./Core/Src/I2C.o ./Core/Src/I2C.su ./Core/Src/Main.cyclo ./Core/Src/Main.d ./Core/Src/Main.o ./Core/Src/Main.su ./Core/Src/TIMERS.cyclo ./Core/Src/TIMERS.d ./Core/Src/TIMERS.o ./Core/Src/TIMERS.su ./Core/Src/UART.cyclo ./Core/Src/UART.d ./Core/Src/UART.o ./Core/Src/UART.su ./Core/Src/blue_unit_conversion.d ./Core/Src/blue_unit_conversion.o ./Core/Src/mainunused.cyclo ./Core/Src/mainunused.d ./Core/Src/mainunused.o ./Core/Src/mainunused.su ./Core/Src/stm32wb0x_hal_msp.cyclo ./Core/Src/stm32wb0x_hal_msp.d ./Core/Src/stm32wb0x_hal_msp.o ./Core/Src/stm32wb0x_hal_msp.su ./Core/Src/stm32wb0x_it.cyclo ./Core/Src/stm32wb0x_it.d ./Core/Src/stm32wb0x_it.o ./Core/Src/stm32wb0x_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32wb0x.cyclo ./Core/Src/system_stm32wb0x.d ./Core/Src/system_stm32wb0x.o ./Core/Src/system_stm32wb0x.su
+	-$(RM) ./Core/Src/BLUETOOTH.cyclo ./Core/Src/BLUETOOTH.d ./Core/Src/BLUETOOTH.o ./Core/Src/BLUETOOTH.su ./Core/Src/BOARD.cyclo ./Core/Src/BOARD.d ./Core/Src/BOARD.o ./Core/Src/BOARD.su ./Core/Src/FLASH.cyclo ./Core/Src/FLASH.d ./Core/Src/FLASH.o ./Core/Src/FLASH.su ./Core/Src/GPIO.cyclo ./Core/Src/GPIO.d ./Core/Src/GPIO.o ./Core/Src/GPIO.su ./Core/Src/I2C.cyclo ./Core/Src/I2C.d ./Core/Src/I2C.o ./Core/Src/I2C.su ./Core/Src/Main.cyclo ./Core/Src/Main.d ./Core/Src/Main.o ./Core/Src/Main.su ./Core/Src/TIMERS.cyclo ./Core/Src/TIMERS.d ./Core/Src/TIMERS.o ./Core/Src/TIMERS.su ./Core/Src/UART.cyclo ./Core/Src/UART.d ./Core/Src/UART.o ./Core/Src/UART.su ./Core/Src/blue_unit_conversion.d ./Core/Src/blue_unit_conversion.o ./Core/Src/mainunused.cyclo ./Core/Src/mainunused.d ./Core/Src/mainunused.o ./Core/Src/mainunused.su ./Core/Src/stm32wb0x_hal_msp.cyclo ./Core/Src/stm32wb0x_hal_msp.d ./Core/Src/stm32wb0x_hal_msp.o ./Core/Src/stm32wb0x_hal_msp.su ./Core/Src/stm32wb0x_it.cyclo ./Core/Src/stm32wb0x_it.d ./Core/Src/stm32wb0x_it.o ./Core/Src/stm32wb0x_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32wb0x.cyclo ./Core/Src/system_stm32wb0x.d ./Core/Src/system_stm32wb0x.o ./Core/Src/system_stm32wb0x.su
 
 .PHONY: clean-Core-2f-Src
 

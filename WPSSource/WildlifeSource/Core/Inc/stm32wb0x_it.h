@@ -52,6 +52,7 @@ void SVC_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
 void LPUART1_IRQHandler(void);
+void USART1_IRQHandler(void);
 void TIM2_IRQHandler(void);
 void GPIOA_IRQHandler(void);
 void GPIOB_IRQHandler(void);

@@ -20,6 +20,10 @@ extern "C" {
 //----------------------------------------Public Includes----------------------------------------
 #include "CONFIG.h"
 
+
+//----------------------------------------Public Defines-----------------------------------------
+#define SCREENADDRESS   0b00111100
+#define RTCADDRESS      0b01101111
 //----------------------------------------Public Functions---------------------------------------
 
 /*
@@ -39,7 +43,7 @@ int I2C_Init(void);
  * 		   uint8_t data: to to be transmitted
  * @return: a flag if the data has been transmitted
  */
-uint8_t I2C_Transmit(uint8_t targetadr, uint8_t registeradr, uint8_t registersize, uint8_t* data);
+HAL_StatusTypeDef I2C_Transmit(uint8_t targetadr, uint8_t registeradr, uint8_t registersize, uint8_t* data);
 
 
 /*
@@ -51,31 +55,9 @@ uint8_t I2C_Transmit(uint8_t targetadr, uint8_t registeradr, uint8_t registersiz
  * 		   void (*PostTo)(Event_t): which service to post to when the data is received
  * @return: -1 if error, 1 if success
  */
-int8_t I2C_Recieve(uint8_t targetadr, uint8_t registeradr, uint8_t registersize ,void (*PostTo)(Event_t));
+HAL_StatusTypeDef I2C_Recieve(uint8_t targetadr, uint8_t registeradr, uint8_t registersize ,void (*PostTo)(Event_t));
 
-/*
- * @Function: I2C_Event_Init
- * @Brief: Provides the initialization function for the events and serviced routine
- * @param: none
- * @return: An 8 bit integer flag reflecting the initialization status
- */
-uint8_t I2C_Event_Init(void);
 
-/*
- * @Function: I2C_Event_Updater
- * @Brief: Provides the event checker that checks and posts the changes in the I2C
- * @param: none
- * @return: An event with 8 bits of recieved data
- */
-Event_t I2C_Event_Updater(void);
-
-/*
- * @Function: I2C_Event_Handler
- * @Brief: stores recieved bytes for later recall
- * @param: Event_t event, incoming event for the handler to handle
- * @return: An 8 byte integer success flag, returns 0 if the program should crash
- */
-uint8_t I2C_Event_Handler(Event_t event);
 
 
 

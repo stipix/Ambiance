@@ -31,7 +31,7 @@
 // Private typedef -----------------------------------------------------------
 
 // Private define ------------------------------------------------------------
-//#define TESTHARNESSACTIVE// Define this when you are using a test harness for a module, disables main
+#define TESTHARNESSACTIVE// Define this when you are using a test harness for a module, disables main
 // Private macro -------------------------------------------------------------
 
 // Private variables ---------------------------------------------------------

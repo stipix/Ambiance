@@ -148,22 +148,6 @@ void SysTick_Handler(void)
 
 
 /**
-  * @brief This function handles LPUART1 Interrupt.
-  */
-void LPUART1_IRQHandler(void)
-{
-  /* USER CODE BEGIN LPUART1_IRQn 0 */
-
-  /* USER CODE END LPUART1_IRQn 0 */
-  HAL_UART_IRQHandler(&hlpuart1);
-  /* USER CODE BEGIN LPUART1_IRQn 1 */
-
-  /* USER CODE END LPUART1_IRQn 1 */
-}
-
-
-
-/**
   * @brief This function handles RADIO_TIMER_CPU_WKUP global interrupt.
   */
 void RADIO_TIMER_CPU_WKUP_IRQHandler(void)

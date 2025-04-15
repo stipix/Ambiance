@@ -14,6 +14,9 @@ extern "C" {
 
 #include "BOARD.h"
 
+#define UARTSUCCESS 0x00
+#define UARTFAILED 0x25
+
 
 /*
  * @function: UART_Init()
@@ -24,20 +27,36 @@ extern "C" {
 int UART_Init(void);
 
 /*
- * @function: UART_ReadRx()
+ * @function: LPUART_ReadRx()
  * @brief: reads one received byte from the lpuart
  * @param: none
- * @return: the character received, is 0x00 if no character to read
+ * @return: the character received, is 0x25 (NAK) if no character to read
  */
-char UART_ReadRx(void);
+char LPUART_ReadRx(void);
 
 /*
- * @function: UART_WriteTx()
+ * @function: LPUART_WriteTx()
  * @brief: sends one byte through the lpuart
  * @param: none
- * @return: none
+ * @return: status, 0x00 if success,  0x25 (NAK) if failed,
  */
-void UART_WriteTx(char input);
+char LPUART_WriteTx(char input);
+
+/*
+ * @function: USART_ReadRx()
+ * @brief: reads one received byte from the usart
+ * @param: none
+ * @return: the character received, 0x25 (NAK) if no character to read
+ */
+char USART_ReadRx(void);
+
+/*
+ * @function: USART_WriteTx()
+ * @brief: sends one byte through the usart
+ * @param: none
+ * @return: status, 0x00 if success,  0x25 (NAK) if failed,
+ */
+char USART_WriteTx(char input);
 
 #ifdef __cplusplus//allows code to be ran in a c++ program
 }
