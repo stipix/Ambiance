@@ -83,7 +83,7 @@ void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c){
 		data = 0;
 	}
 	//use the received data construct and event to post
-	Event_t ret = {data, EVENT_I2C};
+	Event_t ret = {EVENT_I2C, data};
 	//post the event to the function given
 	RxReq.data[RxReq.head].PostTo(ret);
 	//decrement the circular buffer

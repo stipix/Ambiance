@@ -1,9 +1,9 @@
 /*
  * Name UART.c
- * Brief: provides a library to initialize and access a free running timer
+ * Brief: provides a library to initialize and use the low power UART (LPUART) and USART
  * Author: Caitlin Bonesio
  * Created: 2/5/25
- * Modified: 3/10/25
+ * Modified: 4/15/25
  */
 
 //----------------------------------------Private Includes---------------------------------------
@@ -13,7 +13,7 @@
 #include "stm32wb0x_ll_lpuart.h"
 
 //----------------------------------------Private Defines----------------------------------------
-#define UARTCIRCBUFFSIZE 10
+#define UARTCIRCBUFFSIZE USARTBUFFERSIZE+1
 
 
 //----------------------------------------Private Typedefs---------------------------------------
@@ -35,38 +35,7 @@ UARTcb_t USARTrx;
 
 
 //----------------------------------------Private Functions--------------------------------------
-//void HAL_USART_RxCpltCallback(UART_HandleTypeDef *huart)
-//{
-//	if(huart->Instance == USART1){
-//		if(!USARTrx.full){
-//			//USARTrx.data[USARTrx.head] = *(huart->pRxBuffPtr);
-//			USARTrx.head++;
-//			USARTrx.head %= UARTCIRCBUFFSIZE;
-//			if(USARTrx.tail == USARTrx.head){
-//				USARTrx.full = true;
-//			}
-//
-//			HAL_USART_Receive_IT(huart, USARTrx.data+USARTrx.head, 1);
-//		}
-//	}
-//}
-//
-//void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-//{
-//	if(huart->Instance == USART1){
-//		if(USARTtx.head != USARTtx.tail || USARTtx.full){
-//			USARTtx.tail++;
-//			USARTtx.tail %= UARTCIRCBUFFSIZE;
-//			if(USARTtx.full){
-//			  USARTrx.full = false;
-//			}
-//
-//			HAL_USART_Transmit_IT(huart, USARTtx.data+(USARTtx.tail), 1);
-//		}
-//
-//	}
-//
-//}
+
 /**
   * @brief This function handles LPUART1 Interrupt.
   */
@@ -219,7 +188,7 @@ char LPUART_WriteTx(char input){
  * @function: USART_ReadRx()
  * @brief: reads one received byte from the usart
  * @param: none
- * @return: the character received, is 0x00 if no character to read
+ * @return: the character received, 0x25 (NAK) if no character to read
  */
 char USART_ReadRx(void){
 	if(USARTrx.head != USARTrx.tail || USARTrx.full){
@@ -235,8 +204,8 @@ char USART_ReadRx(void){
 /*
  * @function: USART_WriteTx()
  * @brief: sends one byte through the usart
- * @param: none
- * @return: none
+ * @param: input, character to be sent
+ * @return: status, 0x00 if success,  0x25 (NAK) if failed,
  */
 char USART_WriteTx(char input){
 	if(!USARTtx.full){
@@ -253,9 +222,19 @@ char USART_WriteTx(char input){
 	}
 }
 
+/*
+ * @function: USART_TxEmpty()
+ * @brief: returns if the Tx  buffer is empty
+ * @param: none
+ * @return: status, 0x00 if not empty,  0x01 if empty,
+ */
+uint8_t USART_TxEmpty(void){
+	return (USARTtx.head == USARTtx.tail) && !USARTtx.full;
+}
+
 
 //----------------------------------------Private Test Harness-----------------------------------
-#define UARTTESTHARNESS
+//#define UARTTESTHARNESS
 
 #ifdef UARTTESTHARNESS
 #include "BOARD.h"

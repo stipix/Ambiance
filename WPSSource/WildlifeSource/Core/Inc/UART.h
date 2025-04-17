@@ -3,7 +3,7 @@
  * Brief: provides a library to initialize and access a free running timer
  * Author: Caitlin Bonesio
  * Created: 2/5/25
- * Modified: 3/10/25
+ * Modified: 4/14/25
  */
 #ifndef UART_H
 #define UART_H
@@ -16,6 +16,7 @@ extern "C" {
 
 #define UARTSUCCESS 0x00
 #define UARTFAILED 0x25
+#define USARTBUFFERSIZE 512
 
 
 /*
@@ -57,6 +58,13 @@ char USART_ReadRx(void);
  * @return: status, 0x00 if success,  0x25 (NAK) if failed,
  */
 char USART_WriteTx(char input);
+/*
+ * @function: USART_TxEmpty()
+ * @brief: returns if the Tx  buffer is empty
+ * @param: none
+ * @return: status, 0x00 if not empty,  0x01 if empty,
+ */
+uint8_t USART_TxEmpty(void);
 
 #ifdef __cplusplus//allows code to be ran in a c++ program
 }

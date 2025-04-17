@@ -43,8 +43,10 @@ Core/Src/Main.o: ../Core/Src/Main.c ../Core/Inc/BOARD.h \
  C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.h \
  ../Core/Inc/stm32wb0x_nucleo_conf.h \
  C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h \
- ../Core/Inc/CONFIG.h ../Core/Inc/BOARD.h ../Core/Inc/GPIO.h \
- ../Core/Inc/CONFIG.h ../Core/Inc/UART.h ../Core/Inc/GPIO.h
+ ../Core/Inc/CONFIG.h ../Core/Inc/BOARD.h ../Core/Inc/Events.h \
+ ../Core/Inc/FIFO.h ../Core/Inc/GPIO.h ../Core/Inc/CONFIG.h \
+ ../Core/Inc/COMM.h ../Core/Inc/UART.h ../Core/Inc/GPIO.h \
+ ../Core/Inc/FIFO.h
 ../Core/Inc/BOARD.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal.h:
 ../Core/Inc/stm32wb0x_hal_conf.h:
@@ -92,7 +94,11 @@ C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Dr
 C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h:
 ../Core/Inc/CONFIG.h:
 ../Core/Inc/BOARD.h:
+../Core/Inc/Events.h:
+../Core/Inc/FIFO.h:
 ../Core/Inc/GPIO.h:
 ../Core/Inc/CONFIG.h:
+../Core/Inc/COMM.h:
 ../Core/Inc/UART.h:
 ../Core/Inc/GPIO.h:
+../Core/Inc/FIFO.h:

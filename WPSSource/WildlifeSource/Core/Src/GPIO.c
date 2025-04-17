@@ -10,7 +10,7 @@
 
 //----------------------------------------Private Includes---------------------------------------
 #include "GPIO.h"
-
+#include "FIFO.h"
 //----------------------------------------Private Defines----------------------------------------
 #define BUTTON_0_PIN GPIO_PIN_10
 #define BUTTON_1_PIN GPIO_PIN_2
@@ -28,6 +28,7 @@
 
 //----------------------------------------Private Variable---------------------------------------
 static uint8_t buttons = 0;
+static FIFO GPIOqueue;//the queue of all events generated for the GPIO
 
 //----------------------------------------Public Functions---------------------------------------
 
@@ -93,7 +94,7 @@ uint8_t GPIO_ReadButtons(void){
  * @param: none
  * @return: An 8 bit integer flag reflecting The initialization status
  */
-uint8_t GPIO_Event_Init(void){
+uint8_t GPIO_Event_Init(FIFO Queue){
 	buttons = 0;
 	//Initialize dev board leds, for debug purposes
 	BSP_LED_Init(LED_BLUE);
@@ -104,6 +105,7 @@ uint8_t GPIO_Event_Init(void){
 	BSP_PB_Init(B1, BUTTON_MODE_GPIO);
 	BSP_PB_Init(B2, BUTTON_MODE_GPIO);
 	BSP_PB_Init(B3, BUTTON_MODE_GPIO);
+	GPIOqueue = Queue;
 	return GPIO_Init();
 
 }
@@ -116,13 +118,16 @@ uint8_t GPIO_Event_Init(void){
  * 		 	and the least significant 8 bits representing the changes in the buttons states
  */
 Event_t GPIO_Event_Updater(void){
+	uint8_t event = 0;
 	Event_t update = {0, 0};//Initialize to no event
 	uint8_t newButtons = GPIO_ReadButtons();
 	if(newButtons != buttons){
 		update.data = (uint16_t)(buttons ^ newButtons) | (((uint16_t)newButtons) << 8);
 		update.status = EVENT_BUTTONS;
 		buttons = newButtons;
+		event = 1;
 	}
+	if(event){FIFO_Enqueue(GPIOqueue, update);}
 	return update;
 }
 

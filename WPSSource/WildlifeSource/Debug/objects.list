@@ -1,5 +1,8 @@
 "./Core/Src/BLUETOOTH.o"
 "./Core/Src/BOARD.o"
+"./Core/Src/COMM.o"
+"./Core/Src/DiscountIO.o"
+"./Core/Src/FIFO.o"
 "./Core/Src/FLASH.o"
 "./Core/Src/GPIO.o"
 "./Core/Src/I2C.o"

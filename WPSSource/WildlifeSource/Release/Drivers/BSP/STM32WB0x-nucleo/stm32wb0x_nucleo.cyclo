@@ -16,6 +16,5 @@
 ../Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.c:442:6:BSP_PB_IRQHandler	1
 ../Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.c:508:9:BSP_COM_DeInit	2
 ../Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.c:535:9:BSP_COM_SelectLogPort	2
-../Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.c:569:5:__io_putchar	1
 ../Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.c:650:26:MX_USART1_Init	1
 ../Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.c:464:9:BSP_COM_Init	4

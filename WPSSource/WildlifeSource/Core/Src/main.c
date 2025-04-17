@@ -25,20 +25,23 @@
 #include "CONFIG.h"
 #include "UART.h"
 #include "GPIO.h"
+#include "FIFO.h"
 
 // Private includes ----------------------------------------------------------
 
 // Private typedef -----------------------------------------------------------
 
 // Private define ------------------------------------------------------------
-#define TESTHARNESSACTIVE// Define this when you are using a test harness for a module, disables main
+//#define TESTHARNESSACTIVE// Define this when you are using a test harness for a module, disables main
 // Private macro -------------------------------------------------------------
 
 // Private variables ---------------------------------------------------------
 //Provides a list of all initialization, updater, and handler functions for each modules, functions are defined in CONFIG.h
-uint8_t (*InitList[EVENTLISTSIZE])(void) = EVENT_INITLIST;
+uint8_t (*InitList[EVENTLISTSIZE])(FIFO Queue) = EVENT_INITLIST;
 Event_t (*UpdateList[EVENTLISTSIZE])(void) = EVENT_UPDATELIST;
 uint8_t (*HandlerList[EVENTLISTSIZE])(Event_t update) = EVENT_HANDLERLIST;
+
+FIFO EventQueues[EVENTLISTSIZE];
 //I2C_HandleTypeDef hi2c1;
 
 #ifndef TESTHARNESSACTIVE
@@ -64,27 +67,35 @@ int main(void)
 	if(UART_Init() != INIT_OK){
 		BOARD_CrashHandler();
 	}
-	//list of all updates from the updaters to be passed to handlers
-	Event_t updates[EVENTLISTSIZE];
+
 	//Initialize all modules
 	for(int i = 0; i < EVENTLISTSIZE; i++){
-		if ((*InitList[i])() == EVENT_ERROR){
+		EventQueues[i] = FIFO_Create();
+		if ((*InitList[i])(EventQueues[i]) == EVENT_ERROR){
 			return 0;//We've crashed
 		}
 	}
 	while(1){
 		//run all module event checkers
 		for(int i = 0; i < EVENTLISTSIZE; i++){
-			updates[i] = (*UpdateList[i])();//collect updates from the updaters
-			if (updates[i].status == EVENT_ERROR){
+			//collect updates from the updaters
+			if (((*UpdateList[i])()).status == EVENT_ERROR){
 				BOARD_CrashHandler();//We've crashed
 			}
 		}
-		//run all module event handlers
-		for(int i = 0; i < EVENTLISTSIZE; i++){
-			if(updates[i].status != EVENT_NONE){//If there is an update
-				if ((*HandlerList[i])(updates[i]) == EVENT_ERROR){//pass the updates to the handlers
-					BOARD_CrashHandler();//We've crashed
+		uint8_t done = 0;
+		while(!done){
+			//run all module event handlers
+			done = 1;//assume we're done
+			for(int i = 0; i < EVENTLISTSIZE; i++){
+				Event_t event = FIFO_Dequeue(EventQueues[i]);
+				if(FIFO_GetSize(EventQueues[i]) != 0){
+					done = 0;//if any queue is not empty, we are not done
+				}
+				if(event.status != EVENT_NONE){//If there is an update
+					if ((*HandlerList[i])(event) == EVENT_ERROR){//pass the updates to the handlers
+						BOARD_CrashHandler();//We've crashed
+					}
 				}
 			}
 		}

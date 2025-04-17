@@ -16,34 +16,24 @@ extern "C" {
 
 //----------------------------------------Public Includes----------------------------------------
 #include "BOARD.h"
-
+#include "Events.h"
+#include "FIFO.h"
 //----------------------------------------Public Typedefs----------------------------------------
 
-typedef enum Event_Type{
-	EVENT_NONE = 0,
-	EVENT_BUTTONS,
-	EVENT_I2C,
-}Event_Type;
-
-typedef struct EventReturntype{
-	uint16_t data;
-	Event_Type status;
-}Event_t;
 
 //----------------------------------------Public Defines-----------------------------------------
 
 
-#define EVENT_ERROR -1
-
 //Include event module header files here
 #include "GPIO.h"
+#include "COMM.h"
 
 //Add the initialization, Updater, and handler functions to these lists
-#define EVENTLISTSIZE 1
+#define EVENTLISTSIZE 2
 
-#define EVENT_INITLIST {GPIO_Event_Init}
-#define EVENT_UPDATELIST {GPIO_Event_Updater}
-#define EVENT_HANDLERLIST {GPIO_Event_Handler}
+#define EVENT_INITLIST {GPIO_Event_Init, COMM_Event_Init}
+#define EVENT_UPDATELIST {GPIO_Event_Updater, COMM_Event_Updater}
+#define EVENT_HANDLERLIST {GPIO_Event_Handler, COMM_Event_Handler}
 
 
 #ifdef __cplusplus//allows code to be ran in a c++ program

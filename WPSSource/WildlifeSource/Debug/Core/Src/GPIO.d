@@ -44,7 +44,8 @@ Core/Src/GPIO.o: ../Core/Src/GPIO.c ../Core/Inc/GPIO.h \
  C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.h \
  ../Core/Inc/stm32wb0x_nucleo_conf.h \
  C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h \
- ../Core/Inc/GPIO.h
+ ../Core/Inc/Events.h ../Core/Inc/FIFO.h ../Core/Inc/GPIO.h \
+ ../Core/Inc/COMM.h ../Core/Inc/FIFO.h
 ../Core/Inc/GPIO.h:
 ../Core/Inc/CONFIG.h:
 ../Core/Inc/BOARD.h:
@@ -92,4 +93,8 @@ Core/Src/GPIO.o: ../Core/Src/GPIO.c ../Core/Inc/GPIO.h \
 C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.h:
 ../Core/Inc/stm32wb0x_nucleo_conf.h:
 C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h:
+../Core/Inc/Events.h:
+../Core/Inc/FIFO.h:
 ../Core/Inc/GPIO.h:
+../Core/Inc/COMM.h:
+../Core/Inc/FIFO.h:

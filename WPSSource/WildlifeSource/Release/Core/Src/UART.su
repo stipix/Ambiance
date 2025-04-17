@@ -1,8 +1,8 @@
-../Core/Src/UART.c:73:6:LPUART1_IRQHandler	8	static
-../Core/Src/UART.c:84:6:USART1_IRQHandler	24	static
-../Core/Src/UART.c:124:5:UART_Init	16	static
-../Core/Src/UART.c:194:6:LPUART_ReadRx	0	static
-../Core/Src/UART.c:209:6:LPUART_WriteTx	0	static
-../Core/Src/UART.c:223:6:USART_ReadRx	8	static
-../Core/Src/UART.c:240:6:USART_WriteTx	8	static
-../Core/Src/UART.c:259:5:main	8	static
+../Core/Src/UART.c:42:6:LPUART1_IRQHandler	8	static
+../Core/Src/UART.c:53:6:USART1_IRQHandler	24	static
+../Core/Src/UART.c:94:5:UART_Init	16	static
+../Core/Src/UART.c:164:6:LPUART_ReadRx	0	static
+../Core/Src/UART.c:179:6:LPUART_WriteTx	0	static
+../Core/Src/UART.c:193:6:USART_ReadRx	16	static
+../Core/Src/UART.c:210:6:USART_WriteTx	16	static
+../Core/Src/UART.c:231:9:USART_TxEmpty	0	static

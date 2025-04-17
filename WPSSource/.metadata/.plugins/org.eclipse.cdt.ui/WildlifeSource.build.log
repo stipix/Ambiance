@@ -1,20 +1,10 @@
-18:08:50 **** Incremental Build of configuration Debug for project WildlifeSource ****
+13:54:10 **** Incremental Build of configuration Debug for project WildlifeSource ****
 make -j12 all 
-arm-none-eabi-gcc "../Core/Src/UART.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32WB05 -DUSE_NUCLEO_64 -c -I../Core/Inc -I../Drivers/STM32WB0x_HAL_Driver/Inc -I../Drivers/STM32WB0x_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32WB0X/Include -I../Drivers/CMSIS/Include -I"C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo" -I../Drivers/BSP/STM32WB0x-nucleo -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/UART.d" -MT"Core/Src/UART.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/UART.o"
-arm-none-eabi-gcc -o "WildlifeSource.elf" @"objects.list"   -mcpu=cortex-m0plus -T"C:\Users\stipi\Desktop\HWstuff\ECE129\WildlifeSource\WPSSource\WildlifeSource\STM32WB05KZVX_FLASH.ld" --specs=nosys.specs -Wl,-Map="WildlifeSource.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: WildlifeSource.elf
- 
 arm-none-eabi-size  WildlifeSource.elf 
-arm-none-eabi-objdump -h -S WildlifeSource.elf  > "WildlifeSource.list"
-arm-none-eabi-objcopy  -O ihex WildlifeSource.elf  "WildlifeSource.hex"
    text	   data	    bss	    dec	    hex	filename
-  23012	     36	   4084	  27132	   69fc	WildlifeSource.elf
+  29652	    164	   5460	  35276	   89cc	WildlifeSource.elf
 Finished building: default.size.stdout
  
-Finished building: WildlifeSource.hex
- 
-Finished building: WildlifeSource.list
- 
 
-18:08:51 Build Finished. 0 errors, 0 warnings. (took 1s.114ms)
+13:54:10 Build Finished. 0 errors, 0 warnings. (took 590ms)
 

@@ -1,5 +1,5 @@
-../Core/Src/GPIO.c:40:5:GPIO_Init	40	static
-../Core/Src/GPIO.c:84:9:GPIO_ReadButtons	16	static
-../Core/Src/GPIO.c:96:9:GPIO_Event_Init	8	static
-../Core/Src/GPIO.c:118:9:GPIO_Event_Updater	16	static
-../Core/Src/GPIO.c:135:9:GPIO_Event_Handler	24	static
+../Core/Src/GPIO.c:41:5:GPIO_Init	40	static
+../Core/Src/GPIO.c:85:9:GPIO_ReadButtons	16	static
+../Core/Src/GPIO.c:97:9:GPIO_Event_Init	16	static
+../Core/Src/GPIO.c:120:9:GPIO_Event_Updater	24	static
+../Core/Src/GPIO.c:140:9:GPIO_Event_Handler	24	static

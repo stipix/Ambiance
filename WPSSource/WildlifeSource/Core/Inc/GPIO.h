@@ -17,6 +17,7 @@ extern "C" {
 
 //----------------------------------------Public Includes----------------------------------------
 #include "CONFIG.h"
+#include "FIFO.h"
 
 //----------------------------------------Public Functions---------------------------------------
 /*
@@ -41,7 +42,7 @@ uint8_t GPIO_ReadButtons(void);
  * @param: none
  * @return: An 8 bit integer flag reflecting The initialization status
  */
-uint8_t GPIO_Event_Init(void);
+uint8_t GPIO_Event_Init(FIFO Queue);
 
 /*
  * @Function: GPIO_Event_Updater
