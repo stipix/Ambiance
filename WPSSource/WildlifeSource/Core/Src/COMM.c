@@ -254,7 +254,7 @@ uint8_t COMM_Event_Handler(Event_t event){
 		break;
 	case schedulestart:
 		if(event.status == EVENT_USART){
-			sprintf(text, "start time: %d:%d\n", event.data&0b11111000>>3, (event.data & 0b011)*15);
+			sprintf(text, "start time: %d:%d\n", (event.data&0b11111000)>>3, (event.data & 0b011)*15);
 			discountprintf(text);
 			//record start time here
 			next = schedulestop;
@@ -263,7 +263,7 @@ uint8_t COMM_Event_Handler(Event_t event){
 		break;
 	case schedulestop:
 		if(event.status == EVENT_USART){
-			sprintf(text, "start time: %d:%d\n", event.data&0b11111000>>3, (event.data & 0b011)*15);
+			sprintf(text, "start time: %d:%d\n", (event.data&0b11111000)>>3, (event.data & 0b011)*15);
 			discountprintf(text);
 			//record end time here
 			next = schedulefolder;
