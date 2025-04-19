@@ -566,11 +566,11 @@ int fputc(int ch, FILE *f)
 }
 
 #elif defined(__GNUC__)
-int __io_putchar(int ch)
-{
-  (void) HAL_UART_Transmit(&hcom_uart[COM_ActiveLogPort], (uint8_t *) &ch, 1, COM_POLL_TIMEOUT);
-  return ch;
-}
+//int __io_putchar(int ch)
+//{
+//  (void) HAL_UART_Transmit(&hcom_uart[COM_ActiveLogPort], (uint8_t *) &ch, 1, COM_POLL_TIMEOUT);
+//  return ch;
+//}
 #endif
 
 #endif /* (USE_COM_LOG == 1) */

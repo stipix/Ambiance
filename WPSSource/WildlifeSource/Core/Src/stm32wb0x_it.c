@@ -18,7 +18,7 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include "BOARD.h"
+#include <main.h>
 #include "stm32wb0x_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -55,7 +55,9 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
+extern I2C_HandleTypeDef hi2c1;
+extern UART_HandleTypeDef hlpuart1;
+extern TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -139,6 +141,67 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32wb0x.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles I2C1 Event and Error Interrupt.
+  */
+
+
+/**
+  * @brief This function handles RADIO_TIMER_CPU_WKUP global interrupt.
+  */
+void RADIO_TIMER_CPU_WKUP_IRQHandler(void)
+{
+  /* USER CODE BEGIN RADIO_TIMER_CPU_WKUP_IRQn 0 */
+
+  /* USER CODE END RADIO_TIMER_CPU_WKUP_IRQn 0 */
+  HAL_RADIO_TIMER_CPU_WKUP_IRQHandler();
+  /* USER CODE BEGIN RADIO_TIMER_CPU_WKUP_IRQn 1 */
+
+  /* USER CODE END RADIO_TIMER_CPU_WKUP_IRQn 1 */
+}
+
+/**
+  * @brief This function handles RADIO_TIMER_ERROR global interrupt.
+  */
+void RADIO_TIMER_ERROR_IRQHandler(void)
+{
+  /* USER CODE BEGIN RADIO_TIMER_ERROR_IRQn 0 */
+
+  /* USER CODE END RADIO_TIMER_ERROR_IRQn 0 */
+  HAL_RADIO_TIMER_ERROR_IRQHandler();
+  /* USER CODE BEGIN RADIO_TIMER_ERROR_IRQn 1 */
+
+  /* USER CODE END RADIO_TIMER_ERROR_IRQn 1 */
+}
+
+/**
+  * @brief This function handles RADIO_TXRX global interrupt.
+  */
+void RADIO_TXRX_IRQHandler(void)
+{
+  /* USER CODE BEGIN RADIO_TXRX_IRQn 0 */
+
+  /* USER CODE END RADIO_TXRX_IRQn 0 */
+  HAL_RADIO_TXRX_IRQHandler();
+  /* USER CODE BEGIN RADIO_TXRX_IRQn 1 */
+
+  /* USER CODE END RADIO_TXRX_IRQn 1 */
+}
+
+/**
+  * @brief This function handles RADIO_TXRX_SEQ global interrupt.
+  */
+void RADIO_TXRX_SEQ_IRQHandler(void)
+{
+  /* USER CODE BEGIN RADIO_TXRX_SEQ_IRQn 0 */
+
+  /* USER CODE END RADIO_TXRX_SEQ_IRQn 0 */
+  HAL_RADIO_TXRX_SEQ_IRQHandler();
+  /* USER CODE BEGIN RADIO_TXRX_SEQ_IRQn 1 */
+
+  /* USER CODE END RADIO_TXRX_SEQ_IRQn 1 */
+}
 
 /* USER CODE BEGIN 1 */
 

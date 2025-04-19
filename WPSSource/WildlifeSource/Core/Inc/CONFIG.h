@@ -1,26 +1,44 @@
 /*
- * CONFIG.h
- *
- *  Created on: Feb 7, 2025
- *      Author: Caitlin Bonesio
+ * Name CONFIG.h
+ * Brief: provides a way to easily configure the main loop and add more modules
+ * Author: Caitlin Bonesio
+ * Created: 2/7/25
+ * Modified: 3/10/25
  */
 
 #ifndef CONFIG_H
 #define CONFIG_H
 
-typedef struct EventReturntype{
-	uint16_t data;
-	uint8_t status;
-}Event_t;
-#define ERROR -1
+
+#ifdef __cplusplus//allows code to be ran in a c++ program
+extern "C" {
+#endif
+
+//----------------------------------------Public Includes----------------------------------------
+#include "BOARD.h"
+#include "Events.h"
+#include "FIFO.h"
+//----------------------------------------Public Typedefs----------------------------------------
+
+
+//----------------------------------------Public Defines-----------------------------------------
+
 
 //Include event module header files here
 #include "GPIO.h"
+#include "COMM.h"
 
 //Add the initialization, Updater, and handler functions to these lists
-#define EVENTLISTSIZE 1
-uint8_t (*InitList[EVENTLISTSIZE])(void) = 					{		};
-Event_t (*UpdateList[EVENTLISTSIZE])(void) = 				{		};
-uint8_t (*HandlerList[EVENTLISTSIZE])(Event_t update) = 	{		};
+#define EVENTLISTSIZE 2
+
+#define EVENT_INITLIST {GPIO_Event_Init, COMM_Event_Init}
+#define EVENT_UPDATELIST {GPIO_Event_Updater, COMM_Event_Updater}
+#define EVENT_HANDLERLIST {GPIO_Event_Handler, COMM_Event_Handler}
+
+
+#ifdef __cplusplus//allows code to be ran in a c++ program
+}
+#endif
+
 
 #endif /* CONFIG_H */

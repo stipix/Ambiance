@@ -1,5 +1,0 @@
-
-#include "BOARD.h"
-
-
-int UART_Init(void);

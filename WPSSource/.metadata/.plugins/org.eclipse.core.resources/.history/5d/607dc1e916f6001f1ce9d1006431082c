@@ -1,5 +1,0 @@
-
-
-int GPIO_Init(void);
-
-uint8_t GPIO_ReadButtons(void);

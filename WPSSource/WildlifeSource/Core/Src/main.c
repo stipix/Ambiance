@@ -21,115 +21,89 @@
 // Includes ------------------------------------------------------------------
 //#include "BOARD.h"
 //
-//#include "stm32wb0x_hal.h"
-//#include "CONFIG.h"
-//#include "UART.h"
-//#include "GPIO.h"
+#include "BOARD.h"
+#include "CONFIG.h"
+#include "UART.h"
+#include "GPIO.h"
+#include "FIFO.h"
 
 // Private includes ----------------------------------------------------------
 
 // Private typedef -----------------------------------------------------------
 
 // Private define ------------------------------------------------------------
-#define TESTHARNESSACTIVE
+//#define TESTHARNESSACTIVE// Define this when you are using a test harness for a module, disables main
 // Private macro -------------------------------------------------------------
 
 // Private variables ---------------------------------------------------------
+//Provides a list of all initialization, updater, and handler functions for each modules, functions are defined in CONFIG.h
+uint8_t (*InitList[EVENTLISTSIZE])(FIFO Queue) = EVENT_INITLIST;
+Event_t (*UpdateList[EVENTLISTSIZE])(void) = EVENT_UPDATELIST;
+uint8_t (*HandlerList[EVENTLISTSIZE])(Event_t update) = EVENT_HANDLERLIST;
 
+FIFO EventQueues[EVENTLISTSIZE];
 //I2C_HandleTypeDef hi2c1;
 
 #ifndef TESTHARNESSACTIVE
 // Private function prototypes -----------------------------------------------
-static void MX_GPIO_Init(void);
-static void MX_I2C1_Init(void);
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ *
+ * @brief  The application entry point. Implements a simple events and services routine. the event checkers are called updaters
+ * `	   the services are called handlers
+ * @author Caitlin Bonesio
+ *
+ */
 
 int main(void)
 {
 
 	//MCU Configuration--------------------------------------------------------
-
-	//Reset of all peripherals, Initializes the Flash interface and the Systick.
-	HAL_Init();
-
-	// Configure the system clock
 	if( BOARD_Init() != INIT_OK){
 		BOARD_CrashHandler();
 	}
 
 	// Initialize all configured peripherals
-	MX_GPIO_Init();
-	MX_I2C1_Init();
 	if(UART_Init() != INIT_OK){
 		BOARD_CrashHandler();
 	}
-	//uint8_t updateFlags[EVENTLISTSIZE];
-	Event_t updates[EVENTLISTSIZE];
+
 	//Initialize all modules
 	for(int i = 0; i < EVENTLISTSIZE; i++){
-		if ((*InitList[i])() == ERROR){
+		EventQueues[i] = FIFO_Create();
+		if ((*InitList[i])(EventQueues[i]) == EVENT_ERROR){
 			return 0;//We've crashed
 		}
 	}
 	while(1){
 		//run all module event checkers
 		for(int i = 0; i < EVENTLISTSIZE; i++){
-			updates[i] = (*UpdateList[i])();
-			if (updates[i].status == ERROR){
-				return 0;//We've crashed
+			//collect updates from the updaters
+			if (((*UpdateList[i])()).status == EVENT_ERROR){
+				BOARD_CrashHandler();//We've crashed
 			}
 		}
-		//run all module event handlers
-		for(int i = 0; i < EVENTLISTSIZE; i++){
-			if(updates[i].status == 1){
-				if ((*HandlerList[i])(updates[i]) == ERROR){
-					BOARD_CrashHandler();
+		uint8_t done = 0;
+		while(!done){
+			//run all module event handlers
+			done = 1;//assume we're done
+			for(int i = 0; i < EVENTLISTSIZE; i++){
+				Event_t event = FIFO_Dequeue(EventQueues[i]);
+				if(FIFO_GetSize(EventQueues[i]) != 0){
+					done = 0;//if any queue is not empty, we are not done
+				}
+				if(event.status != EVENT_NONE){//If there is an update
+					if ((*HandlerList[i])(event) == EVENT_ERROR){//pass the updates to the handlers
+						BOARD_CrashHandler();//We've crashed
+					}
 				}
 			}
 		}
+
 	}
 }
 #endif
-///**
-//  * @brief I2C1 Initialization Function
-//  * @param None
-//  * @return None
-//  */
-//static void MX_I2C1_Init(void)
-//{
-//  hi2c1.Instance = I2C1;
-//  hi2c1.Init.Timing = 0x00303D5B;
-//  hi2c1.Init.OwnAddress1 = 0;
-//  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-//  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-//  hi2c1.Init.OwnAddress2 = 0;
-//  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-//  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-//  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-//  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-//  {
-//		BOARD_CrashHandler();
-//  }
-//
-//  /** Configure Analogue filter
-//  */
-//  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
-//  {
-//		BOARD_CrashHandler();
-//  }
-//
-//  /** Configure Digital filter
-//  */
-//  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
-//  {
-//		BOARD_CrashHandler();
-//  }
-//
-//}
+
 
 
 
