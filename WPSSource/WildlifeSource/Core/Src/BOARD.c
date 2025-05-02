@@ -9,7 +9,8 @@
 //----------------------------------------Private Includes---------------------------------------
 #include "BOARD.h"
 
-
+//----------------------------------------Private Variables--------------------------------------
+static uint8_t initialized = 0;
 //----------------------------------------Private Functions--------------------------------------
 /**
   * @brief System Clock Configuration
@@ -72,7 +73,7 @@ int PeriphCommonClock_Config(void)
  * @return: Init Status, whether the operation failed or succeeded
  */
 int BOARD_Init(void){
-
+	if(initialized){return INIT_OK;}
 	HAL_Init();
 	int errorFlag = INIT_OK;
 	if(PeriphCommonClock_Config() == INIT_ERROR){
@@ -81,6 +82,7 @@ int BOARD_Init(void){
 	if(SystemClock_Config() == INIT_ERROR){
 		errorFlag = INIT_ERROR;
 	}
+	initialized = 1;
 	return errorFlag;
 }
 

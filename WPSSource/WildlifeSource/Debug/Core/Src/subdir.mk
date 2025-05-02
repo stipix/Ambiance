@@ -10,16 +10,19 @@ S_SRCS += \
 C_SRCS += \
 ../Core/Src/BLUETOOTH.c \
 ../Core/Src/BOARD.c \
+../Core/Src/ButtonsMenuSM.c \
 ../Core/Src/COMM.c \
 ../Core/Src/DiscountIO.c \
 ../Core/Src/FIFO.c \
 ../Core/Src/FLASH.c \
 ../Core/Src/GPIO.c \
 ../Core/Src/I2C.c \
-../Core/Src/Main.c \
+../Core/Src/MP3.c \
+../Core/Src/Scheduler.c \
 ../Core/Src/TIMERS.c \
 ../Core/Src/UART.c \
-../Core/Src/mainunused.c \
+../Core/Src/main.c \
+../Core/Src/mainUnused.c \
 ../Core/Src/stm32wb0x_hal_msp.c \
 ../Core/Src/stm32wb0x_it.c \
 ../Core/Src/syscalls.c \
@@ -29,17 +32,20 @@ C_SRCS += \
 OBJS += \
 ./Core/Src/BLUETOOTH.o \
 ./Core/Src/BOARD.o \
+./Core/Src/ButtonsMenuSM.o \
 ./Core/Src/COMM.o \
 ./Core/Src/DiscountIO.o \
 ./Core/Src/FIFO.o \
 ./Core/Src/FLASH.o \
 ./Core/Src/GPIO.o \
 ./Core/Src/I2C.o \
-./Core/Src/Main.o \
+./Core/Src/MP3.o \
+./Core/Src/Scheduler.o \
 ./Core/Src/TIMERS.o \
 ./Core/Src/UART.o \
 ./Core/Src/blue_unit_conversion.o \
-./Core/Src/mainunused.o \
+./Core/Src/main.o \
+./Core/Src/mainUnused.o \
 ./Core/Src/stm32wb0x_hal_msp.o \
 ./Core/Src/stm32wb0x_it.o \
 ./Core/Src/syscalls.o \
@@ -52,16 +58,19 @@ S_DEPS += \
 C_DEPS += \
 ./Core/Src/BLUETOOTH.d \
 ./Core/Src/BOARD.d \
+./Core/Src/ButtonsMenuSM.d \
 ./Core/Src/COMM.d \
 ./Core/Src/DiscountIO.d \
 ./Core/Src/FIFO.d \
 ./Core/Src/FLASH.d \
 ./Core/Src/GPIO.d \
 ./Core/Src/I2C.d \
-./Core/Src/Main.d \
+./Core/Src/MP3.d \
+./Core/Src/Scheduler.d \
 ./Core/Src/TIMERS.d \
 ./Core/Src/UART.d \
-./Core/Src/mainunused.d \
+./Core/Src/main.d \
+./Core/Src/mainUnused.d \
 ./Core/Src/stm32wb0x_hal_msp.d \
 ./Core/Src/stm32wb0x_it.d \
 ./Core/Src/syscalls.d \
@@ -78,7 +87,7 @@ Core/Src/%.o: ../Core/Src/%.s Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/BLUETOOTH.cyclo ./Core/Src/BLUETOOTH.d ./Core/Src/BLUETOOTH.o ./Core/Src/BLUETOOTH.su ./Core/Src/BOARD.cyclo ./Core/Src/BOARD.d ./Core/Src/BOARD.o ./Core/Src/BOARD.su ./Core/Src/COMM.cyclo ./Core/Src/COMM.d ./Core/Src/COMM.o ./Core/Src/COMM.su ./Core/Src/DiscountIO.cyclo ./Core/Src/DiscountIO.d ./Core/Src/DiscountIO.o ./Core/Src/DiscountIO.su ./Core/Src/FIFO.cyclo ./Core/Src/FIFO.d ./Core/Src/FIFO.o ./Core/Src/FIFO.su ./Core/Src/FLASH.cyclo ./Core/Src/FLASH.d ./Core/Src/FLASH.o ./Core/Src/FLASH.su ./Core/Src/GPIO.cyclo ./Core/Src/GPIO.d ./Core/Src/GPIO.o ./Core/Src/GPIO.su ./Core/Src/I2C.cyclo ./Core/Src/I2C.d ./Core/Src/I2C.o ./Core/Src/I2C.su ./Core/Src/Main.cyclo ./Core/Src/Main.d ./Core/Src/Main.o ./Core/Src/Main.su ./Core/Src/TIMERS.cyclo ./Core/Src/TIMERS.d ./Core/Src/TIMERS.o ./Core/Src/TIMERS.su ./Core/Src/UART.cyclo ./Core/Src/UART.d ./Core/Src/UART.o ./Core/Src/UART.su ./Core/Src/blue_unit_conversion.d ./Core/Src/blue_unit_conversion.o ./Core/Src/mainunused.cyclo ./Core/Src/mainunused.d ./Core/Src/mainunused.o ./Core/Src/mainunused.su ./Core/Src/stm32wb0x_hal_msp.cyclo ./Core/Src/stm32wb0x_hal_msp.d ./Core/Src/stm32wb0x_hal_msp.o ./Core/Src/stm32wb0x_hal_msp.su ./Core/Src/stm32wb0x_it.cyclo ./Core/Src/stm32wb0x_it.d ./Core/Src/stm32wb0x_it.o ./Core/Src/stm32wb0x_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32wb0x.cyclo ./Core/Src/system_stm32wb0x.d ./Core/Src/system_stm32wb0x.o ./Core/Src/system_stm32wb0x.su
+	-$(RM) ./Core/Src/BLUETOOTH.cyclo ./Core/Src/BLUETOOTH.d ./Core/Src/BLUETOOTH.o ./Core/Src/BLUETOOTH.su ./Core/Src/BOARD.cyclo ./Core/Src/BOARD.d ./Core/Src/BOARD.o ./Core/Src/BOARD.su ./Core/Src/ButtonsMenuSM.cyclo ./Core/Src/ButtonsMenuSM.d ./Core/Src/ButtonsMenuSM.o ./Core/Src/ButtonsMenuSM.su ./Core/Src/COMM.cyclo ./Core/Src/COMM.d ./Core/Src/COMM.o ./Core/Src/COMM.su ./Core/Src/DiscountIO.cyclo ./Core/Src/DiscountIO.d ./Core/Src/DiscountIO.o ./Core/Src/DiscountIO.su ./Core/Src/FIFO.cyclo ./Core/Src/FIFO.d ./Core/Src/FIFO.o ./Core/Src/FIFO.su ./Core/Src/FLASH.cyclo ./Core/Src/FLASH.d ./Core/Src/FLASH.o ./Core/Src/FLASH.su ./Core/Src/GPIO.cyclo ./Core/Src/GPIO.d ./Core/Src/GPIO.o ./Core/Src/GPIO.su ./Core/Src/I2C.cyclo ./Core/Src/I2C.d ./Core/Src/I2C.o ./Core/Src/I2C.su ./Core/Src/MP3.cyclo ./Core/Src/MP3.d ./Core/Src/MP3.o ./Core/Src/MP3.su ./Core/Src/Scheduler.cyclo ./Core/Src/Scheduler.d ./Core/Src/Scheduler.o ./Core/Src/Scheduler.su ./Core/Src/TIMERS.cyclo ./Core/Src/TIMERS.d ./Core/Src/TIMERS.o ./Core/Src/TIMERS.su ./Core/Src/UART.cyclo ./Core/Src/UART.d ./Core/Src/UART.o ./Core/Src/UART.su ./Core/Src/blue_unit_conversion.d ./Core/Src/blue_unit_conversion.o ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/mainUnused.cyclo ./Core/Src/mainUnused.d ./Core/Src/mainUnused.o ./Core/Src/mainUnused.su ./Core/Src/stm32wb0x_hal_msp.cyclo ./Core/Src/stm32wb0x_hal_msp.d ./Core/Src/stm32wb0x_hal_msp.o ./Core/Src/stm32wb0x_hal_msp.su ./Core/Src/stm32wb0x_it.cyclo ./Core/Src/stm32wb0x_it.d ./Core/Src/stm32wb0x_it.o ./Core/Src/stm32wb0x_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32wb0x.cyclo ./Core/Src/system_stm32wb0x.d ./Core/Src/system_stm32wb0x.o ./Core/Src/system_stm32wb0x.su
 
 .PHONY: clean-Core-2f-Src
 

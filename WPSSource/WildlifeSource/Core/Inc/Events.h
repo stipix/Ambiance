@@ -3,7 +3,7 @@
  * Brief: Provides
  * Author: Caitlin Bonesio
  * Created: 4/15/25
- * Modified: 4/15/25
+ * Modified: 4/21/25
  */
 
 #ifndef EVENTS_H
@@ -24,6 +24,9 @@ typedef enum Event_Type{
 	EVENT_USART,
 	EVENT_USART_READY,
 	EVENT_LPUART,
+	EVENT_TIMEOUT,
+	EVENT_SETTINGS,
+	EVENT_PLAY,
 }Event_Type;
 
 typedef struct EventReturntype{

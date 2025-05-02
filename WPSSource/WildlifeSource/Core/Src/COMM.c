@@ -3,7 +3,7 @@
  * Brief: a module to listen for signals from the GUI interface
  * Author: Caitlin Bonesio
  * Created: 4/15/25
- * Modified: 4/15/25
+ * Modified: 4/23/25
  */
 
 //----------------------------------------Private Includes---------------------------------------
@@ -11,6 +11,7 @@
 #include "FIFO.h"
 #include "UART.h"
 #include "DiscountIO.h"
+#include "FLASH.h"
 #include <stdbool.h>
 
 //----------------------------------------Private Defines----------------------------------------
@@ -21,6 +22,8 @@
 #define DCCONTROL       0x04
 #define SCHEDULECONTROL 0x05
 #define SCHEDULEEND     0x0D
+#define DEBUGPRINT   	0x0E
+#define DEBUGPRINTEND  	'\n'
 
 #define MAXSCHEDULEEVENTS 180
 
@@ -50,7 +53,7 @@
 //----------------------------------------Private Variables--------------------------------------
  COMMSTATES_t commSM;
  FIFO COMMqueue;
- uint8_t sendinglogs;
+ static uint8_t sendinglogs;
 //----------------------------------------Public Functions---------------------------------------
 /*
  * @Function: EVENT_COMM_Event_Init
@@ -61,6 +64,7 @@
 uint8_t COMM_Event_Init(FIFO Queue){
 	commSM = init;
 	COMMqueue = Queue;
+	UART_Init();
 	COMM_Event_Post((Event_t){EVENT_INIT, 0});
 	return INIT_OK;
 }
@@ -101,6 +105,8 @@ Event_t COMM_Event_Updater(void){
  */
 uint8_t COMM_Event_Handler(Event_t event){
 	bool transition = 0;
+
+	static uint8_t folder;
 	COMMSTATES_t next = commSM;
 	char text[50];
 	switch(commSM){
@@ -113,31 +119,32 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case idle:
 		if(event.status == EVENT_ENTRY){
 			sendinglogs = 0;
+			BSP_LED_Toggle(LED_BLUE);
 		}
 		if(event.status == EVENT_USART){
 			switch (event.data){
 			case VOLUMECONTROL:
-				discountprintf("received volume control\n");
+				discountprintf("received volume control");
 				next = volumecontrol;
 				transition = true;
 				break;
 			case FOLDERCONTROL:
-				discountprintf("received folder control\n");
+				discountprintf("received folder control");
 				next = foldercontrol;
 				transition = true;
 				break;
 			case LOGSREQUEST:
-				discountprintf("received logs request\n");
+				discountprintf("received logs request");
 				next = logsrequest;
 				transition = true;
 				break;
 			case DCCONTROL:
-				discountprintf("received DC control\n");
+				discountprintf("received DC control");
 				next = dccontrol;
 				transition = true;
 				break;
 			case SCHEDULECONTROL:
-				discountprintf("received schedule control\n");
+				discountprintf("received schedule control");
 				next = schedulecontrol;
 				transition = true;
 				break;
@@ -148,13 +155,15 @@ uint8_t COMM_Event_Handler(Event_t event){
 		break;
 	case volumecontrol:
 		if(event.status == EVENT_USART){
-			discountprintf("Storing volume\n");
+			//FLASH_SetDCVol((uint8_t)event.data, FLASH_GetDutyCycle());
+			discountprintf("Storing volume");
 			next = idle;
 			transition = true;
 		}
 		break;
 	case foldercontrol:
 		if(event.status == EVENT_USART){
+			folder = event.data;
 			discountprintf("Sending folder selector\n");
 			next = folderselected;
 			transition = true;
@@ -162,6 +171,9 @@ uint8_t COMM_Event_Handler(Event_t event){
 		break;
 	case folderselected:
 		if(event.status == EVENT_USART){
+			//post to mp3 controller with the new data
+			Event_t play = (Event_t){EVENT_PLAY, (folder<<8) + (event.data)};
+			MP3_Event_Post(play);
 			discountprintf("Sending track selector\n");
 			next = idle;
 			transition = true;
@@ -172,7 +184,8 @@ uint8_t COMM_Event_Handler(Event_t event){
 		if(event.status == EVENT_ENTRY){
 			sendinglogs = 1;
 			sent = 0;
-			uint16_t size = PLACEHOLDER;//placeholder until flash library is complete
+			//uint16_t size = FLASH_GetLogsSize();
+			uint16_t size = 32;
 			USART_WriteTx((uint8_t)(size>>8));
 			USART_WriteTx((uint8_t)(size));
 			next = logsdata;
@@ -182,30 +195,46 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case logsdata:
 		if(event.status == EVENT_USART_READY){
 			//get logs size
-			uint8_t data = 'A';//placeholder until flash library is complete
-			uint16_t size = PLACEHOLDER;
-			if(size - sent > USARTBUFFERSIZE){
+			uint16_t size  = 32;
+			//uint16_t size = FLASH_GetLogsSize();
+			if(size - sent > (uint16_t)(USARTBUFFERSIZE/6)){
 				//send next part of logs here, use sent to index the
-				for(int i = 0; i < USARTBUFFERSIZE; i++){
-					USART_WriteTx(data);
+				for(int i = 0; i < (uint16_t)(USARTBUFFERSIZE/6); i++){
+					//scheduleEvent levent = FLASH_ReadLogs(sent);
+					scheduleEvent levent = {1, 1, 0b1001001, 0b1001010, 1, 1};
+					USART_WriteTx(levent.month);
+					USART_WriteTx(levent.day);
+					USART_WriteTx(levent.start);
+					USART_WriteTx(levent.stop);
+					USART_WriteTx(levent.folder);
+					USART_WriteTx(levent.track);
+					sent++;
 				}
-				sent = sent + USARTBUFFERSIZE;
-				next = logsdata;
-				transition = true;
-				discountprintf("data partly sent\n");
 			} else {
 				for(int i = 0; i < size - sent; i++){
-					USART_WriteTx(data);
+					//scheduleEvent levent = FLASH_ReadLogs(sent);
+					scheduleEvent levent = {1, 1, 0b1001001, 0b1001010, 1, 1};
+					USART_WriteTx(levent.month);
+					USART_WriteTx(levent.day);
+					USART_WriteTx(levent.start);
+					USART_WriteTx(levent.stop);
+					USART_WriteTx(levent.folder);
+					USART_WriteTx(levent.track);
+					sent++;
 				}
+				USART_WriteTx(LOGSDONE);
 				//send last of logs here
+				sent = 0;
+				sendinglogs = 0;
 				next = idle;
 				transition = true;
-				discountprintf("data sent\n");
+				discountprintf("\ndata sent\n");
 			}
 		}
 		break;
 	case dccontrol:
 		if(event.status == EVENT_USART){
+			//FLASH_SetDCVol(FLASH_GetVolume(), (uint8_t)event.data);
 			discountprintf("storing duty cycle\n");
 			//store duty cycle here
 			next = idle;
@@ -214,8 +243,10 @@ uint8_t COMM_Event_Handler(Event_t event){
 		break;
 	case schedulecontrol:
 		static uint8_t numevents;
+		static scheduleEvent sevent;
 		if(event.status == EVENT_ENTRY){
 			discountprintf("receiving schedule\n");
+			sevent = (scheduleEvent){0,0,0,0,0,0};
 			next = schedulemonth;
 			transition = true;
 			numevents = 0;
@@ -227,14 +258,22 @@ uint8_t COMM_Event_Handler(Event_t event){
 				discountprintf("schedule complete\n");
 				next = idle;
 				transition = true;
+				if(!(sevent.month == 0 && sevent.day == 0)){
+					//FLASH_AppendSchedule(sevent);
+				}
 			} else if(numevents > MAXSCHEDULEEVENTS){
 				discountprintf("schedule forced to complete\n");
-
-				//record a schedule end here
+				if(!(sevent.month == 0 && sevent.day == 0)){
+					//FLASH_AppendSchedule(sevent);
+				}
 				next = scheduleend;
 				transition = true;
 				USART_WriteTx(SCHEDULEEND);//please stop sending me the schedule
 			}else{
+				if(!(sevent.month == 0 && sevent.day == 0)){
+					//FLASH_AppendSchedule(sevent);
+				}
+				sevent.month = event.data;
 				sprintf(text, "Month: %d\n", event.data);
 				discountprintf(text);
 				//store month here
@@ -245,6 +284,7 @@ uint8_t COMM_Event_Handler(Event_t event){
 		break;
 	case scheduleday:
 		if(event.status == EVENT_USART){
+			sevent.day = event.data;
 			sprintf(text, "Day: %d\n", event.data);
 			discountprintf(text);
 			//record day here
@@ -254,6 +294,7 @@ uint8_t COMM_Event_Handler(Event_t event){
 		break;
 	case schedulestart:
 		if(event.status == EVENT_USART){
+			sevent.start =  event.data;
 			sprintf(text, "start time: %d:%d\n", (event.data&0b11111000)>>3, (event.data & 0b011)*15);
 			discountprintf(text);
 			//record start time here
@@ -263,6 +304,7 @@ uint8_t COMM_Event_Handler(Event_t event){
 		break;
 	case schedulestop:
 		if(event.status == EVENT_USART){
+			sevent.stop = event.data;
 			sprintf(text, "start time: %d:%d\n", (event.data&0b11111000)>>3, (event.data & 0b011)*15);
 			discountprintf(text);
 			//record end time here
@@ -272,6 +314,7 @@ uint8_t COMM_Event_Handler(Event_t event){
 		break;
 	case schedulefolder:
 		if(event.status == EVENT_USART){
+			sevent.folder = event.data;
 			sprintf(text, "folder#: %d\n", event.data);
 			discountprintf(text);
 			//record end time here
@@ -281,6 +324,7 @@ uint8_t COMM_Event_Handler(Event_t event){
 		break;
 	case scheduletrack:
 		if(event.status == EVENT_USART){
+			sevent.track = event.data;
 			sprintf(text, "track#: %d\n", event.data);
 			discountprintf(text);
 			//record end time here

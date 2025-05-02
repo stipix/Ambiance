@@ -2,14 +2,16 @@
  * Name template.c
  * Brief: a template to use when creating event/service modules
  * Author: Caitlin Bonesio
- * Created: 4/15/25
- * Modified: 4/15/25
+ * Created: / /25
+ * Modified: / /25
  */
 
 
-//----------------------------------------Public Includes----------------------------------------
+//----------------------------------------Private Includes---------------------------------------
 #include "CONFIG.h"
-
+#include "TEMPLATE.h"
+//----------------------------------------Private Variables--------------------------------------
+FIFO TEMPLATEqueue;
 //----------------------------------------Public Functions---------------------------------------
 /*
  * @Function: TEMPLATE_Event_Init
@@ -17,9 +19,20 @@
  * @param: none
  * @return: An 8 bit integer flag reflecting The initialization status
  */
-uint8_t TEMPLATE_Event_Init(void){
-    return INIT_OK
+uint8_t TEMPLATE_Event_Init(FIFO Queue){
+    TEMPLATEqueue = Queue;
+    return INIT_OK;
 }
+/*
+ * @Function: TEMPLATE_Event_Init
+ * @Brief: Provides the ability for state machines to interact
+ * @param: event to be posted
+ * @return: none
+ */
+void TEMPLATE_Event_Post(Event_t event){
+    FIFO_Enqueue(TEMPLATEqueue, event);
+}
+
 
 /*
  * @Function: TEMPLATE_Event_Updater

@@ -28,6 +28,7 @@
 
 //----------------------------------------Private Variable---------------------------------------
 static uint8_t buttons = 0;
+static uint8_t initialized = 0;
 static FIFO GPIOqueue;//the queue of all events generated for the GPIO
 
 //----------------------------------------Public Functions---------------------------------------
@@ -39,6 +40,7 @@ static FIFO GPIOqueue;//the queue of all events generated for the GPIO
  * @return: Init Status, whether the operation failed or succeeded
  */
 int GPIO_Init(){
+	if(initialized){return INIT_OK;}
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 
 	//GPIO Ports Clock Enable */
@@ -56,6 +58,7 @@ int GPIO_Init(){
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	initialized = 1;
 	return INIT_OK;
 }
 
@@ -83,6 +86,7 @@ int GPIO_Init(){
  * @return: An 8 bit integer where the LSB is button 0, and the 3rd bit is button 3
  */
 uint8_t GPIO_ReadButtons(void){
+	if(!initialized){return 0;}
 	return ((!HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) << 2) |
 			(!HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5) << 1) |
 			(!HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14) << 0));
@@ -106,7 +110,8 @@ uint8_t GPIO_Event_Init(FIFO Queue){
 	BSP_PB_Init(B2, BUTTON_MODE_GPIO);
 	BSP_PB_Init(B3, BUTTON_MODE_GPIO);
 	GPIOqueue = Queue;
-	return GPIO_Init();
+	//GPIO_Init()
+	return HAL_OK;
 
 }
 

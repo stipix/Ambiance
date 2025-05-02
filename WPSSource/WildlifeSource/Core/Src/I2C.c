@@ -3,7 +3,7 @@
  * Brief: provides a library to initialize and access the MCU's I2C hardware
  * Author: Caitlin Bonesio
  * Created: 3/4/25
- * Modified: 3/31/25
+ * Modified: 4/23/25
  */
 
 //----------------------------------------Private Includes---------------------------------------
@@ -37,6 +37,8 @@ I2C_HandleTypeDef hi2c1;
 
 ReqBuffer_t RxReq;//Receive request
 ReqBuffer_t TxReq;//Transmit request
+
+static uint8_t initialized = 0;
 
 
 //----------------------------------------Private functions--------------------------------------
@@ -78,7 +80,7 @@ void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c){
 	if(RxReq.data[RxReq.head].registersize == 2){
 		data = (RxReq.data[RxReq.head].data[0] << 8) + (RxReq.data[RxReq.head].data[1]);
 	}else if(RxReq.data[RxReq.head].registersize == 1){
-		data = RxReq.data[RxReq.head].data[0];
+		data = RxReq.data[RxReq.head].data[0] + (RxReq.data[RxReq.head].registeradr << 8);
 	}else {//error recovery
 		data = 0;
 	}
@@ -129,6 +131,7 @@ void I2C1_IRQHandler(void)
  * @return: Init Status, whether the operation failed or succeeded
  */
 int I2C_Init(void){
+	if(initialized){return INIT_OK;}
 	hi2c1.Instance = I2C1;
 	hi2c1.Init.Timing = 0x00303D5B;
 	hi2c1.Init.OwnAddress1 = 0;
@@ -162,6 +165,7 @@ int I2C_Init(void){
 	TxReq.full = false;
 	TxReq.tail = 0;
 	TxReq.head = 0;
+	initialized = 1;
 	//enables interrupts
 	//hi2c1.Instance->CR1 = hi2c1.Instance->CR1 | I2C_CR1_RXIE_Msk | I2C_CR1_TXIE_Msk;
 	__HAL_I2C_ENABLE_IT(&hi2c1, I2C_IT_RXI);
@@ -177,25 +181,24 @@ int I2C_Init(void){
  * 		   uint8_t data: to to be transmitted
  * @return: a flag if the data has been transmitted
  */
-HAL_StatusTypeDef I2C_Transmit(uint8_t targetadr, uint8_t registeradr, uint8_t registersize, uint8_t* data){
+HAL_StatusTypeDef I2C_Transmit(uint8_t targetadr, uint8_t registeradr, uint8_t data){
+	if(!initialized){return HAL_ERROR;}
 	HAL_StatusTypeDef status = HAL_OK;
 	//will not attempt to receive if the buffer is full
 	if(RxReq.full){
 		return HAL_ERROR;
 	}
-	//will not try to receive if the register is larger than can be posted with an event
-	if(registersize > MAXREQSIZE){
-		return HAL_ERROR;
-	}
+
 	//place the transmit request into the buffer
 	MemReq_t Post;
 	Post.targetadr = targetadr;
 	Post.registeradr = registeradr;
-	Post.registersize = registersize;
+	Post.registersize = 1;
 	Post.PostTo = 0;//null pointer, no function is posted to after the transmit is complete
-	for(int i = 0; i < registersize; i++){
-		Post.data[i] = *(data+i);//make use of pointer arithmetic where data + i = data + sizeof(uint8_t)*i
-	}
+	Post.data[0] = data;
+//	for(int i = 0; i < registersize; i++){
+//		Post.data[i] = *(data+i);//make use of pointer arithmetic where data + i = data + sizeof(uint8_t)*i
+//	}
 	TxReq.data[TxReq.tail] = Post;
 	TxReq.tail++;
 	TxReq.tail %= CIRCBUFFERSIZE;
@@ -223,25 +226,22 @@ HAL_StatusTypeDef I2C_Transmit(uint8_t targetadr, uint8_t registeradr, uint8_t r
  * @Brief: transmits requesting data. when the data is received it posts an event with the data to the PostTo function
  * @param: uint8_t targetadr: Address of the device to communicate
  * 		   uint8_t registeradr: Address of the register to read from
- * 		   uint8_t registersize: size of address of the register to read from, keep 2 bytes and under
  * 		   void (*PostTo)(Event_t): which service to post to when the data is received
  * @return: -1 if error, 1 if success
  */
-HAL_StatusTypeDef I2C_Recieve(uint8_t targetadr, uint8_t registeradr, uint8_t registersize ,void (*PostTo)(Event_t)){
+HAL_StatusTypeDef I2C_Recieve(uint8_t targetadr, uint8_t registeradr,void (*PostTo)(Event_t)){
+	if(!initialized){return HAL_ERROR;}
 	HAL_StatusTypeDef status = HAL_OK;
 	//will not attempt to receive if the buffer is full
 	if(RxReq.full){
 		return HAL_ERROR;
 	}
-	//will not try to receive if the register is larger than can be posted with an event
-	if(registersize > MAXREQSIZE){
-		return HAL_ERROR;
-	}
+
 	//place the receive request into the buffer
 	MemReq_t Post;
 	Post.targetadr = targetadr;
 	Post.registeradr = registeradr;
-	Post.registersize = registersize;
+	Post.registersize = 1;
 	Post.PostTo = PostTo;
 	RxReq.data[RxReq.tail] = Post;
 	RxReq.tail++;
@@ -263,6 +263,45 @@ HAL_StatusTypeDef I2C_Recieve(uint8_t targetadr, uint8_t registeradr, uint8_t re
 	}
 	return status;
 
+}
+
+/** I2C_WriteReg(I2CAddress, deviceRegisterAddress, data)
+ *
+ * Writes one device register on chosen I2C device.
+ *
+ * @param   I2CAddress              (unsigned char) 7-bit address of I2C device
+ *                                                  wished to interact with.
+ * @param   deviceRegisterAddress   (unsigned char) 8-bit address of register on
+ *                                                  device.
+ * @param   data                    (uint8_t)       Data wished to be written to
+ *                                                  register.
+ * @return                          (unsigned char) [SUCCESS, ERROR]
+ */
+unsigned char I2C_WriteReg(
+    unsigned char I2CAddress,
+    unsigned char deviceRegisterAddress,
+    uint8_t data
+)
+{
+    HAL_StatusTypeDef ret;
+    I2CAddress = I2CAddress << 1; // Use 8-bit address.
+
+    ret = HAL_I2C_Mem_Write(
+        &hi2c2,
+        I2CAddress,
+        deviceRegisterAddress,
+        I2C_MEMADD_SIZE_8BIT,
+        &data,
+        1,
+        HAL_MAX_DELAY
+    );
+    if (ret != HAL_OK)
+    {
+        printf("I2C Tx Error on write data\r\n");
+        return ERROR;
+    }
+
+    return SUCCESS;
 }
 
 

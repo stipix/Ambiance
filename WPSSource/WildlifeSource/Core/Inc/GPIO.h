@@ -19,6 +19,19 @@ extern "C" {
 #include "CONFIG.h"
 #include "FIFO.h"
 
+//----------------------------------------Public Defines-----------------------------------------
+#define B1MASK 		0x01
+#define B2MASK 		0x02
+#define B3MASK 		0x04
+#define B4MASK 		0x08
+#define B5MASK 		0x10
+#define B6MASK 		0x20
+#define B1XORMASK 	0x0100
+#define B2XORMASK 	0x0200
+#define B3XORMASK 	0x0400
+#define B4XORMASK 	0x0800
+#define B5XORMASK 	0x1000
+#define B6XORMASK 	0x2000
 //----------------------------------------Public Functions---------------------------------------
 /*
  * @function: GPIO_Init()

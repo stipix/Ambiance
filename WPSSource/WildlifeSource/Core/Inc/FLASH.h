@@ -3,11 +3,13 @@
  * Brief: provides a library to initialize and access the flash memory
  * Author: Caitlin Bonesio
  * Created: 4/11/25
- * Modified: 4/18/25
+ * Modified: 4/23/25
  */
 
 #ifndef FLASH_H
 #define FLASH_H
+#include "CONFIG.h"
+
 
 typedef struct shecduleEvent {
 	uint8_t month;
@@ -17,7 +19,7 @@ typedef struct shecduleEvent {
 	uint8_t folder;
 	uint8_t track;
 }scheduleEvent;
-
+//note the number of bytes in this struct is hard coded into COMM.c during the logs data state
 /*
  * @function: FLASH_Init()
  * @brief: initialize the flash access library
@@ -55,7 +57,7 @@ uint8_t FLASH_GetDutyCycle();
 /*
  * @function: FLASH_AppendLogs();
  * @brief: Adds a new event entry to the logs
- * @param: none
+ * @param: event - new event to be added, must have an empty start xor stop time
  * @return: success status
  */
 uint8_t FLASH_AppendLogs(scheduleEvent event);

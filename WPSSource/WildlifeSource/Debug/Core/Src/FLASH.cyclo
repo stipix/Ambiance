@@ -1,0 +1,12 @@
+../Core/Src/FLASH.c:35:9:FLASH_Init	4
+../Core/Src/FLASH.c:73:9:FLASH_SetDCVol	1
+../Core/Src/FLASH.c:90:9:FLASH_GetVolume	2
+../Core/Src/FLASH.c:103:9:FLASH_GetDutyCycle	2
+../Core/Src/FLASH.c:114:9:FLASH_AppendLogs	4
+../Core/Src/FLASH.c:135:10:FLASH_GetLogsSize	2
+../Core/Src/FLASH.c:146:15:FLASH_ReadLogs	3
+../Core/Src/FLASH.c:167:9:FLASH_ClearLogs	1
+../Core/Src/FLASH.c:185:9:FLASH_AppendSchedule	4
+../Core/Src/FLASH.c:206:10:FLASH_GetScheduleSize	2
+../Core/Src/FLASH.c:217:15:FLASH_ReadSchedule	3
+../Core/Src/FLASH.c:238:9:FLASH_ClearSchedule	1

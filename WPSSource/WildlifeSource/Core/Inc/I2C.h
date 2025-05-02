@@ -4,7 +4,7 @@
  * 		  Also provides the functions to implement the I2C into the events and services main
  * Author: Caitlin Bonesio
  * Created: 3/4/25
- * Modified: 3/7/25
+ * Modified: 4/21/25
  */
 
 
@@ -24,6 +24,11 @@ extern "C" {
 //----------------------------------------Public Defines-----------------------------------------
 #define SCREENADDRESS   0b00111100
 #define RTCADDRESS      0b01101111
+#define RTCYEARADDR     0x05
+#define RTCMNTHADDR     0x04
+#define RTCDAYADDR      0x03
+#define RTCHOURADDR     0x02
+#define RTCMINADDR      0x01
 //----------------------------------------Public Functions---------------------------------------
 
 /*
@@ -43,7 +48,7 @@ int I2C_Init(void);
  * 		   uint8_t data: to to be transmitted
  * @return: a flag if the data has been transmitted
  */
-HAL_StatusTypeDef I2C_Transmit(uint8_t targetadr, uint8_t registeradr, uint8_t registersize, uint8_t* data);
+HAL_StatusTypeDef I2C_Transmit(uint8_t targetadr, uint8_t registeradr, uint8_t data);
 
 
 /*
@@ -51,11 +56,10 @@ HAL_StatusTypeDef I2C_Transmit(uint8_t targetadr, uint8_t registeradr, uint8_t r
  * @Brief: transmits requesting data. when the data is received it posts an event with the data to the PostTo function
  * @param: uint8_t targetadr: Address of the device to communicate
  * 		   uint8_t registeradr: Address of the register to read from
- * 		   uint8_t registersize: size of address of the register to read from, keep 2 bytes and under
  * 		   void (*PostTo)(Event_t): which service to post to when the data is received
  * @return: -1 if error, 1 if success
  */
-HAL_StatusTypeDef I2C_Recieve(uint8_t targetadr, uint8_t registeradr, uint8_t registersize ,void (*PostTo)(Event_t));
+HAL_StatusTypeDef I2C_Recieve(uint8_t targetadr, uint8_t registeradr, void (*PostTo)(Event_t));
 
 
 

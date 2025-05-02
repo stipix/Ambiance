@@ -2,8 +2,8 @@
  * Name template.h
  * Brief: a template to use when creating event/service modules
  * Author: Caitlin Bonesio
- * Created: 4/15/25
- * Modified: 4/15/25
+ * Created:  / /25
+ * Modified:  /  /25
  */
 
  #ifdef __cplusplus//allows code to be ran in a c++ program
@@ -14,6 +14,7 @@
  #define TEMPLATE_H//TEMPLATE_H Header Guards
 //----------------------------------------Public Includes----------------------------------------
 #include "CONFIG.h"
+#include "FIFO.h"
 
 //----------------------------------------Public Functions---------------------------------------
 /*
@@ -22,7 +23,15 @@
  * @param: none
  * @return: An 8 bit integer flag reflecting The initialization status
  */
-uint8_t TEMPLATE_Event_Init(void);
+uint8_t TEMPLATE_Event_Init(FIFO Queue);
+
+/*
+ * @Function: TEMPLATE_Event_Init
+ * @Brief: Provides the ability for state machines to interact
+ * @param: event to be posted
+ * @return: none
+ */
+void TEMPLATE_Event_Post(Event_t event);
 
 /*
  * @Function: TEMPLATE_Event_Updater

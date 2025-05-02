@@ -15,6 +15,7 @@
 TIM_HandleTypeDef htim2;
 
 static uint32_t milliSeconds = 0;
+static uint8_t initialized = 0;
 
 //----------------------------------------Public Functions---------------------------------------
 
@@ -25,6 +26,7 @@ static uint32_t milliSeconds = 0;
  * @return: Init Status, whether the operation failed or succeeded
  */
 uint32_t TIMERS_Init(){
+	if(initialized){return INIT_OK;}
 	TIM_ClockConfigTypeDef sClockSourceConfig = {0};
 	htim2.Instance = TIM2;
 	htim2.Init.Prescaler = 32;
@@ -42,6 +44,7 @@ uint32_t TIMERS_Init(){
 		Error_Handler();
 	}
     HAL_TIM_Base_Start_IT(&htim2); // start interrupt
+    initialized = 1;
 	return INIT_OK;
 }
 
@@ -52,6 +55,7 @@ uint32_t TIMERS_Init(){
  * @return: uint32_t FRT's milliseconds
  */
 uint32_t TIMERS_GetMilliSeconds(){
+	if(!initialized){return 0;}
 	return milliSeconds;
 }
 
@@ -62,6 +66,7 @@ uint32_t TIMERS_GetMilliSeconds(){
  * @return: uint32_t FRT's microseconds
  */
 uint64_t TIMERS_GetMircoSeconds(){
+	if(!initialized){return 0;}
 	uint16_t micro = __HAL_TIM_GET_COUNTER(&htim2);
 	return ((milliSeconds*1000)+(micro%1000));
 }
