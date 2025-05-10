@@ -51,7 +51,7 @@ void CompareTime(){
 			event.folder = prevevent.folder;
 			event.track = prevevent.track;
 		}
-
+		FLASH_AppendLogs(event);
 		month = NULLDATE;
 		day = NULLDATE;
 		hour = NULLDATE;

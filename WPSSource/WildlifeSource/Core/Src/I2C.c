@@ -287,7 +287,7 @@ unsigned char I2C_WriteReg(
     I2CAddress = I2CAddress << 1; // Use 8-bit address.
 
     ret = HAL_I2C_Mem_Write(
-        &hi2c2,
+        &hi2c1,
         I2CAddress,
         deviceRegisterAddress,
         I2C_MEMADD_SIZE_8BIT,
@@ -297,7 +297,6 @@ unsigned char I2C_WriteReg(
     );
     if (ret != HAL_OK)
     {
-        printf("I2C Tx Error on write data\r\n");
         return ERROR;
     }
 

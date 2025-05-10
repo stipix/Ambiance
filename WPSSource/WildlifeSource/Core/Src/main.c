@@ -26,6 +26,7 @@
 #include "UART.h"
 #include "GPIO.h"
 #include "FIFO.h"
+#include "BLUETOOTH.h"
 
 // Private includes ----------------------------------------------------------
 
@@ -44,9 +45,18 @@ uint8_t (*HandlerList[EVENTLISTSIZE])(Event_t update) = EVENT_HANDLERLIST;
 FIFO EventQueues[EVENTLISTSIZE];
 //I2C_HandleTypeDef hi2c1;
 
+PKA_HandleTypeDef hpka;
+
+RNG_HandleTypeDef hrng;
+
+
 #ifndef TESTHARNESSACTIVE
 // Private function prototypes -----------------------------------------------
 
+static void MX_RADIO_Init(void);
+static void MX_RADIO_TIMER_Init(void);
+static void MX_RNG_Init(void);
+static void MX_PKA_Init(void);
 /**
  *
  * @brief  The application entry point. Implements a simple events and services routine. the event checkers are called updaters
@@ -63,11 +73,18 @@ int main(void)
 		BOARD_CrashHandler();
 	}
 
-	// Initialize all configured peripherals
-	if(UART_Init() != INIT_OK){
-		BOARD_CrashHandler();
-	}
 
+	MX_RADIO_Init();
+	MX_RADIO_TIMER_Init();
+	MX_RNG_Init();
+	MX_PKA_Init();
+	//Initialize BLE middleware
+	MX_APPE_Init(NULL);
+
+
+	BLUETOOTH_BufferInit();
+	// Initialize all configured peripherals
+	UARTs_Init();
 	//Initialize all modules
 	for(int i = 0; i < EVENTLISTSIZE; i++){
 		EventQueues[i] = FIFO_Create();
@@ -99,6 +116,8 @@ int main(void)
 				}
 			}
 		}
+		//Run Bluetooth Middleware
+	    MX_APPE_Process();
 
 	}
 }
@@ -106,6 +125,127 @@ int main(void)
 
 
 
+
+static void MX_PKA_Init(void)
+{
+
+  /* USER CODE BEGIN PKA_Init 0 */
+
+  /* USER CODE END PKA_Init 0 */
+
+  /* USER CODE BEGIN PKA_Init 1 */
+
+  /* USER CODE END PKA_Init 1 */
+  hpka.Instance = PKA;
+  if (HAL_PKA_Init(&hpka) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN PKA_Init 2 */
+
+  /* USER CODE END PKA_Init 2 */
+
+}
+
+/**
+  * @brief RADIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RADIO_Init(void)
+{
+
+  /* USER CODE BEGIN RADIO_Init 0 */
+//
+  /* USER CODE END RADIO_Init 0 */
+
+  RADIO_HandleTypeDef hradio = {0};
+
+  /* USER CODE BEGIN RADIO_Init 1 */
+//
+  /* USER CODE END RADIO_Init 1 */
+
+  if (__HAL_RCC_RADIO_IS_CLK_DISABLED())
+  {
+    /* Radio Peripheral reset */
+    __HAL_RCC_RADIO_FORCE_RESET();
+    __HAL_RCC_RADIO_RELEASE_RESET();
+
+    /* Enable Radio peripheral clock */
+    __HAL_RCC_RADIO_CLK_ENABLE();
+  }
+  hradio.Instance = RADIO;
+  HAL_RADIO_Init(&hradio);
+  /* USER CODE BEGIN RADIO_Init 2 */
+//
+  /* USER CODE END RADIO_Init 2 */
+
+}
+
+/**
+  * @brief RADIO_TIMER Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RADIO_TIMER_Init(void)
+{
+
+  /* USER CODE BEGIN RADIO_TIMER_Init 0 */
+//
+  /* USER CODE END RADIO_TIMER_Init 0 */
+
+  RADIO_TIMER_InitTypeDef RADIO_TIMER_InitStruct = {0};
+
+  /* USER CODE BEGIN RADIO_TIMER_Init 1 */
+//
+  /* USER CODE END RADIO_TIMER_Init 1 */
+
+  if (__HAL_RCC_RADIO_IS_CLK_DISABLED())
+  {
+    /* Radio Peripheral reset */
+    __HAL_RCC_RADIO_FORCE_RESET();
+    __HAL_RCC_RADIO_RELEASE_RESET();
+
+    /* Enable Radio peripheral clock */
+    __HAL_RCC_RADIO_CLK_ENABLE();
+  }
+  /* Wait to be sure that the Radio Timer is active */
+  while(LL_RADIO_TIMER_GetAbsoluteTime(WAKEUP) < 0x10);
+  RADIO_TIMER_InitStruct.XTAL_StartupTime = 320;
+  RADIO_TIMER_InitStruct.enableInitialCalibration = TRUE;
+  RADIO_TIMER_InitStruct.periodicCalibrationInterval = 10000;
+  HAL_RADIO_TIMER_Init(&RADIO_TIMER_InitStruct);
+  /* USER CODE BEGIN RADIO_TIMER_Init 2 */
+//
+  /* USER CODE END RADIO_TIMER_Init 2 */
+
+}
+
+/**
+  * @brief RNG Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RNG_Init(void)
+{
+
+  /* USER CODE BEGIN RNG_Init 0 */
+
+  /* USER CODE END RNG_Init 0 */
+
+  /* USER CODE BEGIN RNG_Init 1 */
+
+  /* USER CODE END RNG_Init 1 */
+  hrng.Instance = RNG;
+  if (HAL_RNG_Init(&hrng) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RNG_Init 2 */
+
+  /* USER CODE END RNG_Init 2 */
+
+}
 
 
 /* USER CODE BEGIN 4 */

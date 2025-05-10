@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (12.3.rel1)
+# Toolchain: GNU Tools for STM32 (13.3.rel1)
 ################################################################################
 
 ELF_SRCS := 
@@ -27,4 +27,24 @@ Core/Src \
 Core/Startup \
 Drivers/BSP/STM32WB0x-nucleo \
 Drivers/STM32WB0x_HAL_Driver/Src \
+Middlewares/ST/STM32_BLE/evt_handler/src \
+Middlewares/ST/STM32_BLE/queued_writes/src \
+Middlewares/ST/STM32_BLE/stack/config \
+Projects/Common/BLE/Interfaces \
+Projects/Common/BLE/Modules/Flash \
+Projects/Common/BLE/Modules/NVMDB/Src \
+Projects/Common/BLE/Modules/PKAMGR/Src \
+Projects/Common/BLE/Modules/Profiles/Src \
+Projects/Common/BLE/Modules/RADIO_utils/Src \
+Projects/Common/BLE/Modules/RTDebug \
+Projects/Common/BLE/Modules \
+Projects/Common/BLE/Startup \
+STM32_BLE/App \
+STM32_BLE/Target \
+System/Config/Debug_GPIO \
+System/Interfaces \
+Utilities/lpm/tiny_lpm \
+Utilities/misc \
+Utilities/sequencer \
+Utilities/trace/adv_trace \
 

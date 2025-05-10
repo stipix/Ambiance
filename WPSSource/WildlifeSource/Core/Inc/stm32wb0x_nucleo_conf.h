@@ -49,8 +49,8 @@ extern "C" {
 #define NUCLEO_WB05KZ
 
 /* COM define */
-#define USE_COM_LOG                         1U
-#define USE_BSP_COM_FEATURE                 1U
+#define USE_COM_LOG                         0U
+#define USE_BSP_COM_FEATURE                 0U
 
 /**
   * @}

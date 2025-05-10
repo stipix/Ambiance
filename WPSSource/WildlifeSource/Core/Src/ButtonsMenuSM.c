@@ -15,6 +15,7 @@
 #include "I2C.h"
 #include "TIMERS.h"
 #include "FLASH.h"
+#include "UART.h"
 //----------------------------------------Private Defines----------------------------------------
 #define DEBOUNCETIME 100//milliseconds
 #define SLEEPTIMER   30000
@@ -105,9 +106,9 @@ Event_t ButtonsMenuSM_Event_Updater(void){
     Event_t event = (Event_t){EVENT_NONE, 0};
 
     uint8_t currbuttons = GPIO_ReadButtons();
-    if(curbuttons != lastbuttons && debounce >= TIMERS_GetMilliSeconds() + DEBOUNCETIME){
+    if(currbuttons != lastbuttons && debounce >= TIMERS_GetMilliSeconds() + DEBOUNCETIME){
     	event.status = EVENT_BUTTONS;
-    	event.data = (currbuttons ^ lastbuttons) << 8 + currbuttons;
+    	event.data = ((currbuttons ^ lastbuttons) << 8) + currbuttons;
     	lastbuttons = currbuttons;
     	debounce = TIMERS_GetMilliSeconds();
     	timer = TIMERS_GetMilliSeconds();//delay the sleep timer
@@ -135,7 +136,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 		BMState = main;
 	}
 	if(displayoff){
-		if(event.status = EVENT_BUTTONS){
+		if(event.status == EVENT_BUTTONS){
 			displayoff = 0;
 		}
 	} else {
@@ -251,7 +252,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				}
 			} else
 			if(event.data & B6XORMASK && event.data & B6MASK){
-				if(cursospos){
+				if(cursorpos){
 
 					uint8_t accumulation = 0;
 					LPUART_WriteTx(0x7E);//start flag
@@ -289,17 +290,17 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				} else
 				if(event.data & B3XORMASK && event.data & B3MASK){
 					dayselect--;
-					dayselect%31;
+					dayselect %= 31;
 				} else
 				if(event.data & B4XORMASK && event.data & B4MASK){
 					dayselect++;
-					dayselect%31;
+					dayselect %= 31;
 				}
 			}
 			break;
 		case scheduleStart:
 			if(event.status == EVENT_ENTRY){
-				Stimeselect == 0;
+				Stimeselect = 0;
 			}
 			if(event.status == EVENT_BUTTONS){
 				if(event.data & B1XORMASK && event.data & B1MASK){
@@ -315,7 +316,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 						Stimeselect = 0b10111011;//23:45
 					} else {
 						Stimeselect--;
-						Stimeselct &= 0b00000100;
+						Stimeselect &= 0b00000100;
 					}
 
 				} else
@@ -333,7 +334,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 			break;
 		case scheduleStop:
 			if(event.status == EVENT_ENTRY){
-				Etimeselect == 0;
+				Etimeselect = 0;
 			}
 			if(event.status == EVENT_BUTTONS){
 				if(event.data & B1XORMASK && event.data & B1MASK){
@@ -349,7 +350,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 						Etimeselect = 0b10111011;//23:45
 					} else {
 						Etimeselect--;
-						Etimeselct &= 0b00000100;
+						Etimeselect &= 0b00000100;
 					}
 
 				} else
@@ -384,7 +385,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 					sevent.stop = Etimeselect;
 					sevent.track = trackselect+1;
 					sevent.folder = folderselect+1;
-					FLASH_ApeendSchedule(sevent);
+					FLASH_AppendSchedule(sevent);
 					nextstate = main;
 					transition = 1;
 
@@ -422,7 +423,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 		}
 		if(transition){
 			ButtonsMenuSM_Event_Handler((Event_t){EVENT_EXIT});
-			BMState = next;
+			BMState = nextstate;
 			ButtonsMenuSM_Event_Handler((Event_t){EVENT_ENTRY});
 		}
 	}

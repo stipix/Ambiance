@@ -22,6 +22,7 @@ Core/Src/COMM.o: ../Core/Src/COMM.c ../Core/Inc/COMM.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_gpio_ex.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_i2c.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_i2c_ex.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_pka.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_pwr.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_pwr.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_system.h \
@@ -35,12 +36,17 @@ Core/Src/COMM.o: ../Core/Src/COMM.c ../Core/Inc/COMM.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_rcc.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_bus.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_rcc_ex.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_rng.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_tim.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_tim_ex.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h \
- ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart.h \
- ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart_ex.h \
+ ../Core/Inc/app_entry.h ../Core/Inc/app_conf.h ../Core/Inc/app_common.h \
+ ../System/Config/Debug_GPIO/app_debug.h \
+ ../Projects/Common/BLE/Modules/RTDebug/RTDebug.h \
+ ../System/Config/Debug_GPIO/debug_config.h ../Core/Inc/app_conf.h \
+ ../Projects/Common/BLE/Modules/RTDebug/debug_signals.h \
+ ../Projects/Common/BLE/Modules/compiler.h \
  C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.h \
  ../Core/Inc/stm32wb0x_nucleo_conf.h \
  C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h \
@@ -73,6 +79,7 @@ Core/Src/COMM.o: ../Core/Src/COMM.c ../Core/Inc/COMM.h \
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_gpio_ex.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_i2c.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_i2c_ex.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_pka.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_pwr.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_pwr.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_system.h:
@@ -86,12 +93,20 @@ Core/Src/COMM.o: ../Core/Src/COMM.c ../Core/Inc/COMM.h \
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_rcc.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_bus.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_rcc_ex.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_rng.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_tim.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_tim_ex.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h:
-../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart.h:
-../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart_ex.h:
+../Core/Inc/app_entry.h:
+../Core/Inc/app_conf.h:
+../Core/Inc/app_common.h:
+../System/Config/Debug_GPIO/app_debug.h:
+../Projects/Common/BLE/Modules/RTDebug/RTDebug.h:
+../System/Config/Debug_GPIO/debug_config.h:
+../Core/Inc/app_conf.h:
+../Projects/Common/BLE/Modules/RTDebug/debug_signals.h:
+../Projects/Common/BLE/Modules/compiler.h:
 C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.h:
 ../Core/Inc/stm32wb0x_nucleo_conf.h:
 C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h:

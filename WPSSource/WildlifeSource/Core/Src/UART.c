@@ -11,6 +11,8 @@
 
 #include "stm32wb05.h"
 #include "stm32wb0x_ll_lpuart.h"
+#include "app_ble.h"
+#include "BLUETOOTH.h"
 
 //----------------------------------------Private Defines----------------------------------------
 #define UARTCIRCBUFFSIZE USARTBUFFERSIZE+1
@@ -25,12 +27,13 @@ typedef struct UARTcb{
 }UARTcb_t;
 //----------------------------------------Private Variables--------------------------------------
 UART_HandleTypeDef hlpuart1;
-USART_HandleTypeDef husart1;
+UART_HandleTypeDef husart1;
 
-COM_InitTypeDef BspCOMInit;
+//COM_InitTypeDef BspCOMInit;
 
 UARTcb_t USARTtx;
 UARTcb_t USARTrx;
+static uint8_t initialized = 0;
 
 
 
@@ -76,23 +79,25 @@ void USART1_IRQHandler(void)
 			}
 
 		} else {
-			__HAL_USART_CLEAR_FLAG(&husart1, UART_CLEAR_TCF);
+			__HAL_UART_CLEAR_FLAG(&husart1, UART_CLEAR_TCF);
 		}
 	}
 	BSP_LED_Toggle(LED_RED);
-	HAL_USART_IRQHandler(&husart1);
+	HAL_UART_IRQHandler(&husart1);
 
 }
 
 //----------------------------------------Public Functions---------------------------------------
 /*
- * @function: UART_Init()
+ * @function: UARTs_Init()
  * @brief: initialize the lpuart module
  * @param: none
  * @return: Init Status, whether the operation failed or succeeded
  */
-int UART_Init(void){
+int UARTs_Init(void){
 
+	if(initialized == 1){ return 0;}
+	initialized = 1;
 	hlpuart1.Instance = LPUART1;
 	hlpuart1.Init.BaudRate = 9600;
 	hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
@@ -106,15 +111,15 @@ int UART_Init(void){
 	hlpuart1.FifoMode = UART_FIFOMODE_ENABLE;
 	if (HAL_UART_Init(&hlpuart1) != HAL_OK)
 	{
-	return INIT_ERROR;
+		Error_Handler();
 	}
 	if (HAL_UARTEx_SetTxFifoThreshold(&hlpuart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
 	{
-	  return INIT_ERROR;
+		Error_Handler();
 	}
 	if (HAL_UARTEx_SetRxFifoThreshold(&hlpuart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
 	{
-	  return INIT_ERROR;
+		Error_Handler();
 	}
 	husart1.Instance = USART1;
 //	husart1.Init.BaudRate = 9600;
@@ -129,12 +134,39 @@ int UART_Init(void){
 //	return INIT_ERROR;
 //	}
 
-	BspCOMInit.BaudRate   = 9600;
-	BspCOMInit.WordLength = COM_WORDLENGTH_8B;
-	BspCOMInit.StopBits   = COM_STOPBITS_1;
-	BspCOMInit.Parity     = COM_PARITY_NONE;
-	BspCOMInit.HwFlowCtl  = COM_HWCONTROL_NONE;
-	if (BSP_COM_Init(COM1, &BspCOMInit) != BSP_ERROR_NONE)
+//	BspCOMInit.BaudRate   = 9600;
+//	BspCOMInit.WordLength = COM_WORDLENGTH_8B;
+//	BspCOMInit.StopBits   = COM_STOPBITS_1;
+//	BspCOMInit.Parity     = COM_PARITY_NONE;
+//	BspCOMInit.HwFlowCtl  = COM_HWCONTROL_NONE;
+//	if (BSP_COM_Init(COM1, &BspCOMInit) != BSP_ERROR_NONE)
+//	{
+//		Error_Handler();
+//	}
+	husart1.Instance = USART1;
+	husart1.Init.BaudRate = 9600;
+	husart1.Init.WordLength = UART_WORDLENGTH_8B;
+	husart1.Init.StopBits = UART_STOPBITS_1;
+	husart1.Init.Parity = UART_PARITY_NONE;
+	husart1.Init.Mode = UART_MODE_TX_RX;
+	husart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	husart1.Init.OverSampling = UART_OVERSAMPLING_16;
+	husart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+	husart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+	husart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+	if (HAL_UART_Init(&husart1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_UARTEx_SetTxFifoThreshold(&husart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_UARTEx_SetRxFifoThreshold(&husart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_UARTEx_DisableFifoMode(&husart1) != HAL_OK)
 	{
 		Error_Handler();
 	}
@@ -152,7 +184,7 @@ int UART_Init(void){
 
 //	__HAL_USART_ENABLE_IT(&husart1, UART_IT_TXE);
 //	__HAL_USART_ENABLE_IT(&husart1, UART_IT_RXNE);
-	return INIT_OK;
+	return 0;//not INIT_OK to have compatibility with the BLE trace function calls
 }
 
 /*
@@ -208,6 +240,9 @@ char USART_ReadRx(void){
  * @return: status, 0x00 if success,  0x25 (NAK) if failed,
  */
 char USART_WriteTx(char input){
+	if (APP_BLE_Get_Server_Connection_Status() == APP_BLE_CONNECTED_SERVER){
+		BLUETOOTH_WriteBuffer(input);
+	}
 	if(!USARTtx.full){
 		if(USARTtx.head == USARTtx.tail && (husart1.Instance->ISR & USART_ISR_TXE_TXFNF_Msk)){
 			husart1.Instance->TDR = input;

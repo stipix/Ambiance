@@ -27,6 +27,7 @@ typedef enum Event_Type{
 	EVENT_TIMEOUT,
 	EVENT_SETTINGS,
 	EVENT_PLAY,
+	EVENT_BLE,
 }Event_Type;
 
 typedef struct EventReturntype{

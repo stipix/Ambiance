@@ -16,6 +16,11 @@ extern "C" {
 
 
 #include "stm32wb0x_hal.h"
+#include "app_entry.h"
+#include "app_common.h"
+#include "app_debug.h"
+#include "compiler.h"
+
 #include "stm32wb0x_nucleo.h"
 
 #define INIT_ERROR 0

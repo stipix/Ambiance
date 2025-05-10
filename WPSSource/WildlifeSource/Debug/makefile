@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (12.3.rel1)
+# Toolchain: GNU Tools for STM32 (13.3.rel1)
 ################################################################################
 
 -include ../makefile.init
@@ -9,6 +9,26 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include Utilities/trace/adv_trace/subdir.mk
+-include Utilities/sequencer/subdir.mk
+-include Utilities/misc/subdir.mk
+-include Utilities/lpm/tiny_lpm/subdir.mk
+-include System/Interfaces/subdir.mk
+-include System/Config/Debug_GPIO/subdir.mk
+-include STM32_BLE/Target/subdir.mk
+-include STM32_BLE/App/subdir.mk
+-include Projects/Common/BLE/Startup/subdir.mk
+-include Projects/Common/BLE/Modules/RTDebug/subdir.mk
+-include Projects/Common/BLE/Modules/RADIO_utils/Src/subdir.mk
+-include Projects/Common/BLE/Modules/Profiles/Src/subdir.mk
+-include Projects/Common/BLE/Modules/PKAMGR/Src/subdir.mk
+-include Projects/Common/BLE/Modules/NVMDB/Src/subdir.mk
+-include Projects/Common/BLE/Modules/Flash/subdir.mk
+-include Projects/Common/BLE/Modules/subdir.mk
+-include Projects/Common/BLE/Interfaces/subdir.mk
+-include Middlewares/ST/STM32_BLE/stack/config/subdir.mk
+-include Middlewares/ST/STM32_BLE/queued_writes/src/subdir.mk
+-include Middlewares/ST/STM32_BLE/evt_handler/src/subdir.mk
 -include Drivers/STM32WB0x_HAL_Driver/Src/subdir.mk
 -include Drivers/BSP/STM32WB0x-nucleo/subdir.mk
 -include Core/Startup/subdir.mk
@@ -65,7 +85,7 @@ main-build: WildlifeSource.elf secondary-outputs
 
 # Tool invocations
 WildlifeSource.elf WildlifeSource.map: $(OBJS) $(USER_OBJS) C:\Users\stipi\Desktop\HWstuff\ECE129\WildlifeSource\WPSSource\WildlifeSource\STM32WB05KZVX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "WildlifeSource.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\stipi\Desktop\HWstuff\ECE129\WildlifeSource\WPSSource\WildlifeSource\STM32WB05KZVX_FLASH.ld" --specs=nosys.specs -Wl,-Map="WildlifeSource.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "WildlifeSource.elf" @"objects.list" $(USER_OBJS) -Wl,--start-group $(LIBS) -Wl,--end-group -mcpu=cortex-m0plus -T"C:\Users\stipi\Desktop\HWstuff\ECE129\WildlifeSource\WPSSource\WildlifeSource\STM32WB05KZVX_FLASH.ld" --specs=nosys.specs -Wl,-Map="WildlifeSource.map" -Wl,--gc-sections -static -L../Middlewares/ST/STM32_BLE/cryptolib -L../Middlewares/ST/STM32_BLE/stack/lib --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

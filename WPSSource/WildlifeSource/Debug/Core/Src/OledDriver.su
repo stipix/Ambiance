@@ -1,0 +1,7 @@
+../Core/Src/OledDriver.c:74:6:OledHostInit	8	static
+../Core/Src/OledDriver.c:84:6:OledDriverInitDisplay	8	static
+../Core/Src/OledDriver.c:111:6:OledDriverSetDisplayInverted	8	static
+../Core/Src/OledDriver.c:121:6:OledDriverSetDisplayNormal	8	static
+../Core/Src/OledDriver.c:129:6:OledDriverDisableDisplay	8	static
+../Core/Src/OledDriver.c:138:6:OledDriverUpdateDisplay	24	static
+../Core/Src/OledDriver.c:164:6:DelayMs	24	static

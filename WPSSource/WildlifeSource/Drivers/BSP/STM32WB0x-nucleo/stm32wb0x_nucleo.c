@@ -494,6 +494,18 @@ int32_t BSP_COM_Init(COM_TypeDef COM, COM_InitTypeDef *COM_Init)
         status = BSP_ERROR_PERIPH_FAILURE;
       }
     }
+    if (HAL_UARTEx_SetTxFifoThreshold(&hcom_uart[COM], UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+    {
+      status = BSP_ERROR_PERIPH_FAILURE;
+    }
+    if (HAL_UARTEx_SetRxFifoThreshold(&hcom_uart[COM], UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+    {
+      status = BSP_ERROR_PERIPH_FAILURE;
+    }
+    if (HAL_UARTEx_EnableFifoMode(&hcom_uart[COM]) != HAL_OK)
+    {
+      status = BSP_ERROR_PERIPH_FAILURE;
+    }
   }
 
   return status;
@@ -566,11 +578,11 @@ int fputc(int ch, FILE *f)
 }
 
 #elif defined(__GNUC__)
-//int __io_putchar(int ch)
-//{
-//  (void) HAL_UART_Transmit(&hcom_uart[COM_ActiveLogPort], (uint8_t *) &ch, 1, COM_POLL_TIMEOUT);
-//  return ch;
-//}
+int __io_putchar(int ch)
+{
+  (void) HAL_UART_Transmit(&hcom_uart[COM_ActiveLogPort], (uint8_t *) &ch, 1, COM_POLL_TIMEOUT);
+  return ch;
+}
 #endif
 
 #endif /* (USE_COM_LOG == 1) */

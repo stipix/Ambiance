@@ -4,3 +4,4 @@
 ../Core/Src/I2C.c:133:5:I2C_Init	8	static
 ../Core/Src/I2C.c:184:19:I2C_Transmit	56	static
 ../Core/Src/I2C.c:232:19:I2C_Recieve	56	static
+../Core/Src/I2C.c:280:15:I2C_WriteReg	48	static

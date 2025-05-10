@@ -25,7 +25,7 @@ extern "C" {
  * @param: none
  * @return: Init Status, whether the operation failed or succeeded
  */
-int UART_Init(void);
+int UARTs_Init(void);
 
 /*
  * @function: LPUART_ReadRx()

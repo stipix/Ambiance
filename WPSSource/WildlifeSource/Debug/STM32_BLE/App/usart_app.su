@@ -1,0 +1,3 @@
+../STM32_BLE/App/usart_app.c:90:6:USART_Notification	40	static
+../STM32_BLE/App/usart_app.c:142:6:USART_APP_EvtRx	16	static
+../STM32_BLE/App/usart_app.c:180:6:USART_APP_Init	8	static

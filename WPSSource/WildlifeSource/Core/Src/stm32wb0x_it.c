@@ -18,8 +18,12 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include <main.h>
+#include "main.h"
 #include "stm32wb0x_it.h"
+#include "hw_pka.h"
+#include "ble_stack.h"
+#include "miscutil.h"
+#include "stm32wb0x_ll_usart.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -55,9 +59,6 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern I2C_HandleTypeDef hi2c1;
-extern UART_HandleTypeDef hlpuart1;
-extern TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -142,10 +143,35 @@ void SysTick_Handler(void)
 /* please refer to the startup file (startup_stm32wb0x.s).                    */
 /******************************************************************************/
 
-/**
-  * @brief This function handles I2C1 Event and Error Interrupt.
-  */
 
+/**
+  * @brief This function handles GPIOA interrupt.
+  */
+void GPIOA_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPIOA_IRQn 0 */
+
+  /* USER CODE END GPIOA_IRQn 0 */
+  BSP_PB_IRQHandler(GPIOA,B1_PIN);
+  /* USER CODE BEGIN GPIOA_IRQn 1 */
+
+  /* USER CODE END GPIOA_IRQn 1 */
+}
+
+/**
+  * @brief This function handles GPIOB interrupt.
+  */
+void GPIOB_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPIOB_IRQn 0 */
+
+  /* USER CODE END GPIOB_IRQn 0 */
+  BSP_PB_IRQHandler(GPIOB,B3_PIN);
+  BSP_PB_IRQHandler(GPIOB,B2_PIN);
+  /* USER CODE BEGIN GPIOB_IRQn 1 */
+
+  /* USER CODE END GPIOB_IRQn 1 */
+}
 
 /**
   * @brief This function handles RADIO_TIMER_CPU_WKUP global interrupt.

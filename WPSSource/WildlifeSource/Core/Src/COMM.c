@@ -64,7 +64,7 @@
 uint8_t COMM_Event_Init(FIFO Queue){
 	commSM = init;
 	COMMqueue = Queue;
-	UART_Init();
+	UARTs_Init();
 	COMM_Event_Post((Event_t){EVENT_INIT, 0});
 	return INIT_OK;
 }
