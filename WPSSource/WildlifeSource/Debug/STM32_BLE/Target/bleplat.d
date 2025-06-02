@@ -51,6 +51,8 @@ STM32_BLE/Target/bleplat.o: ../STM32_BLE/Target/bleplat.c \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_tim_ex.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart_ex.h \
  ../Core/Inc/app_entry.h ../Core/Inc/app_conf.h ../Core/Inc/app_common.h \
  ../System/Config/Debug_GPIO/app_debug.h \
  ../Projects/Common/BLE/Modules/RTDebug/RTDebug.h \
@@ -62,7 +64,7 @@ STM32_BLE/Target/bleplat.o: ../STM32_BLE/Target/bleplat.c \
  C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h \
  ../Core/Inc/Events.h ../Core/Inc/FIFO.h ../Core/Inc/GPIO.h \
  ../Core/Inc/CONFIG.h ../Core/Inc/COMM.h ../Core/Inc/MP3.h \
- ../Core/Inc/Scheduler.h \
+ ../Core/Inc/Scheduler.h ../Core/Inc/ButtonsMenuSM.h \
  ../Middlewares/ST/STM32_BLE/cryptolib/Inc/Common/types.h \
  ../Middlewares/ST/STM32_BLE/cryptolib/Inc/Common/err_codes.h \
  ../Middlewares/ST/STM32_BLE/cryptolib/Inc/Common/sk.h \
@@ -132,6 +134,8 @@ STM32_BLE/Target/bleplat.o: ../STM32_BLE/Target/bleplat.c \
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_tim_ex.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart_ex.h:
 ../Core/Inc/app_entry.h:
 ../Core/Inc/app_conf.h:
 ../Core/Inc/app_common.h:
@@ -151,6 +155,7 @@ C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Dr
 ../Core/Inc/COMM.h:
 ../Core/Inc/MP3.h:
 ../Core/Inc/Scheduler.h:
+../Core/Inc/ButtonsMenuSM.h:
 ../Middlewares/ST/STM32_BLE/cryptolib/Inc/Common/types.h:
 ../Middlewares/ST/STM32_BLE/cryptolib/Inc/Common/err_codes.h:
 ../Middlewares/ST/STM32_BLE/cryptolib/Inc/Common/sk.h:

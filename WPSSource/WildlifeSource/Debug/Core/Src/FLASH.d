@@ -41,6 +41,8 @@ Core/Src/FLASH.o: ../Core/Src/FLASH.c ../Core/Inc/FLASH.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_tim_ex.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart_ex.h \
  ../Core/Inc/app_entry.h ../Core/Inc/app_conf.h ../Core/Inc/app_common.h \
  ../System/Config/Debug_GPIO/app_debug.h \
  ../Projects/Common/BLE/Modules/RTDebug/RTDebug.h \
@@ -52,7 +54,7 @@ Core/Src/FLASH.o: ../Core/Src/FLASH.c ../Core/Inc/FLASH.h \
  C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h \
  ../Core/Inc/Events.h ../Core/Inc/FIFO.h ../Core/Inc/GPIO.h \
  ../Core/Inc/COMM.h ../Core/Inc/MP3.h ../Core/Inc/Scheduler.h \
- ../Core/Inc/BOARD.h
+ ../Core/Inc/ButtonsMenuSM.h ../Core/Inc/BOARD.h
 ../Core/Inc/FLASH.h:
 ../Core/Inc/CONFIG.h:
 ../Core/Inc/BOARD.h:
@@ -97,6 +99,8 @@ Core/Src/FLASH.o: ../Core/Src/FLASH.c ../Core/Inc/FLASH.h \
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_tim_ex.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart_ex.h:
 ../Core/Inc/app_entry.h:
 ../Core/Inc/app_conf.h:
 ../Core/Inc/app_common.h:
@@ -115,4 +119,5 @@ C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Dr
 ../Core/Inc/COMM.h:
 ../Core/Inc/MP3.h:
 ../Core/Inc/Scheduler.h:
+../Core/Inc/ButtonsMenuSM.h:
 ../Core/Inc/BOARD.h:

@@ -8,16 +8,17 @@
 #include "FLASH.h"
 #include "BOARD.h"
 
-#define VOLUMEADDRESS  	0x1006F800
-#define DCADDRESS 		0x1006F801
+#define VOLUMEADDRESS  	0x1006E000
+#define DCADDRESS 		0x1006E001
 #define SCHEDULEADDRESS	0x1006F000
 #define LOGSADDRESS 	0x1006E800
 
-#define DCVOLPAGE		96
-#define SCHEDULEPAGE	95
-#define LOGSPAGE		94
+#define DCVOLPAGE		92
+#define SCHEDULEPAGE	94
+#define LOGSPAGE		93
 
-#define FLASHEMPTY 0x1111
+#define FLASHEMPTY 0xFF
+#define FLASHPAGESIZE 0x800
 
 #define SCHEDULEEVENTSIZE 8//must be a multiple of 4
 
@@ -34,15 +35,17 @@ static uint8_t initialized = 0;
  */
 uint8_t FLASH_Init(){
 	if(initialized){return INIT_OK;}
+	
+	__HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
 	//find size of schedule
-	for(int i = 0; i < 2048/SCHEDULEEVENTSIZE; i++){
+	for(int i = 0; i < FLASHPAGESIZE/SCHEDULEEVENTSIZE; i++){
 		if ((uint8_t)(*(uint8_t*)(SCHEDULEADDRESS+(i*SCHEDULEEVENTSIZE))) == FLASHEMPTY ){
 			ScheduleSize = i-1;
 			break;
 		}
 	}
 	//find size of logs
-	for(int i = 0; i < 2048/SCHEDULEEVENTSIZE; i++){
+	for(int i = 0; i < FLASHPAGESIZE/SCHEDULEEVENTSIZE; i++){
 		if ((uint8_t)(*(uint8_t*)(LOGSADDRESS+(i*SCHEDULEEVENTSIZE))) == FLASHEMPTY ){
 			LogsSize = i-1;
 			break;
@@ -51,14 +54,14 @@ uint8_t FLASH_Init(){
 	initialized = 1;
 	//load default values into the duty cycle and volume if they are not initialized
 	if(FLASH_GetVolume() == FLASHEMPTY ||FLASH_GetDutyCycle() == FLASHEMPTY){
-		if(FLASH_GetVolume() == FLASHEMPTY){
-			if(FLASH_GetDutyCycle() == FLASHEMPTY){
-				FLASH_SetDCVol(50, 40);
-			} else {
+		if(FLASH_GetVolume() == FLASHEMPTY && FLASH_GetDutyCycle() == FLASHEMPTY){
+			FLASH_SetDCVol(50, 40);
+		}else {
+			if(FLASH_GetVolume() == FLASHEMPTY){
 				FLASH_SetDCVol(50, FLASH_GetDutyCycle());
+			}else {
+				FLASH_SetDCVol(FLASH_GetVolume(), 40);
 			}
-		} else {
-			FLASH_SetDCVol(FLASH_GetVolume(), 40);
 		}
 	}
 	return INIT_OK;
@@ -71,13 +74,17 @@ uint8_t FLASH_Init(){
  * @return: success status
  */
 uint8_t FLASH_SetDCVol(uint8_t volume, uint8_t DC){
+	if(!initialized){return 0;}
 	FLASH_EraseInitTypeDef erase;
 	erase.Page = DCVOLPAGE;
 	erase.NbPages = 1;
 	erase.TypeErase = FLASH_TYPEERASE_PAGES;
 	uint32_t faultypage;
 	HAL_FLASHEx_Erase(&erase, &faultypage);
-	HAL_StatusTypeDef status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, VOLUMEADDRESS, ((uint32_t)(DC)<<8)&(uint32_t)(volume));
+	FLASH_GetVolume();
+	FLASH_GetDutyCycle();
+	uint32_t data = ((uint32_t)(DC)<<8)+(uint32_t)(volume);
+	HAL_StatusTypeDef status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, VOLUMEADDRESS, data);
 	return status == HAL_OK;
 }
 
@@ -89,7 +96,8 @@ uint8_t FLASH_SetDCVol(uint8_t volume, uint8_t DC){
  */
 uint8_t FLASH_GetVolume(){
 	if(!initialized){return 0;}
-	return (uint8_t)(*((uint8_t*)VOLUMEADDRESS));
+	uint8_t* adr = (uint8_t*)VOLUMEADDRESS;
+	return *adr;
 }
 
 
@@ -102,7 +110,8 @@ uint8_t FLASH_GetVolume(){
  */
 uint8_t FLASH_GetDutyCycle(){
 	if(!initialized){return 0;}
-	return (uint8_t)(*((uint8_t*)DCADDRESS));
+	uint8_t* adr = (uint8_t*)DCADDRESS;
+	return *adr;
 }
 
 /*
@@ -114,13 +123,13 @@ uint8_t FLASH_GetDutyCycle(){
 uint8_t FLASH_AppendLogs(scheduleEvent event){
 	if(!initialized){return 0;}
 	LogsSize++;
-	uint32_t Data1 = (event.month)&(event.day<<8)&(event.start<<16)&(event.stop<<24);
-	uint32_t Data2 = (event.folder)&(event.track<<8);
-	//this isn't blocking code officer I swear! (this is blocking code)
+	uint32_t Data1 = (event.month)|(event.day<<8)|(event.start<<16)|(event.stop<<24);
+	uint32_t Data2 = (event.folder)|(event.track<<8);
+	//this isn't blocking code officer I swear! (this is blocking code, to be improved later)
 	if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, LOGSADDRESS+LogsSize*SCHEDULEEVENTSIZE, Data1) != HAL_OK ){
 		return 0;
 	}
-	if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, LOGSADDRESS+LogsSize*SCHEDULEEVENTSIZE, Data2) != HAL_OK ){
+	if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, LOGSADDRESS+LogsSize*SCHEDULEEVENTSIZE+4, Data2) != HAL_OK ){
 		return 0;
 	}
 	return 1;
@@ -147,12 +156,12 @@ scheduleEvent FLASH_ReadLogs(uint16_t index){
 	scheduleEvent event = (scheduleEvent){0, 0, 0, 0, 0, 0};
 	if(!initialized){return event;}
 	if(index >= 0 && index <= LogsSize){
-		event.month = *(uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE);
-		event.day = *(uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+1);
-		event.start = *(uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+2);
-		event.stop = *(uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+3);
-		event.folder = *(uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+4);
-		event.track = *(uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+5);
+		event.month = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE));
+		event.day = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+1));
+		event.start = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+2));
+		event.stop = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+3));
+		event.folder = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+4));
+		event.track = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+5));
 
 	}
 	return event;
@@ -165,6 +174,7 @@ scheduleEvent FLASH_ReadLogs(uint16_t index){
  * @return: success status
  */
 uint8_t FLASH_ClearLogs(){
+	LogsSize = 0;
 	FLASH_EraseInitTypeDef erase;
 	erase.Page = LOGSPAGE;
 	erase.NbPages = 1;
@@ -184,16 +194,17 @@ uint8_t FLASH_ClearLogs(){
  */
 uint8_t FLASH_AppendSchedule(scheduleEvent event){
 	if(!initialized){return 0;}
-	LogsSize++;
-	uint32_t Data1 = (event.month)&(event.day<<8)&(event.start<<16)&(event.stop<<24);
-	uint32_t Data2 = (event.folder)&(event.track<<8);
+	uint32_t Data1 = (event.month)|(event.day<<8)|(event.start<<16)|(event.stop<<24);
+	uint32_t Data2 = (event.folder)|(event.track<<8);
 	//this isn't blocking code officer I swear! (this is blocking code)
-	if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, SCHEDULEADDRESS+LogsSize*SCHEDULEEVENTSIZE, Data1) != HAL_OK ){
+	if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, SCHEDULEADDRESS+ScheduleSize*SCHEDULEEVENTSIZE, Data1) != HAL_OK ){
 		return 0;
 	}
-	if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, SCHEDULEADDRESS+LogsSize*SCHEDULEEVENTSIZE, Data2) != HAL_OK ){
+	if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, SCHEDULEADDRESS+ScheduleSize*SCHEDULEEVENTSIZE+4, Data2) != HAL_OK ){
 		return 0;
 	}
+	ScheduleSize++;
+	FLASH_ReadSchedule(ScheduleSize-1);
 	return 1;
 }
 
@@ -217,16 +228,16 @@ uint16_t FLASH_GetScheduleSize(){
 scheduleEvent FLASH_ReadSchedule(uint16_t index){
 	scheduleEvent event = (scheduleEvent){0, 0, 0, 0, 0, 0};
 	if(!initialized){return event;}
-		if(index >= 0 && index <= LogsSize){
-			event.month = *(uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE);
-			event.day = *(uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+1);
-			event.start = *(uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+2);
-			event.stop = *(uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+3);
-			event.folder = *(uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+4);
-			event.track = *(uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+5);
+	if(index >= 0 && index < ScheduleSize){
+		event.month = *((uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE));
+		event.day = *((uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+1));
+		event.start = *((uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+2));
+		event.stop = *((uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+3));
+		event.folder = *((uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+4));
+		event.track = *((uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+5));
 
-		}
-		return event;
+	}
+	return event;
 }
 
 /*
@@ -236,6 +247,7 @@ scheduleEvent FLASH_ReadSchedule(uint16_t index){
  * @return: success status
  */
 uint8_t FLASH_ClearSchedule(){
+	ScheduleSize = 0;
 	FLASH_EraseInitTypeDef erase;
 	erase.Page = SCHEDULEPAGE;
 	erase.NbPages = 1;

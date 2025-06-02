@@ -49,30 +49,30 @@ int GPIO_Init(void);
  */
 uint8_t GPIO_ReadButtons(void);
 
-/*
- * @Function: GPIO_Event_Init
- * @Brief: Provides the initialization function for the events and serviced routine
- * @param: none
- * @return: An 8 bit integer flag reflecting The initialization status
- */
-uint8_t GPIO_Event_Init(FIFO Queue);
-
-/*
- * @Function: GPIO_Event_Updater
- * @Brief: Provides the event checker that checks and posts the changes in the buttons and the current buttons states
- * @param: none
- * @return: An event where the 16bit data is formatted at the 8 most significant bits representing the current states
- * 		 	and the least significant 8 bits representing the changes in the buttons states
- */
-Event_t GPIO_Event_Updater(void);
-
-/*
- * @Function: GPIO_Event_Handler
- * @Brief: Currently changes the LEDs on the devboard based on the updates
- * @param: Event_t event, incoming event for the handler to handle
- * @return: An 8 byte integer success flag, returns 0 if the program should crash
- */
-uint8_t GPIO_Event_Handler(Event_t event);
+///*
+// * @Function: GPIO_Event_Init
+// * @Brief: Provides the initialization function for the events and serviced routine
+// * @param: none
+// * @return: An 8 bit integer flag reflecting The initialization status
+// */
+//uint8_t GPIO_Event_Init(FIFO Queue);
+//
+///*
+// * @Function: GPIO_Event_Updater
+// * @Brief: Provides the event checker that checks and posts the changes in the buttons and the current buttons states
+// * @param: none
+// * @return: An event where the 16bit data is formatted at the 8 most significant bits representing the current states
+// * 		 	and the least significant 8 bits representing the changes in the buttons states
+// */
+//Event_t GPIO_Event_Updater(void);
+//
+///*
+// * @Function: GPIO_Event_Handler
+// * @Brief: Currently changes the LEDs on the devboard based on the updates
+// * @param: Event_t event, incoming event for the handler to handle
+// * @return: An 8 byte integer success flag, returns 0 if the program should crash
+// */
+//uint8_t GPIO_Event_Handler(Event_t event);
 
 #ifdef __cplusplus
 }

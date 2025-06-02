@@ -18,11 +18,14 @@
 #define ASCII_FONT_WIDTH  6
 
 // Special codes.
-#define OVEN_TOP_ON         "\x01"
-#define OVEN_TOP_OFF        "\x02"
-#define OVEN_BOTTOM_ON      "\x03"
-#define OVEN_BOTTOM_OFF     "\x04"
-#define DEGREE_SYMBOL       "\xF8"
+#define UP_ARROW_OFF        '\x01'
+#define UP_ARROW_ON         '\x02'
+#define DOWN_ARROW_OFF      '\x03'
+#define DOWN_ARROW_ON       '\x04'
+#define LEFT_ARROW_OFF      '\x05'
+#define LEFT_ARROW_ON       '\x06'
+#define RIGHT_ARROW_OFF     '\x07'
+#define RIGHT_ARROW_ON      '\x08'
 
 
 /*  PROTOTYPES  */

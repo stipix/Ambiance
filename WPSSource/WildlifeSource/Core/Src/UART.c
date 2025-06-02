@@ -12,11 +12,14 @@
 #include "stm32wb05.h"
 #include "stm32wb0x_ll_lpuart.h"
 #include "app_ble.h"
+#include "stm32wb0x_nucleo.h"
 #include "BLUETOOTH.h"
+#include "I2C-UART_Manager.h"
+#include "TIMERS.h"
 
 //----------------------------------------Private Defines----------------------------------------
 #define UARTCIRCBUFFSIZE USARTBUFFERSIZE+1
-
+#define LPUARTCIRCBUFFSIZE 32
 
 //----------------------------------------Private Typedefs---------------------------------------
 typedef struct UARTcb{
@@ -25,19 +28,30 @@ typedef struct UARTcb{
 	uint16_t tail;
 	bool full;
 }UARTcb_t;
+
+typedef struct LPUARTcb{
+	uint8_t data[LPUARTCIRCBUFFSIZE];
+	uint16_t head;
+	uint16_t tail;
+	bool full;
+}LPUARTcb_t;
 //----------------------------------------Private Variables--------------------------------------
 UART_HandleTypeDef hlpuart1;
-UART_HandleTypeDef husart1;
+USART_HandleTypeDef husart1;
 
-//COM_InitTypeDef BspCOMInit;
+COM_InitTypeDef BspCOMInit;
 
 UARTcb_t USARTtx;
 UARTcb_t USARTrx;
+
+LPUARTcb_t LPUARTtx;
+LPUARTcb_t LPUARTrx;
 static uint8_t initialized = 0;
 
 
 
 //----------------------------------------Private Functions--------------------------------------
+
 
 /**
   * @brief This function handles LPUART1 Interrupt.
@@ -46,6 +60,32 @@ void LPUART1_IRQHandler(void)
 {
   /* USER CODE BEGIN LPUART1_IRQn 0 */
 
+	if(hlpuart1.Instance->ISR & USART_ISR_RXNE_RXFNE_Msk){
+		if(!LPUARTrx.full){
+			LPUARTrx.data[LPUARTrx.head] = hlpuart1.Instance->RDR;
+			LPUARTrx.head++;
+			LPUARTrx.head %= LPUARTCIRCBUFFSIZE;
+			if(LPUARTrx.tail == LPUARTrx.head){
+				LPUARTrx.full = true;
+			}
+		} else {
+			uint8_t discard = hlpuart1.Instance->RDR;
+			discard++;
+		}
+	}
+	if((hlpuart1.Instance->ISR & USART_ISR_TC_Msk)){
+		if(LPUARTtx.head != LPUARTtx.tail || LPUARTtx.full){
+			hlpuart1.Instance->TDR = LPUARTtx.data[LPUARTtx.tail];
+			LPUARTtx.tail++;
+			LPUARTtx.tail %= LPUARTCIRCBUFFSIZE;
+			if(LPUARTtx.full){
+				LPUARTtx.full = false;
+			}
+
+		} else {
+			__HAL_UART_CLEAR_FLAG(&hlpuart1, UART_CLEAR_TCF);
+		}
+	}
   /* USER CODE END LPUART1_IRQn 0 */
   HAL_UART_IRQHandler(&hlpuart1);
   /* USER CODE BEGIN LPUART1_IRQn 1 */
@@ -71,19 +111,20 @@ void USART1_IRQHandler(void)
 	}
 	if((husart1.Instance->ISR & USART_ISR_TC_Msk)){
 		if(USARTtx.head != USARTtx.tail || USARTtx.full){
+			I2CUARTtoUSART(1);//delays because a transmission follows immediately, should be rare as it was already initialized before the interrupt
 			husart1.Instance->TDR = USARTtx.data[USARTtx.tail];
 			USARTtx.tail++;
 			USARTtx.tail %= UARTCIRCBUFFSIZE;
 			if(USARTtx.full){
-				USARTrx.full = false;
+				USARTtx.full = false;
 			}
 
 		} else {
-			__HAL_UART_CLEAR_FLAG(&husart1, UART_CLEAR_TCF);
+			I2CUARTtoI2C(1);//after transmission is complete default to I2C, no delay
+			__HAL_USART_CLEAR_FLAG(&husart1, UART_CLEAR_TCF);
 		}
 	}
-	BSP_LED_Toggle(LED_RED);
-	HAL_UART_IRQHandler(&husart1);
+	HAL_USART_IRQHandler(&husart1);
 
 }
 
@@ -97,6 +138,7 @@ void USART1_IRQHandler(void)
 int UARTs_Init(void){
 
 	if(initialized == 1){ return 0;}
+	TIMERS_Init();
 	initialized = 1;
 	hlpuart1.Instance = LPUART1;
 	hlpuart1.Init.BaudRate = 9600;
@@ -108,7 +150,7 @@ int UARTs_Init(void){
 	hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
 	hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
 	hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-	hlpuart1.FifoMode = UART_FIFOMODE_ENABLE;
+	hlpuart1.FifoMode = UART_FIFOMODE_DISABLE;
 	if (HAL_UART_Init(&hlpuart1) != HAL_OK)
 	{
 		Error_Handler();
@@ -121,6 +163,10 @@ int UARTs_Init(void){
 	{
 		Error_Handler();
 	}
+
+	HAL_NVIC_SetPriority(LPUART1_IRQn, 3, 1);
+	HAL_NVIC_EnableIRQ(LPUART1_IRQn);
+	hlpuart1.Instance->CR1 |= (USART_CR1_RXNEIE_RXFNEIE_Msk | USART_CR1_TCIE_Msk);
 	husart1.Instance = USART1;
 //	husart1.Init.BaudRate = 9600;
 //	husart1.Init.WordLength = UART_WORDLENGTH_8B;
@@ -134,43 +180,31 @@ int UARTs_Init(void){
 //	return INIT_ERROR;
 //	}
 
-//	BspCOMInit.BaudRate   = 9600;
-//	BspCOMInit.WordLength = COM_WORDLENGTH_8B;
-//	BspCOMInit.StopBits   = COM_STOPBITS_1;
-//	BspCOMInit.Parity     = COM_PARITY_NONE;
-//	BspCOMInit.HwFlowCtl  = COM_HWCONTROL_NONE;
-//	if (BSP_COM_Init(COM1, &BspCOMInit) != BSP_ERROR_NONE)
+	BspCOMInit.BaudRate   = 9600;
+	BspCOMInit.WordLength = COM_WORDLENGTH_8B;
+	BspCOMInit.StopBits   = COM_STOPBITS_1;
+	BspCOMInit.Parity     = COM_PARITY_NONE;
+	BspCOMInit.HwFlowCtl  = COM_HWCONTROL_NONE;
+	if (BSP_COM_Init(COM1, &BspCOMInit) != BSP_ERROR_NONE)
+	{
+		Error_Handler();
+	}
+//	husart1.Instance = USART1;
+//	husart1.Init.BaudRate = 9600;
+//	husart1.Init.WordLength = UART_WORDLENGTH_8B;
+//	husart1.Init.StopBits = UART_STOPBITS_1;
+//	husart1.Init.Parity = UART_PARITY_NONE;
+//	husart1.Init.Mode = UART_MODE_TX_RX;
+//	husart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+//	if (HAL_USART_Init(&husart1) != HAL_OK)
 //	{
 //		Error_Handler();
 //	}
-	husart1.Instance = USART1;
-	husart1.Init.BaudRate = 9600;
-	husart1.Init.WordLength = UART_WORDLENGTH_8B;
-	husart1.Init.StopBits = UART_STOPBITS_1;
-	husart1.Init.Parity = UART_PARITY_NONE;
-	husart1.Init.Mode = UART_MODE_TX_RX;
-	husart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-	husart1.Init.OverSampling = UART_OVERSAMPLING_16;
-	husart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-	husart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
-	husart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-	if (HAL_UART_Init(&husart1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	if (HAL_UARTEx_SetTxFifoThreshold(&husart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	if (HAL_UARTEx_SetRxFifoThreshold(&husart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	if (HAL_UARTEx_DisableFifoMode(&husart1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	HAL_NVIC_SetPriority(USART1_IRQn, 1, 1);
+//	if (HAL_USARTEx_DisableFifoMode(&husart1) != HAL_OK)
+//	{
+//		Error_Handler();
+//	}
+	HAL_NVIC_SetPriority(USART1_IRQn, 3, 1);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
 	husart1.Instance->CR1 |= (USART_CR1_RXNEIE_RXFNEIE_Msk | USART_CR1_TCIE_Msk);
 
@@ -194,9 +228,12 @@ int UARTs_Init(void){
  * @return: the character received, is 0x00 if no character to read
  */
 char LPUART_ReadRx(void){
-	if(LL_LPUART_IsActiveFlag_RXNE_RXFNE(LPUART1)){
-		return LL_LPUART_ReadReg(LPUART1, RDR);
-	}else {
+	if(LPUARTrx.head != LPUARTrx.tail || LPUARTrx.full){
+		char data = LPUARTrx.data[LPUARTrx.tail];
+		LPUARTrx.tail++;
+		LPUARTrx.tail %= LPUARTCIRCBUFFSIZE;
+		return data;
+	} else {
 		return UARTFAILED;
 	}
 
@@ -209,10 +246,19 @@ char LPUART_ReadRx(void){
  * @return: none
  */
 char LPUART_WriteTx(char input){
-	if (LL_LPUART_IsActiveFlag_TXE_TXFNF(LPUART1)){
-		LL_LPUART_WriteReg(LPUART1, TDR, input);
+	if(!LPUARTtx.full){
+		if(LPUARTtx.head == LPUARTtx.tail && (hlpuart1.Instance->ISR & USART_ISR_TXE_TXFNF_Msk)){
+			hlpuart1.Instance->TDR = input;
+		} else {
+			LPUARTtx.data[LPUARTtx.head] = input;
+			LPUARTtx.head++;
+			LPUARTtx.head %= LPUARTCIRCBUFFSIZE;
+			if(LPUARTtx.head == LPUARTtx.tail){
+				LPUARTtx.full = true;
+			}
+		}
 		return UARTSUCCESS;
-	}else {
+	} else {
 		return UARTFAILED;
 	}
 }
@@ -245,11 +291,15 @@ char USART_WriteTx(char input){
 	}
 	if(!USARTtx.full){
 		if(USARTtx.head == USARTtx.tail && (husart1.Instance->ISR & USART_ISR_TXE_TXFNF_Msk)){
+			I2CUARTtoUSART(1);//delay to have pin ready for transmission by next line
 			husart1.Instance->TDR = input;
 		} else {
 			USARTtx.data[USARTtx.head] = input;
 			USARTtx.head++;
 			USARTtx.head %= UARTCIRCBUFFSIZE;
+			if(USARTtx.head == USARTtx.tail){
+				USARTtx.full = true;
+			}
 		}
 		return UARTSUCCESS;
 	} else {

@@ -49,7 +49,7 @@ PKA_HandleTypeDef hpka;
 
 RNG_HandleTypeDef hrng;
 
-
+//#define TESTHARNESSACTIVE
 #ifndef TESTHARNESSACTIVE
 // Private function prototypes -----------------------------------------------
 
@@ -64,7 +64,7 @@ static void MX_PKA_Init(void);
  * @author Caitlin Bonesio
  *
  */
-
+#include "FLASH.h"
 int main(void)
 {
 
@@ -72,7 +72,6 @@ int main(void)
 	if( BOARD_Init() != INIT_OK){
 		BOARD_CrashHandler();
 	}
-
 
 	MX_RADIO_Init();
 	MX_RADIO_TIMER_Init();

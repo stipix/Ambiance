@@ -41,6 +41,8 @@ Projects/Common/BLE/Interfaces/hw_aes.o: \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_tim_ex.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart_ex.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_bus.h \
  ../Projects/Common/BLE/Interfaces/hw_aes.h
 ../Drivers/CMSIS/Device/ST/STM32WB0X/Include/stm32wb0x.h:
@@ -84,5 +86,7 @@ Projects/Common/BLE/Interfaces/hw_aes.o: \
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_tim_ex.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart_ex.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_ll_bus.h:
 ../Projects/Common/BLE/Interfaces/hw_aes.h:

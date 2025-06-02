@@ -42,6 +42,8 @@ Projects/Common/BLE/Modules/stm_list.o: \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_tim_ex.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart.h \
  ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart.h \
+ ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart_ex.h \
  ../Projects/Common/BLE/Modules/stm_list.h \
  ../Middlewares/ST/STM32_BLE/stm32_ble_common.h \
  ../Drivers/CMSIS/Include/cmsis_compiler.h
@@ -88,6 +90,8 @@ Projects/Common/BLE/Modules/stm_list.o: \
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_tim_ex.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_uart_ex.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart.h:
+../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal_usart_ex.h:
 ../Projects/Common/BLE/Modules/stm_list.h:
 ../Middlewares/ST/STM32_BLE/stm32_ble_common.h:
 ../Drivers/CMSIS/Include/cmsis_compiler.h:

@@ -1,4 +1,9 @@
-../Core/Src/ButtonsMenuSM.c:51:9:ButtonsMenuSM_Event_Init	1
-../Core/Src/ButtonsMenuSM.c:65:6:ButtonsMenuSM_Event_Post	1
-../Core/Src/ButtonsMenuSM.c:100:9:ButtonsMenuSM_Event_Updater	4
-../Core/Src/ButtonsMenuSM.c:133:9:ButtonsMenuSM_Event_Handler	105
+../Core/Src/ButtonsMenuSM.c:51:6:DrawMain	1
+../Core/Src/ButtonsMenuSM.c:65:6:DrawFolder	5
+../Core/Src/ButtonsMenuSM.c:80:6:DrawOptions	7
+../Core/Src/ButtonsMenuSM.c:95:6:DrawSetTime	9
+../Core/Src/ButtonsMenuSM.c:112:6:DrawSchedule	13
+../Core/Src/ButtonsMenuSM.c:139:9:ButtonsMenuSM_Event_Init	1
+../Core/Src/ButtonsMenuSM.c:157:6:ButtonsMenuSM_Event_Post	1
+../Core/Src/ButtonsMenuSM.c:192:9:ButtonsMenuSM_Event_Updater	4
+../Core/Src/ButtonsMenuSM.c:228:9:ButtonsMenuSM_Event_Handler	152

@@ -1,4 +1,4 @@
-../Core/Src/COMM.c:64:9:COMM_Event_Init	1
-../Core/Src/COMM.c:72:6:COMM_Event_Post	1
-../Core/Src/COMM.c:82:9:COMM_Event_Updater	5
-../Core/Src/COMM.c:106:9:COMM_Event_Handler	47
+../Core/Src/COMM.c:67:9:COMM_Event_Init	1
+../Core/Src/COMM.c:76:6:COMM_Event_Post	1
+../Core/Src/COMM.c:86:9:COMM_Event_Updater	6
+../Core/Src/COMM.c:110:9:COMM_Event_Handler	53

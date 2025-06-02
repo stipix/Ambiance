@@ -17,7 +17,7 @@
 #define OLED_DRIVER_PIXEL_COLUMNS                                                          128
 
 // The number of pixel rows in the OLED display.
-#define OLED_DRIVER_PIXEL_ROWS                                                              32
+#define OLED_DRIVER_PIXEL_ROWS                                                              64
 
 // Store how high each column is for the OLED in bits in terms of data structure storage.
 #define OLED_DRIVER_BUFFER_LINE_HEIGHT                                                       8

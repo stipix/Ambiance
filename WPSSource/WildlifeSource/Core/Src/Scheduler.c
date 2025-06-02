@@ -15,6 +15,7 @@
 #include "I2C.h"
 #include "FLASH.h"
 #include "TIMERS.h"
+#include "discountIO.h"
 //----------------------------------------Private Defines----------------------------------------
 #define REFRESHRATE (1/*minutes*/*60000/*milliseconds/minute*/)
 #define NULLDATE    0xFF
@@ -34,6 +35,7 @@ void CompareTime(){
 	if(month == NULLDATE || day == NULLDATE || hour == NULLDATE || minute == NULLDATE){
 		return;
 	}
+	discountprintf("Date received");
 	if(logging){
 		scheduleEvent event;
 

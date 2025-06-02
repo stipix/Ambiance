@@ -14,11 +14,11 @@
 
 int	discountprintf (const char * text){
 	int length = strlen(text);
-	//USART_WriteTx(DEBUGPRINT);
+	USART_WriteTx(DEBUGPRINT);
 	for(int i = 0; i < length; i++){
 		USART_WriteTx(text[i]);
 	}
-	//USART_WriteTx(DEBUGPRINTEND);
+	USART_WriteTx(DEBUGPRINTEND);
 	return 1;
 }
 

@@ -118,11 +118,20 @@ void USART_Notification(USART_NotificationEvt_t *p_Notification)
 
     case USART_REQ_TX_WRITE_EVT:
       /* USER CODE BEGIN Service1Char3_WRITE_EVT */
-        uint8_t data = BLUETOOTH_ReadBuffer();
-        USART_Data_t value = {&data, 1};
-        USART_UpdateValue(USART_TX, &value);
-        data = 0;
-        USART_UpdateValue(USART_REQ_TX, &value);
+        int16_t data = BLUETOOTH_ReadBuffer();
+        if(data != -1){
+        	uint8_t data1 = (uint8_t)data;
+			USART_Data_t value1 = {&data1, 1};
+			USART_UpdateValue(USART_TX, &value1);
+			uint8_t data2 = 0;
+			USART_Data_t value2 = {&data2, 1};
+			USART_UpdateValue(USART_REQ_TX, &value2);
+        } else {
+
+			uint8_t data2 = 2;
+			USART_Data_t value2 = {&data2, 1};
+			USART_UpdateValue(USART_REQ_TX, &value2);
+        }
 
       /* USER CODE END Service1Char3_WRITE_EVT */
       break;
@@ -159,10 +168,10 @@ void USART_APP_EvtRx(USART_APP_ConnHandleNotEvt_t *p_Notification)
     case USART_DISCON_HANDLE_EVT :
       USART_APP_Context.ConnectionHandle = 0xFFFF;
       /* USER CODE BEGIN Service1_APP_DISCON_HANDLE_EVT */
-
+      /* Start to Advertise to accept a new connection */
+            APP_BLE_Procedure_Gap_Peripheral(PROC_GAP_PERIPH_ADVERTISE_START_FAST);
       /* USER CODE END Service1_APP_DISCON_HANDLE_EVT */
       break;
-
     default:
       /* USER CODE BEGIN Service1_APP_EvtRx_default */
 

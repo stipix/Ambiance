@@ -29,13 +29,14 @@ extern "C" {
 #include "COMM.h"
 #include "MP3.h"
 #include "Scheduler.h"
+#include "ButtonsMenuSM.h"
 
 //Add the initialization, Updater, and handler functions to these lists
 #define EVENTLISTSIZE 4
 
-#define EVENT_INITLIST {GPIO_Event_Init, COMM_Event_Init, MP3_Event_Init, Scheduler_Event_Init}
-#define EVENT_UPDATELIST {GPIO_Event_Updater, COMM_Event_Updater, MP3_Event_Updater, Scheduler_Event_Updater}
-#define EVENT_HANDLERLIST {GPIO_Event_Handler, COMM_Event_Handler,  MP3_Event_Handler, Scheduler_Event_Handler}
+#define EVENT_INITLIST {COMM_Event_Init, MP3_Event_Init, Scheduler_Event_Init, ButtonsMenuSM_Event_Init}
+#define EVENT_UPDATELIST {COMM_Event_Updater, MP3_Event_Updater, Scheduler_Event_Updater, ButtonsMenuSM_Event_Updater}
+#define EVENT_HANDLERLIST {COMM_Event_Handler,  MP3_Event_Handler, Scheduler_Event_Handler, ButtonsMenuSM_Event_Handler}
 
 
 #ifdef __cplusplus//allows code to be ran in a c++ program

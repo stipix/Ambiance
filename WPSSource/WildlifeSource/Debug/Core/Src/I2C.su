@@ -1,7 +1,7 @@
-../Core/Src/I2C.c:51:6:HAL_I2C_MemTxCpltCallback	40	static
-../Core/Src/I2C.c:77:6:HAL_I2C_MemRxCpltCallback	48	static
-../Core/Src/I2C.c:113:6:I2C1_IRQHandler	8	static
-../Core/Src/I2C.c:133:5:I2C_Init	8	static
-../Core/Src/I2C.c:184:19:I2C_Transmit	56	static
-../Core/Src/I2C.c:232:19:I2C_Recieve	56	static
-../Core/Src/I2C.c:280:15:I2C_WriteReg	48	static
+../Core/Src/I2C.c:66:6:HAL_I2C_MemTxCpltCallback	32	static
+../Core/Src/I2C.c:94:6:HAL_I2C_MemRxCpltCallback	40	static
+../Core/Src/I2C.c:122:6:I2C1_IRQHandler	8	static
+../Core/Src/I2C.c:142:5:I2C_Init	24	static
+../Core/Src/I2C.c:199:19:I2C_Transmit	40	static
+../Core/Src/I2C.c:257:19:I2C_Recieve	48	static
+../Core/Src/I2C.c:306:15:I2C_WriteReg	32	static

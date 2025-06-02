@@ -15,9 +15,11 @@ void OledInit(void)
 {
     // First initialize the STM32 to be able to talk over I2C to the OLED.
     OledHostInit();
+    HAL_Delay(10);
 
     // Now send initialization commands to the OLED.
     OledDriverInitDisplay();
+    HAL_Delay(200);//allow time for OLED screen to initialize
 
     // Clear the frame buffer by filling it with black pixels.
     OledClear(OLED_COLOR_BLACK);
@@ -94,11 +96,11 @@ uint8_t OledDrawChar(int x, int y, char c)
             int j;
             for (j = 0; j < colMax - colMin; ++j) {
                 int oledCol = colMin + j;
-                uint8_t newCharCol = rgbOledBmp[rowMax * OLED_DRIVER_PIXEL_COLUMNS + oledCol] & ~colMask;
+                uint8_t newCharCol = rgbOledBmp[rowMax * OLED_DRIVER_PIXEL_COLUMNS + ASCII_FONT_WIDTH - 1 - oledCol] & ~colMask;
                 // Make sure we grab the proper part of the character from the font.
                 newCharCol |= (ascii[charIndex][j] & (colMask << (OLED_DRIVER_BUFFER_LINE_HEIGHT - rowY))) >>
                         (OLED_DRIVER_BUFFER_LINE_HEIGHT - rowY);
-                rgbOledBmp[rowMax * OLED_DRIVER_PIXEL_COLUMNS + oledCol] = newCharCol;
+                rgbOledBmp[rowMax * OLED_DRIVER_PIXEL_COLUMNS + ASCII_FONT_WIDTH - 1 - oledCol] = newCharCol;
             }
         }
     }

@@ -29,6 +29,7 @@ extern "C" {
 #define RTCDAYADDR      0x03
 #define RTCHOURADDR     0x02
 #define RTCMINADDR      0x01
+#define RTCSECADDR 		0x00
 //----------------------------------------Public Functions---------------------------------------
 
 /*
@@ -61,6 +62,8 @@ HAL_StatusTypeDef I2C_Transmit(uint8_t targetadr, uint8_t registeradr, uint8_t d
  */
 HAL_StatusTypeDef I2C_Recieve(uint8_t targetadr, uint8_t registeradr, void (*PostTo)(Event_t));
 
+
+void I2C_USARTtoI2C();
 
 /** I2C_WriteReg(I2CAddress, deviceRegisterAddress, data)
  *

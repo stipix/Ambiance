@@ -1,7 +1,7 @@
-../Core/Src/OledDriver.c:74:6:OledHostInit	1
-../Core/Src/OledDriver.c:84:6:OledDriverInitDisplay	1
-../Core/Src/OledDriver.c:111:6:OledDriverSetDisplayInverted	1
-../Core/Src/OledDriver.c:121:6:OledDriverSetDisplayNormal	1
-../Core/Src/OledDriver.c:129:6:OledDriverDisableDisplay	1
-../Core/Src/OledDriver.c:138:6:OledDriverUpdateDisplay	3
-../Core/Src/OledDriver.c:164:6:DelayMs	2
+../Core/Src/OledDriver.c:79:6:OledHostInit	1
+../Core/Src/OledDriver.c:89:6:OledDriverInitDisplay	1
+../Core/Src/OledDriver.c:148:6:OledDriverSetDisplayInverted	1
+../Core/Src/OledDriver.c:158:6:OledDriverSetDisplayNormal	1
+../Core/Src/OledDriver.c:166:6:OledDriverDisableDisplay	1
+../Core/Src/OledDriver.c:175:6:OledDriverUpdateDisplay	3
+../Core/Src/OledDriver.c:201:6:DelayMs	2

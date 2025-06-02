@@ -37,8 +37,10 @@ typedef enum {
     OLED_COMMAND_SET_SEGMENT_REMAP = 0xA1,
     OLED_COMMAND_DISPLAY_NORMAL = 0xA6,
     OLED_COMMAND_DISPLAY_INVERTED = 0xA7,
+    OLED_COMMAND_MULTIPLEX_RATIO = 0xA8,
     OLED_COMMAND_DISPLAY_OFF = 0xAE,
     OLED_COMMAND_DISPLAY_ON = 0xAF,
+	OLED_COMMAND_SET_OSC_FREQ = 0xD5,
     OLED_COMMAND_SET_PRECHARGE_PERIOD = 0xD9,
     OLED_COMMAND_SET_COM_PINS_CONFIG = 0xDA
 } OledCommand;
@@ -48,12 +50,15 @@ typedef enum {
  */
 typedef enum {
     OLED_SETTING_ENABLE_CHARGE_PUMP = 0x14,
+	OLED_SETTING_OSC_FREQ = 0x80,
+    OLED_SETTING_MULTIPLEX_RATIO = 0x3F,
     OLED_SETTING_MAXIMUM_PRECHARGE = 0xF1,
     OLED_SETTING_SEQUENTIAL_COM_NON_INTERLEAVED = 0x20,
-    OLED_SETTING_REVERSE_ROW_ORDERING = 0xC8
+    OLED_SETTING_REVERSE_ROW_ORDERING = 0xC8,
+    OLED_SETTING_NORMAL_ROW_ORDERING = 0xC0
 } OledSetting;
 
-#define OLED_DRIVER_PAGES 4
+#define OLED_DRIVER_PAGES 8
 
 /**
  * This array is the off-screen frame buffer used for rendering.
@@ -85,6 +90,38 @@ void OledDriverInitDisplay(void)
 {
     // Turn off the display.
     I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_COMMAND_DISPLAY_OFF);
+    DelayMs(10);
+//
+//    I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_COMMAND_SET_OSC_FREQ);
+//    I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_SETTING_OSC_FREQ);
+//
+    I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_COMMAND_MULTIPLEX_RATIO);
+    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0x3F);
+//
+    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0xD3);//Display OFFSET
+    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0x08);
+
+    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0x40);//Set display start line
+    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0xA1);//Set segment re-map
+    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0xC0);//Set COM output Scan direction
+
+    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0xDA);//Set COM hardware config
+    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0x12);
+
+//    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0x81);//Set Contrast control
+//    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0xCF);
+//
+//    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0xD9);//Set Precharge period
+//    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0xF1);
+//
+//    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0xDB);//Set VCOMH deselect level
+//    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0x40);
+//
+//
+//
+    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0xA4);//Set entire display on/off
+    I2C_WriteReg(OLED_ADDRESS, COMMAND, 0xA6);//Set normal/inverted display
+
 
     // Enable the charge pump and
     I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_COMMAND_SET_CHARGE_PUMP);
@@ -92,13 +129,13 @@ void OledDriverInitDisplay(void)
     I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_COMMAND_SET_PRECHARGE_PERIOD);
     I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_SETTING_MAXIMUM_PRECHARGE);
 
-    // Invert row numbering so that (0,0) is upper-right.
-    I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_COMMAND_SET_SEGMENT_REMAP);
-    I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_SETTING_REVERSE_ROW_ORDERING);
-
-    // Set sequential COM configuration with non-interleaved memory.
-    I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_COMMAND_SET_COM_PINS_CONFIG);
-    I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_SETTING_SEQUENTIAL_COM_NON_INTERLEAVED);
+//    // Invert row numbering so that (0,0) is upper-right.
+//    I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_COMMAND_SET_SEGMENT_REMAP);
+//    I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_SETTING_NORMAL_ROW_ORDERING);
+//
+//    // Set sequential COM configuration with non-interleaved memory.
+//    I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_COMMAND_SET_COM_PINS_CONFIG);
+//    I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_SETTING_SEQUENTIAL_COM_NON_INTERLEAVED);
 
     // And turn on the display.
     I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_COMMAND_DISPLAY_ON);
@@ -137,13 +174,13 @@ void OledDriverDisableDisplay(void)
  */
 void OledDriverUpdateDisplay(void)
 {
-    uint8_t *pb = rgbOledBmp;
+    uint8_t *pb = &(rgbOledBmp[OLED_DRIVER_BUFFER_SIZE-1]);
     int page;
     for (page = 0; page < OLED_DRIVER_PAGES; page++) {
 
         // Set the desired page.
-        I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_COMMAND_SET_PAGE);
-        I2C_WriteReg(OLED_ADDRESS, COMMAND, page);
+        I2C_WriteReg(OLED_ADDRESS, COMMAND, 0xB0 | (OLED_DRIVER_PAGES- page));//select page start address
+//        I2C_WriteReg(OLED_ADDRESS, COMMAND, page);
 
         // Set the starting column back to the origin.
         I2C_WriteReg(OLED_ADDRESS, COMMAND, OLED_COMMAND_SET_DISPLAY_LOWER_COLUMN_0);
@@ -152,7 +189,7 @@ void OledDriverUpdateDisplay(void)
         // Write this entire column to the OLED.
         for (int i = 0; i < OLED_DRIVER_PIXEL_COLUMNS; i++) {
             I2C_WriteReg(OLED_ADDRESS, DATA, *pb);
-            pb++;
+            pb--;
         }
     }
 }

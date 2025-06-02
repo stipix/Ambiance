@@ -161,6 +161,7 @@ static const char a_GapDeviceName[] = {  'W', 'i', 'l', 'd', 'l', 'i', 'f', 'e',
 uint8_t a_AdvData[] =
 {
   2, AD_TYPE_FLAGS, FLAG_BIT_LE_GENERAL_DISCOVERABLE_MODE|FLAG_BIT_BR_EDR_NOT_SUPPORTED,
+  12, AD_TYPE_COMPLETE_LOCAL_NAME, 'W', 'P', 'S', '_', 's', 'p', 'e', 'a', 'k', 'e', 'r',  /* Complete name */
 };
 
 /* USER CODE BEGIN PV */
