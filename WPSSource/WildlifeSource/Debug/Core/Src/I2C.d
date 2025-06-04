@@ -53,8 +53,9 @@ Core/Src/I2C.o: ../Core/Src/I2C.c ../Core/Inc/I2C.h ../Core/Inc/CONFIG.h \
  C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo_errno.h \
  ../Core/Inc/Events.h ../Core/Inc/FIFO.h ../Core/Inc/GPIO.h \
  ../Core/Inc/COMM.h ../Core/Inc/MP3.h ../Core/Inc/Scheduler.h \
- ../Core/Inc/ButtonsMenuSM.h ../Core/Inc/BOARD.h \
- ../Core/Inc/I2C-UART_Manager.h ../Core/Inc/TIMERS.h
+ ../Core/Inc/ButtonsMenuSM.h ../Core/Inc/scheduler.h ../Core/Inc/BOARD.h \
+ ../Core/Inc/I2C-UART_Manager.h ../Core/Inc/TIMERS.h \
+ ../Core/Inc/OledDriver.h
 ../Core/Inc/I2C.h:
 ../Core/Inc/CONFIG.h:
 ../Core/Inc/BOARD.h:
@@ -120,6 +121,8 @@ C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Dr
 ../Core/Inc/MP3.h:
 ../Core/Inc/Scheduler.h:
 ../Core/Inc/ButtonsMenuSM.h:
+../Core/Inc/scheduler.h:
 ../Core/Inc/BOARD.h:
 ../Core/Inc/I2C-UART_Manager.h:
 ../Core/Inc/TIMERS.h:
+../Core/Inc/OledDriver.h:

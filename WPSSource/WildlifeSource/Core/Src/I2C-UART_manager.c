@@ -9,6 +9,8 @@
 //----------------------------------------Private Includes----------------------------------------
 #include "I2C-UART_Manager.h"
 #include "TIMERS.h"
+#include "I2C.h"
+#include "UART.h"
 
 
 //----------------------------------------Private variables-----------------------------------------
@@ -23,7 +25,10 @@ static GPIO_InitTypeDef PORTAPIN1 = {GPIO_PIN_1, GPIO_MODE_AF_OD, GPIO_NOPULL, G
  */
 void I2CUARTtoI2C(uint8_t delay){
 	if(PORTAPIN1.Alternate != GPIO_AF0_I2C1){
-
+		 hi2c1.Lock = HAL_UNLOCKED;
+		 hi2c1.State = HAL_I2C_STATE_READY;
+		husart1.Instance->CR1 &= ~0x00000008;//disable the USART Transmit
+		BSP_LED_Off(LED_BLUE);
 		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_1);
 
 		PORTAPIN1.Mode = GPIO_MODE_AF_OD;
@@ -37,6 +42,8 @@ void I2CUARTtoI2C(uint8_t delay){
 			uint32_t start = TIMERS_GetMilliSeconds();
 			while(start+20 > TIMERS_GetMilliSeconds());
 		}
+
+		I2C_Flushbuffer();
 	}
 }
 
@@ -51,11 +58,15 @@ void I2CUARTtoUSART(uint8_t delay){
 
 	if(PORTAPIN1.Alternate != GPIO_AF2_USART1){
 		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_1);
+		 hi2c1.Lock = HAL_LOCKED;
+		 hi2c1.State = HAL_I2C_STATE_RESET;
+		 husart1.Instance->CR1 |= 0x00000008;//enable the USART Transmit
+		 husart1.Instance->CR1 |= 0x00000040;//enable the USART Transmit complete interrupt
 
+		BSP_LED_On(LED_BLUE);
 		PORTAPIN1.Mode = GPIO_MODE_AF_PP;
 		PORTAPIN1.Alternate = GPIO_AF2_USART1;
 		HAL_GPIO_Init(GPIOA, &PORTAPIN1);
-    	BSP_LED_Off(LED_BLUE);
 		if(delay){
 			uint32_t start = TIMERS_GetMilliSeconds();
 			while(start+12 > TIMERS_GetMilliSeconds());

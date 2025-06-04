@@ -135,18 +135,18 @@ Event_t Scheduler_Event_Updater(void){
  */
 uint8_t Scheduler_Event_Handler(Event_t event){
 	if(event.status == EVENT_PLAY){
-		I2C_Recieve(RTCADDRESS, RTCMNTHADDR, Scheduler_Event_Post);
-		I2C_Recieve(RTCADDRESS, RTCDAYADDR, Scheduler_Event_Post);
-		I2C_Recieve(RTCADDRESS, RTCHOURADDR, Scheduler_Event_Post);
-		I2C_Recieve(RTCADDRESS, RTCMINADDR, Scheduler_Event_Post);
+		I2C_Recieve(RTCADDRESS, RTCMNTHADDR, 1);
+		I2C_Recieve(RTCADDRESS, RTCDAYADDR, 1);
+		I2C_Recieve(RTCADDRESS, RTCHOURADDR, 1);
+		I2C_Recieve(RTCADDRESS, RTCMINADDR, 1);
 		logging = 1;
 		playdata = event.data;
 	}
 	if(event.status == EVENT_TIMEOUT){
-		I2C_Recieve(RTCADDRESS, RTCMNTHADDR, Scheduler_Event_Post);
-		I2C_Recieve(RTCADDRESS, RTCDAYADDR, Scheduler_Event_Post);
-		I2C_Recieve(RTCADDRESS, RTCHOURADDR, Scheduler_Event_Post);
-		I2C_Recieve(RTCADDRESS, RTCMINADDR, Scheduler_Event_Post);
+		I2C_Recieve(RTCADDRESS, RTCMNTHADDR, 1);
+		I2C_Recieve(RTCADDRESS, RTCDAYADDR, 1);
+		I2C_Recieve(RTCADDRESS, RTCHOURADDR, 1);
+		I2C_Recieve(RTCADDRESS, RTCMINADDR, 1);
 	}
 	if(event.status == EVENT_I2C){
 		switch (event.data>>8){

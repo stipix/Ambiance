@@ -49,6 +49,14 @@ Event_t MP3_Event_Updater(void);
  */
 uint8_t MP3_Event_Handler(Event_t event);
 
+/*
+ * @Function: MP3_GetCurrentFile
+ * @Brief: gets the current track being played on the mp3 player
+ * @param:
+ * @return: two bytes, the upper 8bits contain the folder, the lower 8 bits hold the tracck number in the folder
+ */
+uint16_t MP3_GetCurrentFile();
+
  #ifdef __cplusplus//allows code to be ran in a c++ program
   }
  #endif

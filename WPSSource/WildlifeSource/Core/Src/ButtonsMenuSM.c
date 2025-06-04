@@ -49,14 +49,14 @@ static uint8_t Stimeselect;
 static uint8_t Etimeselect;
 //----------------------------------------Private Functions--------------------------------------
 void DrawMain(){
-
 	char maintext[176];
 	sprintf(maintext, "Main menu\n"
 					  "Back:play track\n"
-			   	   	  "Select:append schedule\n"
+			   	   	  "Sel:append schedule\n"
 	   	   	  	  	  "%c:Set Date/time\n"
 					  "%c:more options\n"
-					  "Volume: %c%.3d%c",DOWN_ARROW_OFF, UP_ARROW_OFF, LEFT_ARROW_ON, FLASH_GetVolume(), RIGHT_ARROW_ON);
+					  "Volume: %c%.3d%c\n"
+					  "Current song %d-%d",DOWN_ARROW_OFF, UP_ARROW_OFF, LEFT_ARROW_ON, FLASH_GetVolume(), RIGHT_ARROW_ON, MP3_GetCurrentFile()>>8, MP3_GetCurrentFile()&0xFF);
 	OledClear(OLED_COLOR_BLACK);
 	OledDrawString(maintext);
 	OledUpdate();
@@ -310,7 +310,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 					transition = 1;
 				} else
 				if(event.data & B2XORMASK && !(event.data & B2MASK)){
-					MP3_Event_Post(((Event_t){EVENT_PLAY, ((folderselect+1)<<8) + (trackselect+1)}));
+					MP3_Event_Post(((Event_t){EVENT_PLAY, ((folderselect)<<8) + (trackselect)}));
 					//discountprintf("moving to main, select");
 					nextstate = main;
 					transition = 1;
@@ -319,7 +319,9 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				if(event.data & B3XORMASK && !(event.data & B3MASK)){
 					if(!cursorpos){
 						folderselect--;
-						folderselect %= 256;
+						if(folderselect==255){
+							folderselect = 100;
+						}
 					} else {
 						trackselect--;
 						trackselect %= 256;
@@ -330,7 +332,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				if(event.data & B4XORMASK && !(event.data & B4MASK)){
 					if(!cursorpos){
 						folderselect++;
-						folderselect %= 256;
+						folderselect %= 100;
 					} else {
 						trackselect++;
 						trackselect %= 256;
@@ -501,7 +503,9 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				if(event.data & B3XORMASK && !(event.data & B3MASK)){
 					if(!cursorpos){
 						folderselect--;
-						folderselect %= 256;
+						if(folderselect==255){
+							folderselect = 100;
+						}
 					} else {
 						trackselect--;
 						trackselect %= 256;
@@ -512,7 +516,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				if(event.data & B4XORMASK && !(event.data & B4MASK)){
 					if(!cursorpos){
 						folderselect++;
-						folderselect %= 256;
+						folderselect %= 100;
 					} else {
 						trackselect++;
 						trackselect %= 256;
@@ -715,7 +719,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 						LPUART_WriteTx(0xFF);//Version?
 						accumulation += 0x06;
 						LPUART_WriteTx(0x06);//length
-						LPUART_WriteTx(0x01);//Previous track command
+						LPUART_WriteTx(0x01);//next track command
 						accumulation += 0x01;
 						LPUART_WriteTx(0x00);
 						LPUART_WriteTx(0x00);

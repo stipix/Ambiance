@@ -54,8 +54,8 @@ Core/Src/OledDriver.o: ../Core/Src/OledDriver.c ../Core/Inc/Board.h \
  ../Core/Inc/I2C.h ../Core/Inc/CONFIG.h ../Core/Inc/BOARD.h \
  ../Core/Inc/Events.h ../Core/Inc/FIFO.h ../Core/Inc/GPIO.h \
  ../Core/Inc/COMM.h ../Core/Inc/MP3.h ../Core/Inc/Scheduler.h \
- ../Core/Inc/ButtonsMenuSM.h ../Core/Inc/OledDriver.h \
- ../Core/Inc/timers.h
+ ../Core/Inc/ButtonsMenuSM.h ../Core/Inc/scheduler.h \
+ ../Core/Inc/OledDriver.h ../Core/Inc/timers.h
 ../Core/Inc/Board.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal.h:
 ../Core/Inc/stm32wb0x_hal_conf.h:
@@ -122,5 +122,6 @@ C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Dr
 ../Core/Inc/MP3.h:
 ../Core/Inc/Scheduler.h:
 ../Core/Inc/ButtonsMenuSM.h:
+../Core/Inc/scheduler.h:
 ../Core/Inc/OledDriver.h:
 ../Core/Inc/timers.h:

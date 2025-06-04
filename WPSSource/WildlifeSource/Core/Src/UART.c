@@ -37,16 +37,18 @@ typedef struct LPUARTcb{
 }LPUARTcb_t;
 //----------------------------------------Private Variables--------------------------------------
 UART_HandleTypeDef hlpuart1;
-USART_HandleTypeDef husart1;
+USART_HandleTypeDef husart1 = {USART1};
 
+#if USEUSART == 1
 COM_InitTypeDef BspCOMInit;
-
 UARTcb_t USARTtx;
 UARTcb_t USARTrx;
+#endif
 
 LPUARTcb_t LPUARTtx;
 LPUARTcb_t LPUARTrx;
 static uint8_t initialized = 0;
+
 
 
 
@@ -59,7 +61,9 @@ static uint8_t initialized = 0;
 void LPUART1_IRQHandler(void)
 {
   /* USER CODE BEGIN LPUART1_IRQn 0 */
-
+	if(hlpuart1.Instance->ISR & USART_ISR_ORE_Msk){
+			__HAL_UART_CLEAR_FLAG(&hlpuart1, UART_CLEAR_OREF);
+	}
 	if(hlpuart1.Instance->ISR & USART_ISR_RXNE_RXFNE_Msk){
 		if(!LPUARTrx.full){
 			LPUARTrx.data[LPUARTrx.head] = hlpuart1.Instance->RDR;
@@ -69,8 +73,7 @@ void LPUART1_IRQHandler(void)
 				LPUARTrx.full = true;
 			}
 		} else {
-			uint8_t discard = hlpuart1.Instance->RDR;
-			discard++;
+			hlpuart1.Instance->RQR |= 0x08;
 		}
 	}
 	if((hlpuart1.Instance->ISR & USART_ISR_TC_Msk)){
@@ -87,7 +90,8 @@ void LPUART1_IRQHandler(void)
 		}
 	}
   /* USER CODE END LPUART1_IRQn 0 */
-  HAL_UART_IRQHandler(&hlpuart1);
+
+	//HAL_UART_IRQHandler(&hlpuart1);
   /* USER CODE BEGIN LPUART1_IRQn 1 */
 
   /* USER CODE END LPUART1_IRQn 1 */
@@ -95,7 +99,7 @@ void LPUART1_IRQHandler(void)
 
 void USART1_IRQHandler(void)
 {
-
+#if USEUSART == 1
 	if(husart1.Instance->ISR & USART_ISR_RXNE_RXFNE_Msk){
 		if(!USARTrx.full){
 			USARTrx.data[USARTrx.head] = husart1.Instance->RDR;
@@ -120,10 +124,11 @@ void USART1_IRQHandler(void)
 			}
 
 		} else {
-			I2CUARTtoI2C(1);//after transmission is complete default to I2C, no delay
 			__HAL_USART_CLEAR_FLAG(&husart1, UART_CLEAR_TCF);
+			I2CUARTtoI2C(1);//after transmission is complete default to I2C, no delay
 		}
 	}
+#endif
 	HAL_USART_IRQHandler(&husart1);
 
 }
@@ -163,10 +168,21 @@ int UARTs_Init(void){
 	{
 		Error_Handler();
 	}
+	hlpuart1.Instance->CR2 |= 0x8000;//swap the RX and TX pins
 
-	HAL_NVIC_SetPriority(LPUART1_IRQn, 3, 1);
+	HAL_NVIC_SetPriority(LPUART1_IRQn, 0, 0);
 	HAL_NVIC_EnableIRQ(LPUART1_IRQn);
+
+	LPUARTtx.tail = 0;
+	LPUARTtx.head = 0;
+	LPUARTtx.full = false;
+
+	LPUARTrx.tail = 0;
+	LPUARTrx.head = 0;
+	LPUARTrx.full = false;
 	hlpuart1.Instance->CR1 |= (USART_CR1_RXNEIE_RXFNEIE_Msk | USART_CR1_TCIE_Msk);
+
+#if USEUSART == 1
 	husart1.Instance = USART1;
 //	husart1.Init.BaudRate = 9600;
 //	husart1.Init.WordLength = UART_WORDLENGTH_8B;
@@ -204,7 +220,7 @@ int UARTs_Init(void){
 //	{
 //		Error_Handler();
 //	}
-	HAL_NVIC_SetPriority(USART1_IRQn, 3, 1);
+	HAL_NVIC_SetPriority(USART1_IRQn, 2, 1);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
 	husart1.Instance->CR1 |= (USART_CR1_RXNEIE_RXFNEIE_Msk | USART_CR1_TCIE_Msk);
 
@@ -215,7 +231,7 @@ int UARTs_Init(void){
 	USARTrx.tail = 0;
 	USARTrx.head = 0;
 	USARTrx.full = false;
-
+#endif
 //	__HAL_USART_ENABLE_IT(&husart1, UART_IT_TXE);
 //	__HAL_USART_ENABLE_IT(&husart1, UART_IT_RXNE);
 	return 0;//not INIT_OK to have compatibility with the BLE trace function calls
@@ -269,6 +285,7 @@ char LPUART_WriteTx(char input){
  * @return: the character received, 0x25 (NAK) if no character to read
  */
 char USART_ReadRx(void){
+#if USEUSART == 1
 	if(USARTrx.head != USARTrx.tail || USARTrx.full){
 		char data = USARTrx.data[USARTrx.tail];
 		USARTrx.tail++;
@@ -277,6 +294,9 @@ char USART_ReadRx(void){
 	} else {
 		return UARTFAILED;
 	}
+#else
+	return UARTFAILED;
+#endif
 }
 
 /*
@@ -289,8 +309,10 @@ char USART_WriteTx(char input){
 	if (APP_BLE_Get_Server_Connection_Status() == APP_BLE_CONNECTED_SERVER){
 		BLUETOOTH_WriteBuffer(input);
 	}
+#if USEUSART == 1
 	if(!USARTtx.full){
 		if(USARTtx.head == USARTtx.tail && (husart1.Instance->ISR & USART_ISR_TXE_TXFNF_Msk)){
+			husart1.Instance->CR1 |= (USART_CR1_RXNEIE_RXFNEIE_Msk | USART_CR1_TCIE_Msk);
 			I2CUARTtoUSART(1);//delay to have pin ready for transmission by next line
 			husart1.Instance->TDR = input;
 		} else {
@@ -305,6 +327,9 @@ char USART_WriteTx(char input){
 	} else {
 		return UARTFAILED;
 	}
+#else
+	return UARTFAILED;
+#endif
 }
 
 /*
@@ -314,7 +339,11 @@ char USART_WriteTx(char input){
  * @return: status, 0x00 if not empty,  0x01 if empty,
  */
 uint8_t USART_TxEmpty(void){
+#if USEUSART == 1
 	return (USARTtx.head == USARTtx.tail) && !USARTtx.full;
+#else
+	return 00;
+#endif
 }
 
 

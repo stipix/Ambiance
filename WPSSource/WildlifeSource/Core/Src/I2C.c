@@ -12,51 +12,88 @@
 #include "stdbool.h"
 #include "I2C-UART_Manager.h"
 #include "TIMERS.h"
+#include "OledDriver.h"
 //----------------------------------------Private Defines----------------------------------------
 
-#define TXCIRCBUFFERSIZE 2048//one full OLED print, plus extra
-#define RXCIRCBUFFERSIZE 16
-#define MAXREQSIZE 1
+#define CIRCBUFFERSIZE 1536//Slightly less than 1.5 OLED prints
 
 #define I2CBUFFERTIMEOUT 1000 // number of millisecond I2C transmit will wait for a spot in the buffer to appear
+
+
+//#define I2CTESTHARNESS
 //----------------------------------------Private Typedefs---------------------------------------
-typedef struct MemReq{
-	uint8_t targetadr;
-	uint8_t registeradr;
-	void (*PostTo)(Event_t);
-	uint8_t data;
-}MemReq_t;
-typedef struct MemWrite{
+typedef struct MemAdd{//memory address packet, used for both reading and writing memory operations
 	uint8_t targetadr;
 	uint8_t registeradr;
 	uint8_t data;
-}MemWrite_t;
+	uint8_t posterindex;
+}MemAdd_t;
 
-typedef struct TxReqBuffer{
-	MemWrite_t data[TXCIRCBUFFERSIZE];
+typedef struct MemAddBuffer{
+	MemAdd_t data[CIRCBUFFERSIZE];
 	uint16_t head;
 	uint16_t tail;
-	bool full;
-}TxReqBuffer_t;
+}MemAddBuffer_t;
 
-typedef struct RxReqBuffer{
-	MemReq_t data[RXCIRCBUFFERSIZE];
-	uint16_t head;
-	uint16_t tail;
-	bool full;
-}RxReqBuffer_t;
 //----------------------------------------Private Variables--------------------------------------
 
-I2C_HandleTypeDef hi2c1;
-
-static RxReqBuffer_t RxReq;//Receive request
-static TxReqBuffer_t TxReq;//Transmit request
+I2C_HandleTypeDef hi2c1 = {I2C1};
+void (*PosterList[NUMPOSTERS])(Event_t event) = POSTERS;
+static MemAddBuffer_t MemBuff;//Receive and transmit request
 
 static uint8_t initialized = 0;
-static uint16_t finalcount = 0;
 
 
 //----------------------------------------Private functions--------------------------------------
+#ifdef I2CTESTHARNESS
+void fakeposter(Event_t event);
+#endif
+HAL_StatusTypeDef I2C_Post(MemAdd_t* post){
+	if(post->posterindex == 0){
+		return HAL_I2C_Mem_Write_IT(&hi2c1,
+									post->targetadr<<1,
+									post->registeradr,
+									I2C_MEMADD_SIZE_8BIT,
+									&(post->data),
+									1);
+	} else {
+		return HAL_I2C_Mem_Read_IT(&hi2c1,
+								   post->targetadr<<1,
+								   post->registeradr,
+								   I2C_MEMADD_SIZE_8BIT,
+								   &(post->data),
+								   1);
+
+	}
+}
+
+HAL_StatusTypeDef I2C_Enqueue(MemAdd_t Post){
+	if(!initialized){return HAL_ERROR;}
+		HAL_StatusTypeDef status = HAL_OK;
+
+		uint32_t start = TIMERS_GetMilliSeconds();
+		while((MemBuff.tail == ((MemBuff.head+1)%CIRCBUFFERSIZE)) && (((start + I2CBUFFERTIMEOUT) > TIMERS_GetMilliSeconds())));
+		if(MemBuff.tail == (MemBuff.head+1)%CIRCBUFFERSIZE){
+			BSP_LED_On(LED_RED);//indicate a fatal buffer overflow
+			return HAL_ERROR;
+		}
+		BSP_LED_Off(LED_RED);
+		//place the transmit request into the buffer
+		//The I2C-UARTmanager will disable the module but leave the state as ready, the data will still be loaded into the register
+		//The module will not transmit until arbitration is complete
+
+
+		MemBuff.data[MemBuff.head] = Post;
+		MemBuff.head++;
+		MemBuff.head %= CIRCBUFFERSIZE;
+		if((MemBuff.tail+1)%CIRCBUFFERSIZE == MemBuff.head && hi2c1.State == HAL_I2C_STATE_READY){
+			I2CUARTtoI2C(1);
+			status = I2C_Post(MemBuff.data+MemBuff.tail);
+
+		}
+		return status;
+}
+
 /*
  * @Function: HAL_I2C_MemTxCpltCallback
  * @Brief: Overwrites a weak HAL function. Called at the end of an i2c memory transmit operation
@@ -64,23 +101,14 @@ static uint16_t finalcount = 0;
  * @return: none
  */
 void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *hi2c){
-	//here is where to implement something to do with the transmitted data
-
-//	BSP_LED_Toggle(LED_RED);
+	//operation complete, the data at tail is now out-dated;
+	MemBuff.tail++;
+	MemBuff.tail %= CIRCBUFFERSIZE;
 	//if there is more in the buffer
-	if(TxReq.tail != TxReq.head){
+	if(MemBuff.tail != MemBuff.head){
 		I2CUARTtoI2C(1);
-		HAL_I2C_Mem_Write_IT(&hi2c1,
-							 TxReq.data[TxReq.tail].targetadr<<1,
-							 TxReq.data[TxReq.tail].registeradr,
-							 I2C_MEMADD_SIZE_8BIT,
-							 &(TxReq.data[TxReq.tail].data),
-							 1);
-		TxReq.tail++;
-		TxReq.tail %= TXCIRCBUFFERSIZE;
-//		if(TxReq.full){
-//			TxReq.full = false;
-//		}
+		I2C_Post(MemBuff.data+MemBuff.tail);
+
 	}
 }
 
@@ -94,23 +122,34 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *hi2c){
 void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c){
 
 	//use the received data construct and event to post
-	Event_t ret = {EVENT_I2C, RxReq.data[RxReq.tail].registeradr << 8 &RxReq.data[RxReq.tail].data};
-	//post the event to the function given
-	RxReq.data[RxReq.tail].PostTo(ret);
-	//decrement the circular buffer
-	if(RxReq.tail == RxReq.head){
-		RxReq.full = false;
-	}
-	RxReq.tail++;
-	RxReq.tail %= RXCIRCBUFFERSIZE;
-	if(RxReq.head != RxReq.tail){//if the buffer is not empty (cannot be full as we just pulled from the buffer)
+	Event_t ret = {EVENT_I2C, MemBuff.data[MemBuff.tail].registeradr << 8 | MemBuff.data[MemBuff.tail].data};
+	//post the event to the function given by the poster index
+
+#ifdef I2CTESTHARNESS
+	fakeposter(ret);
+#else
+	PosterList[MemBuff.data[MemBuff.tail].posterindex-1](ret);
+#endif
+	//operation complete, the data at tail is now out-dated;
+	MemBuff.tail++;
+	MemBuff.tail %= CIRCBUFFERSIZE;
+	//if there is more in the buffer
+	if(MemBuff.tail != MemBuff.head){
 		I2CUARTtoI2C(1);
-		HAL_I2C_Mem_Read_IT(&hi2c1,
-							RxReq.data[RxReq.head].targetadr<<1,
-							RxReq.data[RxReq.head].registeradr,
-							I2C_MEMADD_SIZE_8BIT,
-							&(RxReq.data[RxReq.head].data),
-							1);
+		I2C_Post(MemBuff.data+MemBuff.tail);
+
+	}
+}
+
+void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c){
+	if(hi2c->ErrorCode&HAL_I2C_ERROR_AF){//NACK Error
+		if(MemBuff.tail != MemBuff.head){
+			uint32_t start = TIMERS_GetMilliSeconds();
+			while(start+10 > TIMERS_GetMilliSeconds());
+			I2CUARTtoI2C(1);
+			I2C_Post(MemBuff.data+MemBuff.tail);//Repost the same data packet that got NACKed, without moving the tail forward
+
+		}
 	}
 }
 /*
@@ -143,7 +182,7 @@ int I2C_Init(void){
 	if(initialized){return INIT_OK;}
 	TIMERS_Init();
 	hi2c1.Instance = I2C1;
-	hi2c1.Init.Timing = 0x00303D5B;
+	hi2c1.Init.Timing = 0x00305B5B;
 	hi2c1.Init.OwnAddress1 = 0;
 	hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
 	hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -151,6 +190,7 @@ int I2C_Init(void){
 	hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
 	hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
 	hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+	hi2c1.State = HAL_I2C_STATE_RESET;
 	HAL_StatusTypeDef ret = HAL_I2C_Init(&hi2c1);
 	if (ret != HAL_OK)
 	{
@@ -170,21 +210,13 @@ int I2C_Init(void){
 		return INIT_ERROR;
 	}
 	//set up circular buffers
-	RxReq.full = false;
-	RxReq.tail = 0;
-	RxReq.head = 0;
-
-	TxReq.full = false;
-	TxReq.tail = 0;
-	TxReq.head = 0;
+	MemBuff.tail = 0;
+	MemBuff.head = 0;
 	initialized = 1;
 	I2CUARTtoI2C(1);
 	//enables interrupts
-	//hi2c1.Instance->CR1 = hi2c1.Instance->CR1 | I2C_CR1_RXIE_Msk | I2C_CR1_TXIE_Msk;
 	HAL_NVIC_SetPriority(I2C1_IRQn, 2, 0);
 	HAL_NVIC_EnableIRQ(I2C1_IRQn);
-//	__HAL_I2C_ENABLE_IT(&hi2c1, I2C_IT_RXI);
-//	__HAL_I2C_ENABLE_IT(&hi2c1, I2C_IT_TXI);
 	return INIT_OK;
 }
 
@@ -199,53 +231,21 @@ int I2C_Init(void){
 HAL_StatusTypeDef I2C_Transmit(uint8_t targetadr, uint8_t registeradr, uint8_t data){
 	if(!initialized){return HAL_ERROR;}
 	HAL_StatusTypeDef status = HAL_OK;
-	//will not attempt to receive if the buffer is full
-	static uint16_t count =0;
-	if(finalcount == 0){
-		count++;
-	}
-	if(TxReq.tail == (TxReq.head+1)%TXCIRCBUFFERSIZE){
-		finalcount = count;
-		BSP_LED_On(LED_RED);
-	}
-	uint32_t start = TIMERS_GetMilliSeconds();
-	while(TxReq.tail == (TxReq.head+1)%TXCIRCBUFFERSIZE && ((start + I2CBUFFERTIMEOUT) > TIMERS_GetMilliSeconds()));
-	if(TxReq.tail == (TxReq.head+1)%TXCIRCBUFFERSIZE){
-		return HAL_ERROR;
-		BSP_LED_On(LED_RED);
-	}
-
-	//place the transmit request into the buffer
-	static MemWrite_t Post;
+	static MemAdd_t Post;
 	Post.targetadr = targetadr;
 	Post.registeradr = registeradr;
-//	Post.PostTo = 0;//null pointer, no function is posted to after the transmit is complete
+	Post.posterindex = 0;//null pointer, no function is posted to after the transmit is complete
 	Post.data = data;
-
-	if(TxReq.tail == TxReq.head && hi2c1.State == HAL_I2C_STATE_READY){
-		I2CUARTtoI2C(1);
-		status = HAL_I2C_Mem_Write_IT(&hi2c1,
-									 Post.targetadr<<1,
-									 Post.registeradr,
-									 I2C_MEMADD_SIZE_8BIT,
-									 &(Post.data),
-									 1);
-		if(status == HAL_BUSY){
-			TxReq.data[TxReq.head] = Post;
-			TxReq.head++;
-			TxReq.head %= TXCIRCBUFFERSIZE;
-		}
-	} else {
-		TxReq.data[TxReq.head] = Post;
-		TxReq.head++;
-		TxReq.head %= TXCIRCBUFFERSIZE;
-//		if(TxReq.tail == TxReq.head){
-//			TxReq.full = true;
-//		}
-	}
+	status = I2C_Enqueue(Post);
 	return status;
 }
 
+void I2C_Flushbuffer(){
+	if(hi2c1.State == HAL_I2C_STATE_READY && MemBuff.tail != MemBuff.head){
+		//error recovery
+		I2C_Post(MemBuff.data+MemBuff.tail);
+	}
+}
 /*
  * @Function: I2C_Recieve
  * @Brief: transmits requesting data. when the data is received it posts an event with the data to the PostTo function
@@ -254,39 +254,18 @@ HAL_StatusTypeDef I2C_Transmit(uint8_t targetadr, uint8_t registeradr, uint8_t d
  * 		   void (*PostTo)(Event_t): which service to post to when the data is received
  * @return: -1 if error, 1 if success
  */
-HAL_StatusTypeDef I2C_Recieve(uint8_t targetadr, uint8_t registeradr,void (*PostTo)(Event_t)){
+HAL_StatusTypeDef I2C_Recieve(uint8_t targetadr, uint8_t registeradr, uint8_t posterindex){
 	if(!initialized){return HAL_ERROR;}
 	HAL_StatusTypeDef status = HAL_OK;
-	//will not attempt to receive if the buffer is full
-	if(RxReq.full){
-		return HAL_ERROR;
-	}
-
-	//place the receive request into the buffer
-	static MemReq_t Post;
+	static MemAdd_t Post;
 	Post.targetadr = targetadr;
 	Post.registeradr = registeradr;
-	Post.PostTo = PostTo;
-	uint8_t first = TxReq.tail == TxReq.head;
-	RxReq.data[RxReq.head] = Post;
-	RxReq.head++;
-	RxReq.head %= RXCIRCBUFFERSIZE;
-	if(RxReq.tail == RxReq.head){
-		RxReq.full = true;
+	if(posterindex == 0 || posterindex > NUMPOSTERS){
+		return HAL_ERROR;
 	}
-	if(first){//if the buffer was empty
-		I2CUARTtoI2C(1);
-		status = HAL_I2C_Mem_Read_IT(&hi2c1,
-							RxReq.data[RxReq.head].targetadr<<1,
-							RxReq.data[RxReq.head].registeradr,
-							I2C_MEMADD_SIZE_8BIT,
-							&(RxReq.data[RxReq.head].data),
-							1);
-		if(status != HAL_OK){
-			RxReq.head--;
-			RxReq.head %= RXCIRCBUFFERSIZE;
-		}
-	}
+	Post.posterindex = posterindex;
+	Post.data = 0;//will store future recieved data
+	status = I2C_Enqueue(Post);
 	return status;
 
 }
@@ -332,7 +311,6 @@ unsigned char I2C_WriteReg(
 
 
 //----------------------------------------Private Test Harness-----------------------------------
-//#define I2CTESTHARNESS
 
 #ifdef I2CTESTHARNESS
 #include "BOARD.h"
@@ -344,7 +322,7 @@ HAL_StatusTypeDef status;
 uint8_t month;
 uint8_t day;
 uint8_t hour;
-uint8_t minute
+uint8_t minute;
 
 void fakeposter(Event_t event){
 	if(event.status == EVENT_I2C){
@@ -364,9 +342,11 @@ void fakeposter(Event_t event){
 			break;
 		case RTCMINADDR:
 			//MINTEN2 MINTEN1 MINTEN0 MINONE3 MINONE2 MINONE1 MINONE0
-			minute = 10*((event.data & 0x30)>>4) +((event.data &0x0F));
+			minute = 10*((event.data & 0x70)>>4) +((event.data &0x0F));
 
 			break;
+		case RTCSTATADDR:
+
 		}
 	}
 	return;
@@ -378,16 +358,25 @@ int main(){
 	TIMERS_Init();
 	BSP_LED_Init(LED_BLUE);
 	BSP_LED_Init(LED_RED);
+	I2C_Init();
+//	I2C_Transmit(RTCADDRESS, RTCSECADDR, 0x80);
+//	I2C_Transmit(RTCADDRESS, RTCMINADDR, 0x53);
+//	I2C_Transmit(RTCADDRESS, RTCHOURADDR, 0x13);
+//	I2C_Transmit(RTCADDRESS, RTCDAYADDR, 0x04);
+//	I2C_Transmit(RTCADDRESS, RTCMNTHADDR, 0x06);
 	HAL_Delay(100);
 	OledInit();
 	HAL_Delay(1000);
 	while (1){
+
+		I2C_Recieve(RTCADDRESS, RTCDAYADDR, 1);
+		I2C_Recieve(RTCADDRESS, RTCHOURADDR, 1);
+		I2C_Recieve(RTCADDRESS, RTCMINADDR, 1);
+		I2C_Recieve(RTCADDRESS, RTCMNTHADDR, 1);
+		I2C_Recieve(RTCADDRESS, RTCSTATADDR, 1);
+
 		char text[88];
-		I2C_Recieve(RTCADDRESS, RTCMNTHADDR, fakeposter);
-		I2C_Recieve(RTCADDRESS, RTCDAYADDR, fakeposter);
-		I2C_Recieve(RTCADDRESS, RTCHOURADDR, fakeposter);
-		I2C_Recieve(RTCADDRESS, RTCMINADDR, fakeposter);
-		sprintf(text, "current time: %d/%d %d:%d", month, day, hour, minute);
+		sprintf(text, "current time:\n%d/%d %d:%.2d", month, day, hour, minute);
 		OledDrawString(text);
 		OledUpdate();
 

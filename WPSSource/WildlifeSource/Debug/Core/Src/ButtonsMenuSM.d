@@ -56,9 +56,10 @@ Core/Src/ButtonsMenuSM.o: ../Core/Src/ButtonsMenuSM.c \
  ../Core/Inc/CONFIG.h ../Core/Inc/COMM.h ../Core/Inc/MP3.h \
  ../Core/Inc/Scheduler.h ../Core/Inc/ButtonsMenuSM.h \
  ../Core/Inc/ButtonsMenuSM.h ../Core/Inc/MP3.h ../Core/Inc/GPIO.h \
- ../Core/Inc/I2C.h ../Core/Inc/TIMERS.h ../Core/Inc/FLASH.h \
- ../Core/Inc/UART.h ../Core/Inc/discountIO.h ../Core/Inc/Oled.h \
- ../Core/Inc/Ascii.h ../Core/Inc/OledDriver.h ../Core/Inc/Board.h
+ ../Core/Inc/I2C.h ../Core/Inc/scheduler.h ../Core/Inc/TIMERS.h \
+ ../Core/Inc/FLASH.h ../Core/Inc/UART.h ../Core/Inc/discountIO.h \
+ ../Core/Inc/Oled.h ../Core/Inc/Ascii.h ../Core/Inc/OledDriver.h \
+ ../Core/Inc/Board.h
 ../Core/Inc/CONFIG.h:
 ../Core/Inc/BOARD.h:
 ../Drivers/STM32WB0x_HAL_Driver/Inc/stm32wb0x_hal.h:
@@ -128,6 +129,7 @@ C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Dr
 ../Core/Inc/MP3.h:
 ../Core/Inc/GPIO.h:
 ../Core/Inc/I2C.h:
+../Core/Inc/scheduler.h:
 ../Core/Inc/TIMERS.h:
 ../Core/Inc/FLASH.h:
 ../Core/Inc/UART.h:
