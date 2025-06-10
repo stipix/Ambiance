@@ -72,6 +72,8 @@ int main(void)
 	if( BOARD_Init() != INIT_OK){
 		BOARD_CrashHandler();
 	}
+    BSP_LED_Init(LED_BLUE);
+    BSP_LED_Init(LED_RED);
 
 	MX_RADIO_Init();
 	MX_RADIO_TIMER_Init();

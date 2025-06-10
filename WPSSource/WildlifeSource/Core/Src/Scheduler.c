@@ -23,6 +23,7 @@
 FIFO Schedulerqueue;
 static uint32_t starttime;//timer
 
+static uint8_t newdata;//flag for when new I2C data is available
 static uint8_t month;//I2C data
 static uint8_t day;
 static uint8_t hour;
@@ -32,10 +33,10 @@ static uint8_t logging;//logging
 static uint8_t playdata;
 //----------------------------------------Private Functions--------------------------------------
 void CompareTime(){
-	if(month == NULLDATE || day == NULLDATE || hour == NULLDATE || minute == NULLDATE){
+	if(!newdata){
 		return;
 	}
-	discountprintf("Date received");
+	//discountprintf("Date received");
 	if(logging){
 		scheduleEvent event;
 
@@ -54,36 +55,44 @@ void CompareTime(){
 			event.track = prevevent.track;
 		}
 		FLASH_AppendLogs(event);
-		month = NULLDATE;
-		day = NULLDATE;
-		hour = NULLDATE;
-		minute = NULLDATE;
+		logging  = 0;
 	} else {
 		scheduleEvent event;
-		for(int i = 0; i < FLASH_GetScheduleSize(); i++){
+		Event_t play = (Event_t){EVENT_PLAY, 0};
+		for(uint16_t i = 0; i < FLASH_GetScheduleSize(); i++){
 			event = FLASH_ReadSchedule(i);
-			if(event.month == month && event.day == day){
-				if((event.start&0b11111000)>>3 == hour && (event.start & 0b011)*15 == minute){
-					Event_t play = (Event_t){EVENT_PLAY, (event.folder<<8) + event.track};
-					MP3_Event_Post(play);
-					month = NULLDATE;
-					day = NULLDATE;
-					hour = NULLDATE;
-					minute = NULLDATE;
+			if(event.month == month && event.day == day){//if the scheduled event has the right day
+				if((event.start&0b11111000)>>3 <= hour && (event.stop&0b11111000)>>3 > hour){//if the current min is within when the schedule should be playing
+					if((event.start & 0b011)*15 <= minute && (event.stop & 0b011)*15 > minute){//repeat for minute
+						if(event.folder != (MP3_GetCurrentFile()>>8)){//if we have not already sent this event
+							play.data = (event.folder<<8) + event.track;//Update the MP3
+							MP3_Event_Post(play);
+						}
+						break;
+					}
 				}
-				if((event.stop&0b11111000)>>3 == hour && (event.stop & 0b011)*15 == minute){
-					Event_t play = (Event_t){EVENT_PLAY, 0};
-					event.start = 0;
+				if ((event.stop&0b11111000)>>3 == hour && (event.stop & 0b011)*15 == minute){
+					play.data = 0;
 					MP3_Event_Post(play);
-					month = NULLDATE;
-					day = NULLDATE;
-					hour = NULLDATE;
-					minute = NULLDATE;
 				}
 			}
 		}
 	}
+	newdata = 0;
 }
+uint8_t Scheduler_GetMonth(){
+	return month;
+}
+uint8_t Scheduler_GetDay(){
+	return day;
+}
+uint8_t Scheduler_GetHour(){
+	return hour;
+}
+uint8_t Scheduler_GetMinute(){
+	return minute;
+}
+
 //----------------------------------------Public Functions---------------------------------------
 /*
  * @Function: Scheduler_Event_Init
@@ -95,7 +104,9 @@ uint8_t Scheduler_Event_Init(FIFO Queue){
     Schedulerqueue = Queue;
     I2C_Init();
     TIMERS_Init();
-    starttime = TIMERS_GetMilliSeconds();
+    I2C_Transmit(RTCADDRESS, RTCSECADDR, 0x80);//enable the clock
+	I2C_Transmit(RTCADDRESS, RTCSTATADDR, 0x28);//enables the use of backup battery
+    starttime = -1;//force check time on wake-up
     return INIT_OK;
 }
 /*
@@ -167,6 +178,7 @@ uint8_t Scheduler_Event_Handler(Event_t event){
 			CompareTime();
 			break;
 		case RTCMINADDR:
+			newdata = 1;
 			//MINTEN2 MINTEN1 MINTEN0 MINONE3 MINONE2 MINONE1 MINONE0
 			minute = 10*((event.data & 0x30)>>4) +((event.data &0x0F));
 			CompareTime();

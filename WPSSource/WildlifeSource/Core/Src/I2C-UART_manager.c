@@ -28,7 +28,7 @@ void I2CUARTtoI2C(uint8_t delay){
 		 hi2c1.Lock = HAL_UNLOCKED;
 		 hi2c1.State = HAL_I2C_STATE_READY;
 		husart1.Instance->CR1 &= ~0x00000008;//disable the USART Transmit
-		BSP_LED_Off(LED_BLUE);
+//		BSP_LED_Off(LED_BLUE);
 		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_1);
 
 		PORTAPIN1.Mode = GPIO_MODE_AF_OD;
@@ -63,7 +63,7 @@ void I2CUARTtoUSART(uint8_t delay){
 		 husart1.Instance->CR1 |= 0x00000008;//enable the USART Transmit
 		 husart1.Instance->CR1 |= 0x00000040;//enable the USART Transmit complete interrupt
 
-		BSP_LED_On(LED_BLUE);
+//		BSP_LED_On(LED_BLUE);
 		PORTAPIN1.Mode = GPIO_MODE_AF_PP;
 		PORTAPIN1.Alternate = GPIO_AF2_USART1;
 		HAL_GPIO_Init(GPIOA, &PORTAPIN1);

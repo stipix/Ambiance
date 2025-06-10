@@ -12,7 +12,7 @@
 #include "GPIO.h"
 #include "FIFO.h"
 //----------------------------------------Private Defines----------------------------------------
-
+#define USEDEBUG
 
 #define BUTTON_1_PIN GPIO_PIN_8
 #define BUTTON_2_PIN GPIO_PIN_2
@@ -52,7 +52,9 @@ int GPIO_Init(){
 
 	//Configure GPIO pins on port A
 	GPIO_InitStruct.Pin = BUTTON_1_PIN | BUTTON_5_PIN | BUTTON_6_PIN ;
+#ifndef USEDEBUG
 //	GPIO_InitStruct.Pin |= BUTTON_2_PIN | BUTTON_3_PIN;//on a separate line to easily disable to allow the debugger to run
+#endif
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -78,8 +80,13 @@ uint8_t GPIO_ReadButtons(void){
 	return ((HAL_GPIO_ReadPin(BUTTON_6) << 5) |
 			(HAL_GPIO_ReadPin(BUTTON_5) << 4) |
 			(HAL_GPIO_ReadPin(BUTTON_4) << 3) |
+#ifndef USEDEBUG
 			(HAL_GPIO_ReadPin(BUTTON_3) << 2) |
 			(HAL_GPIO_ReadPin(BUTTON_2) << 1) |
+#else
+			(1<<2)|
+			(1<<1)|
+#endif
 			(HAL_GPIO_ReadPin(BUTTON_1) << 0));
 }
 

@@ -1,7 +1,7 @@
 ../Core/Src/MP3.c:66:6:MP3_SendData	2
 ../Core/Src/MP3.c:86:9:parsePacket	21
-../Core/Src/MP3.c:172:9:MP3_Event_Init	1
-../Core/Src/MP3.c:200:6:MP3_Event_Post	1
-../Core/Src/MP3.c:211:9:MP3_Event_Updater	10
-../Core/Src/MP3.c:254:9:MP3_Event_Handler	25
-../Core/Src/MP3.c:383:10:MP3_GetCurrentFile	1
+../Core/Src/MP3.c:171:9:MP3_Event_Init	1
+../Core/Src/MP3.c:194:6:MP3_Event_Post	1
+../Core/Src/MP3.c:205:9:MP3_Event_Updater	10
+../Core/Src/MP3.c:257:9:MP3_Event_Handler	30
+../Core/Src/MP3.c:396:10:MP3_GetCurrentFile	1

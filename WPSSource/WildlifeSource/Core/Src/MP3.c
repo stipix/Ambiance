@@ -46,7 +46,7 @@ typedef struct DFPacket{
 
 //----------------------------------------Private Variables--------------------------------------
 FIFO MP3queue;
-static uint8_t play;//should the mp3 player be playing
+static uint8_t pause;//should the mp3 player be playing. 0x01 for pause in DC, 0x02 for stop until next play event
 static uint8_t DC;//how long until the next cycle of the duty cycle
 static uint8_t volume;
 static uint32_t starttime;
@@ -138,7 +138,6 @@ uint8_t parsePacket(char rx){
 		if(rx == (checkval&0xFF)){
 			PacketSM = Checksum2;
 		}else {
-			BSP_LED_On(LED_RED);
 			PacketSM = Start;
 			char send[4] = {0x40, 0x00, 0x00, 0x06};
 			MP3_SendData(send);
@@ -173,7 +172,7 @@ uint8_t MP3_Event_Init(FIFO Queue){
 	//somehow need to be sent 3 seconds after the mp3 turns on
     MP3queue = Queue;
     TIMERS_Init();
-    play = 1;
+    pause = 0x02;
     DC = FLASH_GetDutyCycle()/100;
     volume = FLASH_GetVolume()/100;
     starttime = TIMERS_GetMilliSeconds();
@@ -184,11 +183,6 @@ uint8_t MP3_Event_Init(FIFO Queue){
 	MP3_SendData(send);
 	}
 
-
-//	{
-//	char send[4] = {0x08, 0x00, 0x00, 0x01};//set folder repeat command
-//	MP3_SendData(send);
-//	}
     return INIT_OK;
 }
 /*
@@ -212,31 +206,40 @@ Event_t MP3_Event_Updater(void){
     Event_t event = (Event_t){EVENT_NONE, 0};
     uint32_t timer = TIMERS_GetMilliSeconds();
     char rx = LPUART_ReadRx();
+    //Check for LPUART events
 	if(rx != UARTFAILED){
 		event.status = EVENT_LPUART;
 		event.data = rx;
 		MP3_Event_Post(event);
 	}
-    if (play){
-		if((timer-starttime) >= CYCLELENGTH*DC){//if the speaker is playing, and time is up
-			event.status = EVENT_TIMEOUT;
-			event.data = 0;//next state of play
-			starttime = timer;
-			MP3_Event_Post(event);
+
+	//Check for duty cycle events
+	if(!(pause&0x02)){//if the module is in a scheduled playing time
+		if (!pause){
+			if((CYCLELENGTH*((double)DC/100.0)+starttime) <= timer ){//if the speaker is playing, and time is up
+				event.status = EVENT_TIMEOUT;
+				event.data = 1;//next state of pause
+				starttime = timer;
+				MP3_Event_Post(event);
+			}
+		} else {
+			if((CYCLELENGTH*((double)(100-DC)/100.0)+starttime) <= timer ){// if the speaker is playing and time is up, DC = 0 don't play, used to stop the speaker
+				event.status = EVENT_TIMEOUT;
+				event.data = 0;//next state of pause
+				starttime = timer;
+				MP3_Event_Post(event);
+			}
 		}
-    } else {
-		if(DC != 0 && ((timer-starttime) >= CYCLELENGTH*(1-DC))){// if the speaker is playing and time is up, DC = 0 don't play
-			event.status = EVENT_TIMEOUT;
-			event.data = 1;//next state of play
-			starttime = timer;
-			MP3_Event_Post(event);
-		}
-    }
-    if(((timer-inittime) >= 3000) && !initialized){//if the speaker is playing, and time is up
+	}
+
+	//check for init timer events
+    if(((timer-inittime) >= 3000) && !initialized){//wait for the speaker to be ready for use n initialization
 		event.status = EVENT_INIT;
 		event.data = 0;
 		MP3_Event_Post(event);
 	}
+
+    //check for settings update events
     if(volume != FLASH_GetVolume() || DC != FLASH_GetDutyCycle()){
     	event.status = EVENT_SETTINGS;
     	event.data = (volume == FLASH_GetVolume());
@@ -269,7 +272,11 @@ uint8_t MP3_Event_Handler(Event_t event){
 			char send[4] = {0x4E, 0x00, 0x00, numfolders};//query the number of files on the micrSD
 			MP3_SendData(send);
 			}
-			while(!parsePacket(LPUART_ReadRx()));
+			uint32_t time = TIMERS_GetMilliSeconds();
+			while(!parsePacket(LPUART_ReadRx()) && (time+1000) > TIMERS_GetMilliSeconds());
+			if((time+1000) < TIMERS_GetMilliSeconds()){
+				continue;// reattempt communication
+			}
 			if(Packet.command==0x4E){
 				numfolders++;
 				FIFO_Enqueue(tempFolders, (Event_t){EVENT_NONE, Packet.Param2});
@@ -284,17 +291,19 @@ uint8_t MP3_Event_Handler(Event_t event){
 		}
 		FIFO_Destroy(tempFolders);
 		initialized = 1;
+		char send[4] = {0x06, 0x00, 0x00, (uint8_t)(((uint16_t)volume)*30/100)};
+		MP3_SendData(send);
 	}
 	if(event.status == EVENT_TIMEOUT){
 		//send either play or stop to the mp3 player
-		if(event.data == 0){//pause
-					play = event.data;
-					char send[4] = {0x0E, 0x00, 0x00, 0x00};
-					MP3_SendData(send);
+		if(event.data == 1){//pause
+			pause = event.data;
+			char send[4] = {0x0E, 0x00, 0x00, 0x00};
+			MP3_SendData(send);
 
-		}else if(event.data == 1){//play
-			char send[4] = {0x0D, 0x00, 0x00, 0x00};
-			play = event.data;
+		}else if(event.data == 0){//play
+			pause = event.data;
+			char send[4] = {0x03, 0x00, 0x00, firsttrack+track-1};
 			MP3_SendData(send);
 		}
 
@@ -303,18 +312,12 @@ uint8_t MP3_Event_Handler(Event_t event){
 		sprintf(text, "Play event: %d, %d", event.data>>8, (event.data&0xFF));
 		discountprintf(text);
 		Scheduler_Event_Post(event);
-		if(event.data == 0){//0 is not a valid folder or track number
-			DC = 0;// immediately cause a timeout to stop the speaker
-			{
-			char send[4] = {0x0E, 0x00, 0x00, 0x00};//pause
-			MP3_SendData(send);
-			}
-//			char send[4] = {0x0A, 0x00, 0x00, 0x00};//enter low power mode
-//			MP3_SendData(send);
-		} else if(event.data>>8 != 0 && (event.data>>8) <= numfolders &&  (event.data&0xFF)!= 0 && (event.data&0xFF) <= folders[(event.data>>8)-1]){
+		starttime = TIMERS_GetMilliSeconds();
+		if(event.data>>8 != 0 && (event.data>>8) <= numfolders &&  (event.data&0xFF)!= 0 && (event.data&0xFF) <= folders[(event.data>>8)-1]){
 			folder = event.data>>8;
 			track = event.data&0xFF;
 			firsttrack = 1;
+			pause = 0;
 			for(int i = 0; i < folder-1; i ++){
 				firsttrack+= folders[i];
 			}
@@ -327,42 +330,52 @@ uint8_t MP3_Event_Handler(Event_t event){
 			char send[4] = {0x0D, 0x00, 0x00, 0x00};
 			MP3_SendData(send);
 			}
+		}else {
+
+			pause = 0x02;
+			{
+			char send[4] = {0x0E, 0x00, 0x00, 0x00};//pause
+			MP3_SendData(send);
+			}
+			if(!(event.data>>8) && !(event.data&0xFF)){
+				folder = 0;
+				track = 0;
+			}
+//			char send[4] = {0x0A, 0x00, 0x00, 0x00};//enter low power mode
+//			MP3_SendData(send);
 		}
 
 
 	}if(event.status == EVENT_SETTINGS){
 		DC = FLASH_GetDutyCycle();
 		volume = FLASH_GetVolume();
-		char text[30];
-		sprintf(text, "Settings event: %d, %d", event.data>>8, (event.data&0xFF));
-		discountprintf(text);
+//		char text[30];
+//		sprintf(text, "Settings event: %d, %d", event.data>>8, (event.data&0xFF));
+//		discountprintf(text);
 		if(!event.data){//volume == FLASH_GetVolume()
 			//send new volume to the mp3 player
 			char send[4] = {0x06, 0x00, 0x00, (uint8_t)(((uint16_t)volume)*30/100)};
 			MP3_SendData(send);
 		}
 	}if (event.status == EVENT_LPUART){
-		//don't do anything for now, may parse errors and moving to next track later
-		USART_WriteTx(event.data);
+		//USART_WriteTx(event.data);
 		char rx = event.data;
 		if(rx != UARTFAILED){
 			if(parsePacket(rx)){
 				if(Packet.command == 0x3D){
 					if(Packet.Param2 != lastplayed){//prevent the mp3 play from sending double
 						lastplayed = Packet.Param2;
-						track++;
-	//							char send[4] = {0x0D, 0x00, 0x00, 0x00};
-	//							MP3_SendData(send);
-						if(track > folders[folder-1]){
-							char send2[4] = {0x03, 0x00, 0x00, firsttrack};
-							MP3_SendData(send2);
-							BSP_LED_On(LED_RED);
-							track = 1;
-						} else {
+						if(folder && track){
+							track++;
+							if(track > folders[folder-1]){
+								char send2[4] = {0x03, 0x00, 0x00, firsttrack};
+								MP3_SendData(send2);
+								track = 1;
+							} else {
 
-							char send[4] = {0x01, 0x00, 0x00, 0x00};
-							MP3_SendData(send);
-							BSP_LED_Off(LED_RED);
+								char send[4] = {0x01, 0x00, 0x00, 0x00};
+								MP3_SendData(send);
+							}
 						}
 					}
 

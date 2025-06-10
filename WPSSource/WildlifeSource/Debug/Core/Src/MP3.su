@@ -1,7 +1,7 @@
 ../Core/Src/MP3.c:66:6:MP3_SendData	32	static
 ../Core/Src/MP3.c:86:9:parsePacket	32	static
-../Core/Src/MP3.c:172:9:MP3_Event_Init	24	static
-../Core/Src/MP3.c:200:6:MP3_Event_Post	16	static
-../Core/Src/MP3.c:211:9:MP3_Event_Updater	48	static
-../Core/Src/MP3.c:254:9:MP3_Event_Handler	160	static
-../Core/Src/MP3.c:383:10:MP3_GetCurrentFile	8	static
+../Core/Src/MP3.c:171:9:MP3_Event_Init	24	static
+../Core/Src/MP3.c:194:6:MP3_Event_Post	16	static
+../Core/Src/MP3.c:205:9:MP3_Event_Updater	48	static
+../Core/Src/MP3.c:257:9:MP3_Event_Handler	136	static
+../Core/Src/MP3.c:396:10:MP3_GetCurrentFile	8	static

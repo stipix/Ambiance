@@ -55,7 +55,8 @@ Core/Src/COMM.o: ../Core/Src/COMM.c ../Core/Inc/COMM.h \
  ../Core/Inc/Events.h ../Core/Inc/FIFO.h ../Core/Inc/GPIO.h \
  ../Core/Inc/COMM.h ../Core/Inc/MP3.h ../Core/Inc/Scheduler.h \
  ../Core/Inc/ButtonsMenuSM.h ../Core/Inc/FIFO.h ../Core/Inc/UART.h \
- ../Core/Inc/DiscountIO.h ../Core/Inc/FLASH.h ../Core/Inc/BLUETOOTH.h
+ ../Core/Inc/DiscountIO.h ../Core/Inc/FLASH.h ../Core/Inc/BLUETOOTH.h \
+ ../Core/Inc/I2C.h ../Core/Inc/scheduler.h
 ../Core/Inc/COMM.h:
 ../Core/Inc/CONFIG.h:
 ../Core/Inc/BOARD.h:
@@ -126,3 +127,5 @@ C:/Users/stipi/Desktop/HWstuff/ECE129/WildlifeSource/WPSSource/WildlifeSource/Dr
 ../Core/Inc/DiscountIO.h:
 ../Core/Inc/FLASH.h:
 ../Core/Inc/BLUETOOTH.h:
+../Core/Inc/I2C.h:
+../Core/Inc/scheduler.h:

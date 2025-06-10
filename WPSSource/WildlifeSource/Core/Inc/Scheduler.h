@@ -49,6 +49,11 @@ Event_t Scheduler_Event_Updater(void);
  */
 uint8_t Scheduler_Event_Handler(Event_t event);
 
+uint8_t Scheduler_GetMonth();
+uint8_t Scheduler_GetDay();
+uint8_t Scheduler_GetHour();
+uint8_t Scheduler_GetMinute();
+
  #ifdef __cplusplus//allows code to be ran in a c++ program
   }
  #endif

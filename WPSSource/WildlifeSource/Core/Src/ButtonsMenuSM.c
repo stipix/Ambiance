@@ -18,6 +18,7 @@
 #include "UART.h"
 #include "discountIO.h"
 #include "Oled.h"
+#include "Scheduler.h"
 #include <string.h>
 //----------------------------------------Private Defines----------------------------------------
 #define DEBOUNCETIME 50//milliseconds
@@ -48,6 +49,7 @@ static uint8_t dayselect;
 static uint8_t Stimeselect;
 static uint8_t Etimeselect;
 //----------------------------------------Private Functions--------------------------------------
+
 void DrawMain(){
 	char maintext[176];
 	sprintf(maintext, "Main menu\n"
@@ -279,7 +281,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				} else
 				if(event.data & B5XORMASK && !(event.data & B5MASK)){
 					//discountprintf("decrementing volume");
-					uint8_t vol = FLASH_GetVolume()-1;
+					uint8_t vol = FLASH_GetVolume()-5;
 					if(vol >= 0){
 						FLASH_SetDCVol(vol, FLASH_GetDutyCycle());
 					}
@@ -288,7 +290,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				} else
 				if(event.data & B6XORMASK && !(event.data & B6MASK)){
 					//discountprintf("moving to set Time");
-					uint8_t vol = FLASH_GetVolume()+1;
+					uint8_t vol = FLASH_GetVolume()+5;
 					if(vol <= 100){
 						FLASH_SetDCVol(vol, FLASH_GetDutyCycle());
 					}
@@ -540,10 +542,10 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 			static int8_t month;
 			if(event.status == EVENT_ENTRY){
 				cursorpos = 0;
-				minute = 0;
-				hour = 0;
-				day = 0;
-				month = 0;
+				minute = Scheduler_GetMinute();
+				hour = Scheduler_GetHour();
+				day = Scheduler_GetDay();
+				month = Scheduler_GetMonth();
 				DrawSetTime(cursorpos, month+1, day+1, hour, minute);
 			}
 			if(event.status == EVENT_BUTTONS){
@@ -672,10 +674,11 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				if(event.data & B5XORMASK && !(event.data & B5MASK)){
 					switch(cursorpos){
 					case 0:
-						int8_t dc = FLASH_GetDutyCycle()-1;
+						int8_t dc = FLASH_GetDutyCycle()-5;
 						if(dc < 0){
 							dc = 0;
 							FLASH_SetDCVol(FLASH_GetVolume(), dc);
+							DrawOptions(cursorpos, dc);
 						} else {
 							FLASH_SetDCVol(FLASH_GetVolume(), dc);
 							DrawOptions(cursorpos, dc);
@@ -703,10 +706,11 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				if(event.data & B6XORMASK && !(event.data & B6MASK)){
 					switch(cursorpos){
 					case 0:
-						uint8_t dc = FLASH_GetDutyCycle()+1;
+						uint8_t dc = FLASH_GetDutyCycle()+5;
 						if(dc > 100){
 							dc = 100;
 							FLASH_SetDCVol(FLASH_GetVolume(), dc);
+							DrawOptions(cursorpos, dc);
 						} else {
 							FLASH_SetDCVol(FLASH_GetVolume(), dc);
 							DrawOptions(cursorpos, dc);

@@ -311,12 +311,13 @@ unsigned char I2C_WriteReg(
 
 
 //----------------------------------------Private Test Harness-----------------------------------
-
+//#define is at the top of the page
 #ifdef I2CTESTHARNESS
 #include "BOARD.h"
 #include "Oled.h"
 #include "DiscountIO.h"
 #include "UART.h"
+#include "TIMERS.h"
 
 HAL_StatusTypeDef status;
 uint8_t month;
@@ -359,28 +360,29 @@ int main(){
 	BSP_LED_Init(LED_BLUE);
 	BSP_LED_Init(LED_RED);
 	I2C_Init();
-//	I2C_Transmit(RTCADDRESS, RTCSECADDR, 0x80);
-//	I2C_Transmit(RTCADDRESS, RTCMINADDR, 0x53);
-//	I2C_Transmit(RTCADDRESS, RTCHOURADDR, 0x13);
-//	I2C_Transmit(RTCADDRESS, RTCDAYADDR, 0x04);
+	I2C_Transmit(RTCADDRESS, RTCSECADDR, 0x80);
+	I2C_Transmit(RTCADDRESS, RTCSTATADDR, 0x28);
+//	I2C_Transmit(RTCADDRESS, RTCMINADDR, 0x34);
+//	I2C_Transmit(RTCADDRESS, RTCHOURADDR, 0x11);
+//	I2C_Transmit(RTCADDRESS, RTCDAYADDR, 0x09);
 //	I2C_Transmit(RTCADDRESS, RTCMNTHADDR, 0x06);
 	HAL_Delay(100);
 	OledInit();
 	HAL_Delay(1000);
 	while (1){
+		if(TIMERS_GetMilliSeconds()%500 == 0){
+			I2C_Recieve(RTCADDRESS, RTCDAYADDR, 1);
+			I2C_Recieve(RTCADDRESS, RTCHOURADDR, 1);
+			I2C_Recieve(RTCADDRESS, RTCMINADDR, 1);
+			I2C_Recieve(RTCADDRESS, RTCMNTHADDR, 1);
+			I2C_Recieve(RTCADDRESS, RTCSTATADDR, 1);
 
-		I2C_Recieve(RTCADDRESS, RTCDAYADDR, 1);
-		I2C_Recieve(RTCADDRESS, RTCHOURADDR, 1);
-		I2C_Recieve(RTCADDRESS, RTCMINADDR, 1);
-		I2C_Recieve(RTCADDRESS, RTCMNTHADDR, 1);
-		I2C_Recieve(RTCADDRESS, RTCSTATADDR, 1);
+			char text[88];
+			sprintf(text, "current time:\n%d/%d %d:%.2d", month, day, hour, minute);
+			OledDrawString(text);
+			OledUpdate();
+		}
 
-		char text[88];
-		sprintf(text, "current time:\n%d/%d %d:%.2d", month, day, hour, minute);
-		OledDrawString(text);
-		OledUpdate();
-
-		HAL_Delay(1000);
 
 	}
 

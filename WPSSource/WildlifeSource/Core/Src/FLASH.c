@@ -23,8 +23,8 @@
 #define SCHEDULEEVENTSIZE 8//must be a multiple of 4
 
 
-static uint16_t ScheduleSize;
-static uint16_t LogsSize;
+static int16_t ScheduleSize;
+static int16_t LogsSize;
 static uint8_t initialized = 0;
 
 /*
@@ -40,14 +40,14 @@ uint8_t FLASH_Init(){
 	//find size of schedule
 	for(int i = 0; i < FLASHPAGESIZE/SCHEDULEEVENTSIZE; i++){
 		if ((uint8_t)(*(uint8_t*)(SCHEDULEADDRESS+(i*SCHEDULEEVENTSIZE))) == FLASHEMPTY ){
-			ScheduleSize = i-1;
+			ScheduleSize = i;
 			break;
 		}
 	}
 	//find size of logs
 	for(int i = 0; i < FLASHPAGESIZE/SCHEDULEEVENTSIZE; i++){
 		if ((uint8_t)(*(uint8_t*)(LOGSADDRESS+(i*SCHEDULEEVENTSIZE))) == FLASHEMPTY ){
-			LogsSize = i-1;
+			LogsSize = i;
 			break;
 		}
 	}

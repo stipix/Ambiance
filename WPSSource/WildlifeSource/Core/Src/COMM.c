@@ -14,6 +14,7 @@
 #include "DiscountIO.h"
 #include "FLASH.h"
 #include "BLUETOOTH.h"
+#include "I2C.h"
 
 #include <stdbool.h>
 
@@ -26,6 +27,7 @@
 #define SCHEDULECONTROL 0x05
 #define SCHEDULEEND     0x0D
 #define DEBUGPRINT   	0x0E
+#define SETTIME			0x0F
 #define DEBUGPRINTEND  	'\n'
 
 #define MAXSCHEDULEEVENTS 180
@@ -50,6 +52,10 @@
 	 schedulefolder,
 	 scheduletrack,
 	 scheduleend,
+	 timeminute,
+	 timehour,
+	 timeday,
+	 timemonth,
  }COMMSTATES_t;
 
 
@@ -149,6 +155,11 @@ uint8_t COMM_Event_Handler(Event_t event){
 			case SCHEDULECONTROL:
 				discountprintf("received schedule control");
 				next = schedulecontrol;
+				transition = true;
+				break;
+			case SETTIME:
+				discountprintf("received set time control");
+				next = timeminute;
 				transition = true;
 				break;
 			default:
@@ -342,6 +353,44 @@ uint8_t COMM_Event_Handler(Event_t event){
 				transition = true;
 			}
 		}
+		break;
+	case timeminute:
+		if(event.status == EVENT_USART){
+			if(event.data < 60){
+				I2C_Transmit(RTCADDRESS, RTCMINADDR, ((event.data/10)<<4) + event.data%10);
+				next = timehour;
+				transition = true;
+			}
+		}
+
+		break;
+	case timehour:
+		if(event.status == EVENT_USART){
+			if(event.data < 24){
+				I2C_Transmit(RTCADDRESS, RTCHOURADDR, ((event.data/10)<<4) + event.data%10);
+				next = timeday;
+				transition = true;
+			}
+		}
+
+		break;
+	case timeday:
+		if(event.status == EVENT_USART){
+			if(event.data <= 31){
+				I2C_Transmit(RTCADDRESS, RTCDAYADDR, ((event.data/10)<<4) + event.data%10);
+				next = timemonth;
+				transition = true;
+			}
+		}
+	case timemonth:
+		if(event.status == EVENT_USART){
+			if(event.data <= 12){
+				I2C_Transmit(RTCADDRESS, RTCMNTHADDR, ((event.data/10)<<4) + event.data%10);
+				next = idle;
+				transition = true;
+			}
+		}
+
 		break;
 	default:
 		break;
