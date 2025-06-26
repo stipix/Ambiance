@@ -1,4 +1,4 @@
-# WildlifeSource
+# Ambiance Playback Speaker Source
 
 ## description
 A robust second generation solar speaker meant to play sound tracks on a schedule. This is being produced to help in the study of the interactions wild animals have with human voices. most project specific code is found in the core folder. however sme specific code is used the the STM32_BLE middleware.
