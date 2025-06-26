@@ -23,7 +23,6 @@
 FIFO Schedulerqueue;
 static uint32_t starttime;//timer
 
-static uint8_t newdata;//flag for when new I2C data is available
 static uint8_t month;//I2C data
 static uint8_t day;
 static uint8_t hour;
@@ -33,10 +32,6 @@ static uint8_t logging;//logging
 static uint8_t playdata;
 //----------------------------------------Private Functions--------------------------------------
 void CompareTime(){
-	if(!newdata){
-		return;
-	}
-	//discountprintf("Date received");
 	if(logging){
 		scheduleEvent event;
 
@@ -163,11 +158,9 @@ uint8_t Scheduler_Event_Handler(Event_t event){
 		switch (event.data>>8){
 		case RTCMNTHADDR:
 			month = ((event.data & 0x10)>>4)*10 + (event.data & 0x0F);
-			CompareTime();
 			break;
 		case RTCDAYADDR:
 			day = ((event.data & 0x30)>>4)*10 + (event.data & 0x0F);
-			CompareTime();
 			break;
 		case RTCHOURADDR:
 			if(event.data & 0x40){//AM/PM
@@ -175,10 +168,8 @@ uint8_t Scheduler_Event_Handler(Event_t event){
 			}else {//24Hr
 				hour = 10*((event.data &0x30)>>4) + ((event.data &0x0F));
 			}
-			CompareTime();
 			break;
 		case RTCMINADDR:
-			newdata = 1;
 			//MINTEN2 MINTEN1 MINTEN0 MINONE3 MINONE2 MINONE1 MINONE0
 			minute = 10*((event.data & 0x30)>>4) +((event.data &0x0F));
 			CompareTime();

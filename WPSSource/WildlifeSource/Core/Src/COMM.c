@@ -118,7 +118,7 @@ uint8_t COMM_Event_Handler(Event_t event){
 
 	static uint8_t folder;
 	COMMSTATES_t next = commSM;
-	char text[50];
+	//char text[50];
 	switch(commSM){
 	case init:
 		if(event.status == EVENT_INIT){
@@ -133,32 +133,32 @@ uint8_t COMM_Event_Handler(Event_t event){
 		if(event.status == EVENT_USART){
 			switch (event.data){
 			case VOLUMECONTROL:
-				discountprintf("received volume control");
+				//discountprintf("received volume control");
 				next = volumecontrol;
 				transition = true;
 				break;
 			case FOLDERCONTROL:
-				discountprintf("received folder control");
+				//discountprintf("received folder control");
 				next = foldercontrol;
 				transition = true;
 				break;
 			case LOGSREQUEST:
-				discountprintf("received logs request");
+				//discountprintf("received logs request");
 				next = logsrequest;
 				transition = true;
 				break;
 			case DCCONTROL:
-				discountprintf("received DC control");
+				//discountprintf("received DC control");
 				next = dccontrol;
 				transition = true;
 				break;
 			case SCHEDULECONTROL:
-				discountprintf("received schedule control");
+				//discountprintf("received schedule control");
 				next = schedulecontrol;
 				transition = true;
 				break;
 			case SETTIME:
-				discountprintf("received set time control");
+				//discountprintf("received set time control");
 				next = timeminute;
 				transition = true;
 				break;
@@ -169,9 +169,11 @@ uint8_t COMM_Event_Handler(Event_t event){
 		break;
 	case volumecontrol:
 		if(event.status == EVENT_USART){
-			FLASH_SetDCVol((uint8_t)event.data, FLASH_GetDutyCycle());
-			sprintf(text, "Storing volume %d", FLASH_GetVolume());
-			discountprintf(text);
+			if(FLASH_SetDCVol((uint8_t)event.data, FLASH_GetDutyCycle())==0){
+				discountprintf("failed to set volume");
+			}
+			//sprintf(text, "Storing volume %d", FLASH_GetVolume());
+			//discountprintf(text);
 			next = idle;
 			transition = true;
 		}
@@ -179,7 +181,7 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case foldercontrol:
 		if(event.status == EVENT_USART){
 			folder = event.data;
-			discountprintf("Storing folder selector");
+			//discountprintf("Storing folder selector");
 			next = folderselected;
 			transition = true;
 		}
@@ -189,7 +191,7 @@ uint8_t COMM_Event_Handler(Event_t event){
 			//post to mp3 controller with the new data
 			Event_t play = (Event_t){EVENT_PLAY, (folder<<8) + (event.data)};
 			MP3_Event_Post(play);
-			discountprintf("Sending track selector");
+			//discountprintf("Sending track selector");
 			next = idle;
 			transition = true;
 		}
@@ -238,20 +240,25 @@ uint8_t COMM_Event_Handler(Event_t event){
 					sent++;
 				}
 				USART_WriteTx(LOGSDONE);
+				if(size >= 255){
+					discountprintf("logs buffer overflowed, most recent data has been lost");
+				}
 				//send last of logs here
 				sent = 0;
 				sendinglogs = 0;
 				next = idle;
 				transition = true;
-				discountprintf("data sent");
+				//discountprintf("data sent");
 			}
 		}
 		break;
 	case dccontrol:
 		if(event.status == EVENT_USART){
-			FLASH_SetDCVol(FLASH_GetVolume(), (uint8_t)event.data);
-			sprintf(text, "Storing volume %d", FLASH_GetDutyCycle());
-			discountprintf(text);
+			if(FLASH_SetDCVol(FLASH_GetVolume(), (uint8_t)event.data) == 0){
+				discountprintf("failed to set duty cycle");
+			}
+			//sprintf(text, "Storing volume %d", FLASH_GetDutyCycle());
+			//discountprintf(text);
 
 			next = idle;
 			transition = true;
@@ -261,9 +268,11 @@ uint8_t COMM_Event_Handler(Event_t event){
 		static uint8_t numevents;
 		static scheduleEvent sevent;
 		if(event.status == EVENT_ENTRY){
-			discountprintf("receiving schedule");
+			//discountprintf("receiving schedule");
 			sevent = (scheduleEvent){0,0,0,0,0,0};
-			FLASH_ClearSchedule();
+			if(FLASH_ClearSchedule()== 0){
+				discountprintf("failed to clear schedule");
+			}
 			next = schedulemonth;
 			transition = true;
 			numevents = 0;
@@ -272,14 +281,14 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case schedulemonth:
 		if(event.status == EVENT_USART){
 			if(event.data == SCHEDULEEND){
-				discountprintf("schedule complete");
+				//discountprintf("schedule complete");
 				next = idle;
 				transition = true;
 				if(!(sevent.month == 0 && sevent.day == 0)){
 					FLASH_AppendSchedule(sevent);
 				}
 			} else if(numevents > MAXSCHEDULEEVENTS){
-				discountprintf("schedule forced to complete");
+				discountprintf("schedule overflow, forced to complete");
 				if(!(sevent.month == 0 && sevent.day == 0)){
 					FLASH_AppendSchedule(sevent);
 				}
@@ -291,8 +300,8 @@ uint8_t COMM_Event_Handler(Event_t event){
 					FLASH_AppendSchedule(sevent);
 				}
 				sevent.month = event.data;
-				sprintf(text, "Month: %d", event.data);
-				discountprintf(text);
+				//sprintf(text, "Month: %d", event.data);
+				//discountprintf(text);
 				//store month here
 				next = scheduleday;
 				transition = true;
@@ -302,8 +311,8 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case scheduleday:
 		if(event.status == EVENT_USART){
 			sevent.day = event.data;
-			sprintf(text, "Day: %d", event.data);
-			discountprintf(text);
+//			sprintf(text, "Day: %d", event.data);
+//			discountprintf(text);
 			next = schedulestart;
 			transition = true;
 		}
@@ -311,8 +320,8 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case schedulestart:
 		if(event.status == EVENT_USART){
 			sevent.start =  event.data;
-			sprintf(text, "start time: %d:%d", (event.data&0b11111000)>>3, (event.data & 0b011)*15);
-			discountprintf(text);
+//			sprintf(text, "start time: %d:%d", (event.data&0b11111000)>>3, (event.data & 0b011)*15);
+//			discountprintf(text);
 			next = schedulestop;
 			transition = true;
 		}
@@ -320,8 +329,8 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case schedulestop:
 		if(event.status == EVENT_USART){
 			sevent.stop = event.data;
-			sprintf(text, "end time: %d:%d", (event.data&0b11111000)>>3, (event.data & 0b011)*15);
-			discountprintf(text);
+//			sprintf(text, "end time: %d:%d", (event.data&0b11111000)>>3, (event.data & 0b011)*15);
+//			discountprintf(text);
 			next = schedulefolder;
 			transition = true;
 		}
@@ -329,8 +338,8 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case schedulefolder:
 		if(event.status == EVENT_USART){
 			sevent.folder = event.data;
-			sprintf(text, "folder#: %d", event.data);
-			discountprintf(text);
+//			sprintf(text, "folder#: %d", event.data);
+//			discountprintf(text);
 			next = scheduletrack;
 			transition = true;
 		}
@@ -338,8 +347,8 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case scheduletrack:
 		if(event.status == EVENT_USART){
 			sevent.track = event.data;
-			sprintf(text, "track#: %d", event.data);
-			discountprintf(text);
+//			sprintf(text, "track#: %d", event.data);
+//			discountprintf(text);
 			//record end time here
 			next = schedulemonth;
 			transition = true;

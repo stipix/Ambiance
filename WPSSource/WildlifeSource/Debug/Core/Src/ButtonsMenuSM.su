@@ -6,4 +6,4 @@
 ../Core/Src/ButtonsMenuSM.c:141:9:ButtonsMenuSM_Event_Init	16	static
 ../Core/Src/ButtonsMenuSM.c:159:6:ButtonsMenuSM_Event_Post	16	static
 ../Core/Src/ButtonsMenuSM.c:194:9:ButtonsMenuSM_Event_Updater	32	static
-../Core/Src/ButtonsMenuSM.c:230:9:ButtonsMenuSM_Event_Handler	64	static
+../Core/Src/ButtonsMenuSM.c:230:9:ButtonsMenuSM_Event_Handler	72	static

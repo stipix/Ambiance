@@ -12,7 +12,7 @@
 #include "GPIO.h"
 #include "FIFO.h"
 //----------------------------------------Private Defines----------------------------------------
-#define USEDEBUG
+//#define USEDEBUG
 
 #define BUTTON_1_PIN GPIO_PIN_8
 #define BUTTON_2_PIN GPIO_PIN_2

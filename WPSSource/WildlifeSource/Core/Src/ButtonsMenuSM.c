@@ -686,18 +686,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 						break;
 					case 1:
 						uint8_t accumulation = 0;
-						LPUART_WriteTx(0x7E);//start flag
-						accumulation += 0xFF;
-						LPUART_WriteTx(0xFF);//Version?
-						accumulation += 0x06;
-						LPUART_WriteTx(0x06);//length
-						LPUART_WriteTx(0x02);//Previous track command
-						accumulation += 0x02;
-						LPUART_WriteTx(0x00);
-						LPUART_WriteTx(0x00);
-						LPUART_WriteTx(0x00);
-						LPUART_WriteTx(accumulation);//checksum
-						LPUART_WriteTx(0xEF);//start flag
+						MP3_Event_Post(((Event_t){EVENT_PLAY, MP3_GetCurrentFile()-1}));
 						break;
 					default:
 						break;
@@ -717,19 +706,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 						}
 						break;
 					case 1:
-						uint8_t accumulation = 0;
-						LPUART_WriteTx(0x7E);//start flag
-						accumulation += 0xFF;
-						LPUART_WriteTx(0xFF);//Version?
-						accumulation += 0x06;
-						LPUART_WriteTx(0x06);//length
-						LPUART_WriteTx(0x01);//next track command
-						accumulation += 0x01;
-						LPUART_WriteTx(0x00);
-						LPUART_WriteTx(0x00);
-						LPUART_WriteTx(0x00);
-						LPUART_WriteTx(accumulation);//checksum
-						LPUART_WriteTx(0xEF);//start flag
+						MP3_Event_Post(((Event_t){EVENT_PLAY, MP3_GetCurrentFile()+1}));
 						break;
 					default:
 						break;

@@ -122,7 +122,7 @@ uint8_t FLASH_GetDutyCycle(){
  */
 uint8_t FLASH_AppendLogs(scheduleEvent event){
 	if(!initialized){return 0;}
-	LogsSize++;
+	if (logsSize >=FLASHPAGESIZE/SCHEDULEEVENTSIZE){return 0;}
 	uint32_t Data1 = (event.month)|(event.day<<8)|(event.start<<16)|(event.stop<<24);
 	uint32_t Data2 = (event.folder)|(event.track<<8);
 	//this isn't blocking code officer I swear! (this is blocking code, to be improved later)
@@ -132,6 +132,7 @@ uint8_t FLASH_AppendLogs(scheduleEvent event){
 	if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, LOGSADDRESS+LogsSize*SCHEDULEEVENTSIZE+4, Data2) != HAL_OK ){
 		return 0;
 	}
+	LogsSize++;
 	return 1;
 }
 
@@ -194,6 +195,7 @@ uint8_t FLASH_ClearLogs(){
  */
 uint8_t FLASH_AppendSchedule(scheduleEvent event){
 	if(!initialized){return 0;}
+	if (ScheduleSize >=FLASHPAGESIZE/SCHEDULEEVENTSIZE){return 0;}
 	uint32_t Data1 = (event.month)|(event.day<<8)|(event.start<<16)|(event.stop<<24);
 	uint32_t Data2 = (event.folder)|(event.track<<8);
 	//this isn't blocking code officer I swear! (this is blocking code)
@@ -204,7 +206,6 @@ uint8_t FLASH_AppendSchedule(scheduleEvent event){
 		return 0;
 	}
 	ScheduleSize++;
-	FLASH_ReadSchedule(ScheduleSize-1);
 	return 1;
 }
 

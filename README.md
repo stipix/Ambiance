@@ -1,93 +1,40 @@
 # WildlifeSource
 
-
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://git.ucsc.edu/cbonesio/WildlifeSource.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://git.ucsc.edu/cbonesio/WildlifeSource/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## description
+A robust second generation solar speaker meant to play sound tracks on a schedule. This is being produced to help in the study of the interactions wild animals have with human voices. most project specific code is found in the core folder. however sme specific code is used the the STM32_BLE middleware.
 
 ## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+The project is compatable and tested with a Nucleo WB05KZ v1.1 devboard. There are two methods to download the project onto a board, through the STM32cubeIDE and the STM32cubeProgrammer. To use the IDE 
+- first download the repository
+- [download STM32cubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html#get-software) from ST. 
+- Next select import project. 
+- Navigate to the folder with the repository and select the WPSsource folder within
+- Next is to set up the micro controller. The devboard should come with 3 jumpers. Set them up so that one jumper is on connector CN 3 from pin 7 to pin 5, the sencond jumper is on JP2 near the devboard buttons, and finally the last jumper on JP1, 5VSTLK. Refer to image below
+- plug a USB C cable into the board and into the computer eith the repository
+- from there the code can be modified within the IDE and the device can be flashed by hitting the run button in the IDE
+
+NOTE: do not program the device while it is plugged into the accompanying WPS PCB.
+
+The other method uses the programmer
+- first download the repository
+- [download STM32cubeIDE](https://www.st.com/en/development-tools/stm32cubeprog.html#get-software) from ST. 
+- Next is to set up the micro controller. The devboard should come with 3 jumpers. Set them up so that one jumper is on connector CN 3 from pin 7 to pin 5, the sencond jumper is on JP2 near the devboard buttons, and finally the last jumper on JP1, 5VSTLK. Refer to image below.
+- plug a USB C cable into the board and into the computer eith the repository
+- open the programmer
+- select Port: SWD, fequency 400kHz, normal mode, software reset, and reliable speed
+- navigate the the erasing and programming tab on the right
+- select WildlifeSource/WPSSouse/WildlifeSource/Release/Wildlifesouce.elf
+- select full chip erase and hit start programming
+
+NOTE: do not program the device while it is plugged into the accompanying WPS PCB.
+![alt text](./images/NucleoReadyToInstall.jpg?raw=true)
+
+## Using the program
+
+to use the device with the accompanying WPS PCB, prgram the device before plugging in. after installation, remove the JP1, 5V_STLK jumper to prevent the computer from failing to power the PCB and swap the jumper from CN3 pin 5-pin 7 to pin 7-pin 8 (refer to image below). power the board with a 4.5-12V. From there the device can be operated with the buttons and OLED or using the accompanying WPS GUI through a Bluetooth connection. To use the buttons, each button's purpose is labeled on the PCB where from left to right button 1 is back, button 2 is select, B3 is down, B4 is up, B5 is left, and B6 is right. On the main menu these buttons are used to jump to different menus. Play track is used to immediately play a track from a folder, schedule allow the user to set a time to start playing a track in a folder (note month = 0 means the track repeats every month). Set date and time allows the user to set the time on the power loss resistant real time clock. More options allows the user to adjust duty cycle, move to next and previous songs, and clear the schedule. frinall the left and right arrow keys adjust the volume of the speaker.
+
+![alt text](./images/NucleoReadyToPlugIn.jpg?raw=true)
 
 ## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+For support, contact stipix@bonesio.net

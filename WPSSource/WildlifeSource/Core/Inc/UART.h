@@ -18,7 +18,7 @@ extern "C" {
 #define UARTFAILED 0x25
 #define USARTBUFFERSIZE 512
 
-#define USEUSART 1
+#define USEUSART 0
 
 extern USART_HandleTypeDef husart1;
 
