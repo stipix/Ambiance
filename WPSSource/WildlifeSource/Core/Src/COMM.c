@@ -46,8 +46,9 @@
 	 dccontrol,
 	 schedulecontrol,
 	 schedulemonth,
-	 scheduleday,
+	 scheduledaystart,
 	 schedulestart,
+	 scheduledaystop,
 	 schedulestop,
 	 schedulefolder,
 	 scheduletrack,
@@ -214,31 +215,23 @@ uint8_t COMM_Event_Handler(Event_t event){
 			//get logs size
 			uint16_t size  = 32;
 			//uint16_t size = FLASH_GetLogsSize();
+			uint16_t sendsize = size - sent;
 			if(size - sent > (uint16_t)(USARTBUFFERSIZE/6)){
-				//send next part of logs here, use sent to index the
-				for(int i = 0; i < (uint16_t)(USARTBUFFERSIZE/6); i++){
-					//scheduleEvent levent = FLASH_ReadLogs(sent);
-					scheduleEvent levent = {1, 1, 0b1001001, 0b1001010, 1, 1};
-					USART_WriteTx(levent.month);
-					USART_WriteTx(levent.day);
-					USART_WriteTx(levent.start);
-					USART_WriteTx(levent.stop);
-					USART_WriteTx(levent.folder);
-					USART_WriteTx(levent.track);
-					sent++;
-				}
-			} else {
-				for(int i = 0; i < size - sent; i++){
-					//scheduleEvent levent = FLASH_ReadLogs(sent);
-					scheduleEvent levent = {1, 1, 0b1001001, 0b1001010, 1, 1};
-					USART_WriteTx(levent.month);
-					USART_WriteTx(levent.day);
-					USART_WriteTx(levent.start);
-					USART_WriteTx(levent.stop);
-					USART_WriteTx(levent.folder);
-					USART_WriteTx(levent.track);
-					sent++;
-				}
+				sendsize = (uint16_t)(USARTBUFFERSIZE/6);
+			}
+			for(int i = 0; i < sendsize; i++){
+				//scheduleEvent levent = FLASH_ReadLogs(sent);
+				scheduleEvent levent = {1, 1, 0b1001001, 0b1001010, 1, 1};
+				USART_WriteTx(levent.month);
+				USART_WriteTx(levent.daystart);
+				USART_WriteTx(levent.start);
+				USART_WriteTx(levent.daystop);
+				USART_WriteTx(levent.stop);
+				USART_WriteTx(levent.folder);
+				USART_WriteTx(levent.track);
+				sent++;
+			}
+			if(size - sent <= (uint16_t)(USARTBUFFERSIZE/6)){
 				USART_WriteTx(LOGSDONE);
 				if(size >= 255){
 					discountprintf("logs buffer overflowed, most recent data has been lost");
@@ -248,7 +241,6 @@ uint8_t COMM_Event_Handler(Event_t event){
 				sendinglogs = 0;
 				next = idle;
 				transition = true;
-				//discountprintf("data sent");
 			}
 		}
 		break;
@@ -284,33 +276,27 @@ uint8_t COMM_Event_Handler(Event_t event){
 				//discountprintf("schedule complete");
 				next = idle;
 				transition = true;
-				if(!(sevent.month == 0 && sevent.day == 0)){
-					FLASH_AppendSchedule(sevent);
-				}
+				FLASH_AppendSchedule(sevent);
 			} else if(numevents > MAXSCHEDULEEVENTS){
 				discountprintf("schedule overflow, forced to complete");
-				if(!(sevent.month == 0 && sevent.day == 0)){
-					FLASH_AppendSchedule(sevent);
-				}
+				FLASH_AppendSchedule(sevent);
 				next = scheduleend;
 				transition = true;
 				USART_WriteTx(SCHEDULEEND);//please stop sending me the schedule
 			}else{
-				if(!(sevent.month == 0 && sevent.day == 0)){
-					FLASH_AppendSchedule(sevent);
-				}
+				FLASH_AppendSchedule(sevent);
 				sevent.month = event.data;
 				//sprintf(text, "Month: %d", event.data);
 				//discountprintf(text);
 				//store month here
-				next = scheduleday;
+				next = scheduledaystart;
 				transition = true;
 			}
 		}
 		break;
-	case scheduleday:
+	case scheduledaystart:
 		if(event.status == EVENT_USART){
-			sevent.day = event.data;
+			sevent.daystart = event.data;
 //			sprintf(text, "Day: %d", event.data);
 //			discountprintf(text);
 			next = schedulestart;
@@ -321,6 +307,15 @@ uint8_t COMM_Event_Handler(Event_t event){
 		if(event.status == EVENT_USART){
 			sevent.start =  event.data;
 //			sprintf(text, "start time: %d:%d", (event.data&0b11111000)>>3, (event.data & 0b011)*15);
+//			discountprintf(text);
+			next = scheduledaystop;
+			transition = true;
+		}
+		break;
+	case scheduledaystop:
+		if(event.status == EVENT_USART){
+			sevent.daystop = event.data;
+//			sprintf(text, "Day: %d", event.data);
 //			discountprintf(text);
 			next = schedulestop;
 			transition = true;

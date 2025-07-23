@@ -122,9 +122,9 @@ uint8_t FLASH_GetDutyCycle(){
  */
 uint8_t FLASH_AppendLogs(scheduleEvent event){
 	if(!initialized){return 0;}
-	if (logsSize >=FLASHPAGESIZE/SCHEDULEEVENTSIZE){return 0;}
-	uint32_t Data1 = (event.month)|(event.day<<8)|(event.start<<16)|(event.stop<<24);
-	uint32_t Data2 = (event.folder)|(event.track<<8);
+	if (LogsSize >=FLASHPAGESIZE/SCHEDULEEVENTSIZE){return 0;}
+	uint32_t Data1 = (event.month)|(event.daystart<<8)|(event.start<<16)|(event.stop<<24);
+	uint32_t Data2 = (event.daystop)|(event.folder<<8)|(event.track<<16);
 	//this isn't blocking code officer I swear! (this is blocking code, to be improved later)
 	if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, LOGSADDRESS+LogsSize*SCHEDULEEVENTSIZE, Data1) != HAL_OK ){
 		return 0;
@@ -158,11 +158,12 @@ scheduleEvent FLASH_ReadLogs(uint16_t index){
 	if(!initialized){return event;}
 	if(index >= 0 && index <= LogsSize){
 		event.month = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE));
-		event.day = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+1));
+		event.daystart = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+1));
 		event.start = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+2));
 		event.stop = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+3));
-		event.folder = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+4));
-		event.track = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+5));
+		event.daystop = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+4));
+		event.folder = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+5));
+		event.track = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+6));
 
 	}
 	return event;
@@ -196,8 +197,8 @@ uint8_t FLASH_ClearLogs(){
 uint8_t FLASH_AppendSchedule(scheduleEvent event){
 	if(!initialized){return 0;}
 	if (ScheduleSize >=FLASHPAGESIZE/SCHEDULEEVENTSIZE){return 0;}
-	uint32_t Data1 = (event.month)|(event.day<<8)|(event.start<<16)|(event.stop<<24);
-	uint32_t Data2 = (event.folder)|(event.track<<8);
+	uint32_t Data1 = (event.month)|(event.daystart<<8)|(event.start<<16)|(event.stop<<24);
+	uint32_t Data2 = (event.daystop)|(event.folder<<8)|(event.track<<16);
 	//this isn't blocking code officer I swear! (this is blocking code)
 	if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, SCHEDULEADDRESS+ScheduleSize*SCHEDULEEVENTSIZE, Data1) != HAL_OK ){
 		return 0;
@@ -230,12 +231,13 @@ scheduleEvent FLASH_ReadSchedule(uint16_t index){
 	scheduleEvent event = (scheduleEvent){0, 0, 0, 0, 0, 0};
 	if(!initialized){return event;}
 	if(index >= 0 && index < ScheduleSize){
-		event.month = *((uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE));
-		event.day = *((uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+1));
-		event.start = *((uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+2));
-		event.stop = *((uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+3));
-		event.folder = *((uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+4));
-		event.track = *((uint8_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+5));
+		event.month = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE));
+		event.daystart = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+1));
+		event.start = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+2));
+		event.stop = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+3));
+		event.daystop = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+4));
+		event.folder = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+5));
+		event.track = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+6));
 
 	}
 	return event;

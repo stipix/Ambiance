@@ -324,6 +324,8 @@ uint8_t month;
 uint8_t day;
 uint8_t hour;
 uint8_t minute;
+uint8_t stat;
+uint8_t start;
 
 void fakeposter(Event_t event){
 	if(event.status == EVENT_I2C){
@@ -347,7 +349,11 @@ void fakeposter(Event_t event){
 
 			break;
 		case RTCSTATADDR:
-
+			stat = event.data;
+			break;
+		case RTCSECADDR:
+			start = event.data>>7;
+			break;
 		}
 	}
 	return;
@@ -361,11 +367,11 @@ int main(){
 	BSP_LED_Init(LED_RED);
 	I2C_Init();
 	I2C_Transmit(RTCADDRESS, RTCSECADDR, 0x80);
-	I2C_Transmit(RTCADDRESS, RTCSTATADDR, 0x28);
-//	I2C_Transmit(RTCADDRESS, RTCMINADDR, 0x34);
-//	I2C_Transmit(RTCADDRESS, RTCHOURADDR, 0x11);
-//	I2C_Transmit(RTCADDRESS, RTCDAYADDR, 0x09);
-//	I2C_Transmit(RTCADDRESS, RTCMNTHADDR, 0x06);
+	I2C_Transmit(RTCADDRESS, RTCSTATADDR, 0x08);
+	I2C_Transmit(RTCADDRESS, RTCMINADDR, 0x52);
+	I2C_Transmit(RTCADDRESS, RTCHOURADDR, 0x10);
+	I2C_Transmit(RTCADDRESS, RTCDAYADDR, 0x19);
+	I2C_Transmit(RTCADDRESS, RTCMNTHADDR, 0x07);
 	HAL_Delay(100);
 	OledInit();
 	HAL_Delay(1000);
@@ -375,10 +381,13 @@ int main(){
 			I2C_Recieve(RTCADDRESS, RTCHOURADDR, 1);
 			I2C_Recieve(RTCADDRESS, RTCMINADDR, 1);
 			I2C_Recieve(RTCADDRESS, RTCMNTHADDR, 1);
+			I2C_Recieve(RTCADDRESS, RTCSECADDR, 1);
 			I2C_Recieve(RTCADDRESS, RTCSTATADDR, 1);
 
 			char text[88];
-			sprintf(text, "current time:\n%d/%d %d:%.2d", month, day, hour, minute);
+			sprintf(text, "current time:\n"
+						  "%d/%d %d:%.2d\n"
+						  "status: %X, start: %d", month, day, hour, minute, stat, start);
 			OledDrawString(text);
 			OledUpdate();
 		}

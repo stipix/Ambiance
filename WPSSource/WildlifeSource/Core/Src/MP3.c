@@ -44,19 +44,28 @@ typedef struct DFPacket{
 	uint8_t Param2;
 }DFPacket_t;
 
+
 //----------------------------------------Private Variables--------------------------------------
+
+extern RNG_HandleTypeDef hrng;
 FIFO MP3queue;
+
 static uint8_t pause;//should the mp3 player be playing. 0x01 for pause in DC, 0x02 for stop until next play event
 static uint8_t DC;//how long until the next cycle of the duty cycle
 static uint8_t volume;
+
 static uint32_t starttime;
+static uint32_t endtime;
 static uint32_t inittime;
 static uint8_t initialized;
+
 static DFPacketState_t PacketSM;
 static DFPacket_t Packet;
+
 static uint8_t track;
 static uint8_t folder;
 static uint8_t firsttrack;
+static uint8_t nexttrack;
 static uint8_t lastplayed;
 static uint8_t* folders;
 static uint8_t numfolders;
@@ -208,29 +217,40 @@ Event_t MP3_Event_Updater(void){
     char rx = LPUART_ReadRx();
     //Check for LPUART events
 	if(rx != UARTFAILED){
-		event.status = EVENT_LPUART;
-		event.data = rx;
-		MP3_Event_Post(event);
-	}
-
-	//Check for duty cycle events
-	if(!(pause&0x02)){//if the module is in a scheduled playing time
-		if (!pause){
-			if((CYCLELENGTH*((double)DC/100.0)+starttime) <= timer ){//if the speaker is playing, and time is up
-				event.status = EVENT_TIMEOUT;
-				event.data = 1;//next state of pause
-				starttime = timer;
-				MP3_Event_Post(event);
-			}
-		} else {
-			if((CYCLELENGTH*((double)(100-DC)/100.0)+starttime) <= timer ){// if the speaker is playing and time is up, DC = 0 don't play, used to stop the speaker
-				event.status = EVENT_TIMEOUT;
-				event.data = 0;//next state of pause
-				starttime = timer;
-				MP3_Event_Post(event);
-			}
+		if(parsePacket(rx)){
+			event.status = EVENT_LPUART;
+			event.data = rx;
+			MP3_Event_Post(event);
 		}
 	}
+	//checks a timer to un-pause the speaker to adhere to the duty cycle
+	if(pause == 1){
+		uint32_t waittime = (endtime-starttime)*((double)(100/DC)-1);//Pause time = Active time * (1/DC-1)
+		uint32_t curtime = TIMERS_GetMilliSeconds();
+		if(curtime >= starttime+waittime){
+			event.status = EVENT_TIMEOUT;
+			MP3_Event_Post(event);
+
+		}
+	}
+	//Check for duty cycle events
+//	if(!(pause&0x02)){//if the module is in a scheduled playing time
+//		if (!pause){
+//			if((CYCLELENGTH*((double)DC/100.0)+starttime) <= timer ){//if the speaker is playing, and time is up
+//				event.status = EVENT_TIMEOUT;
+//				event.data = 1;//next state of pause
+//				starttime = timer;
+//				MP3_Event_Post(event);
+//			}
+//		} else {
+//			if((CYCLELENGTH*((double)(100-DC)/100.0)+starttime) <= timer ){// if the speaker is playing and time is up, DC = 0 don't play, used to stop the speaker
+//				event.status = EVENT_TIMEOUT;
+//				event.data = 0;//next state of pause
+//				starttime = timer;
+//				MP3_Event_Post(event);
+//			}
+//		}
+//	}
 
 	//check for init timer events
     if(((timer-inittime) >= 3000) && !initialized){//wait for the speaker to be ready for use n initialization
@@ -256,10 +276,6 @@ Event_t MP3_Event_Updater(void){
  */
 uint8_t MP3_Event_Handler(Event_t event){
 	if(event.status == EVENT_INIT){
-		//7E FF 06 08 00 00 01 xx EF //repeat folder
-//		char send[4] = {0x08, 0x00, 0x00, 0x01};
-//		MP3_SendData(send);
-
 		{
 		char send[4] = {0x0E, 0x00, 0x00, 0x00};//pause
 		MP3_SendData(send);
@@ -295,17 +311,11 @@ uint8_t MP3_Event_Handler(Event_t event){
 		MP3_SendData(send);
 	}
 	if(event.status == EVENT_TIMEOUT){
-		//send either play or stop to the mp3 player
-		if(event.data == 1){//pause
-			pause = event.data;
-			char send[4] = {0x0E, 0x00, 0x00, 0x00};
-			MP3_SendData(send);
-
-		}else if(event.data == 0){//play
-			pause = event.data;
-			char send[4] = {0x03, 0x00, 0x00, firsttrack+track-1};
-			MP3_SendData(send);
-		}
+		//restart the MP3 player
+		pause = 0;
+		starttime = TIMERS_GetMilliSeconds();
+		char send[4] = {0x03, 0x00, 0x00, firsttrack+nexttrack-1};
+		MP3_SendData(send);
 
 	}if(event.status == EVENT_PLAY){
 		char text[30];
@@ -313,22 +323,30 @@ uint8_t MP3_Event_Handler(Event_t event){
 		discountprintf(text);
 		Scheduler_Event_Post(event);
 		starttime = TIMERS_GetMilliSeconds();
-		if(event.data>>8 != 0 && (event.data>>8) <= numfolders &&  (event.data&0xFF)!= 0 && (event.data&0xFF) <= folders[(event.data>>8)-1]){
-			folder = event.data>>8;
-			track = event.data&0xFF;
-			firsttrack = 1;
-			pause = 0;
-			for(int i = 0; i < folder-1; i ++){
-				firsttrack+= folders[i];
-			}
-			{
-			char send2[4] = {0x03, 0x00, 0x00, firsttrack+track-1};
-			MP3_SendData(send2);
-			HAL_Delay(100);
-			}
-			{
-			char send[4] = {0x0D, 0x00, 0x00, 0x00};
-			MP3_SendData(send);
+		//if 0 < folder <= max folders and 0 < track <= max tracks in given folder
+		if(event.data>>8 != 0 && (event.data>>8) <= numfolders){
+			if((event.data&0xFF)!= 0 && (event.data&0xFF) <= folders[(event.data>>8)-1]){
+				pause = 0;
+				//store the desired track and folder
+				folder = event.data>>8;
+				track = event.data&0xFF;
+				//calculate the absolute position of the desired track
+				firsttrack = 1;
+				for(int i = 0; i < folder-1; i ++){
+					firsttrack+= folders[i];
+				}
+				//update the desired track to the MP3
+				{
+				char send2[4] = {0x03, 0x00, 0x00, firsttrack+track-1};
+				MP3_SendData(send2);
+				HAL_Delay(100);
+				}
+				//send a play signal
+				{
+				char send[4] = {0x0D, 0x00, 0x00, 0x00};
+				MP3_SendData(send);
+				}
+				lastplayed = track;
 			}
 		}else {
 
@@ -337,12 +355,9 @@ uint8_t MP3_Event_Handler(Event_t event){
 			char send[4] = {0x0E, 0x00, 0x00, 0x00};//pause
 			MP3_SendData(send);
 			}
-			if(!(event.data>>8) && !(event.data&0xFF)){
-				folder = 0;
-				track = 0;
-			}
-//			char send[4] = {0x0A, 0x00, 0x00, 0x00};//enter low power mode
-//			MP3_SendData(send);
+			//set folder and track to zero, this is so that when other modules query/track, a zero can indicate paused
+			folder = 0;
+			track = 0;
 		}
 
 
@@ -358,29 +373,27 @@ uint8_t MP3_Event_Handler(Event_t event){
 			MP3_SendData(send);
 		}
 	}if (event.status == EVENT_LPUART){
-		//USART_WriteTx(event.data);
-		char rx = event.data;
-		if(rx != UARTFAILED){
-			if(parsePacket(rx)){
-				if(Packet.command == 0x3D){
-					if(Packet.Param2 != lastplayed){//prevent the mp3 play from sending double
-						lastplayed = Packet.Param2;
-						if(folder && track){
-							track++;
-							if(track > folders[folder-1]){
-								char send2[4] = {0x03, 0x00, 0x00, firsttrack};
-								MP3_SendData(send2);
-								track = 1;
-							} else {
-
-								char send[4] = {0x01, 0x00, 0x00, 0x00};
-								MP3_SendData(send);
-							}
-						}
+		if(Packet.command == 0x3D){//song complete
+			if(Packet.Param2 != lastplayed){//prevent the mp3 play from sending the same command twice
+				lastplayed = Packet.Param2;
+				endtime = TIMERS_GetMilliSeconds();
+				if(folder && track){
+					uint32_t rand = 0;
+					HAL_RNG_GenerateRandomNumber(&hrng, &rand);
+					rand &= 0xFF;//convert it to one byte of random data
+					rand = (rand*(folders[folder-1])-1)/0xFF;//convert the one bye to the range of 0-max tracks-1
+					nexttrack = rand+1;
+					if(track > folders[folder-1]){
+						nexttrack = 1;
 					}
-
+					track = 0;
+					folder = 0;
+					pause = 1;//entering duty cycle pause
+					char send[4] = {0x0E, 0x00, 0x00, 0x00};//pause
+					MP3_SendData(send);
 				}
 			}
+
 		}
 
 	}

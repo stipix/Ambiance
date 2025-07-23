@@ -11,11 +11,12 @@
 #include "CONFIG.h"
 
 
-typedef struct shecduleEvent {
+typedef struct scheduleEvent {
 	uint8_t month;
-	uint8_t day;
+	uint8_t daystart;
 	uint8_t start;
 	uint8_t stop;
+	uint8_t daystop;
 	uint8_t folder;
 	uint8_t track;
 }scheduleEvent;

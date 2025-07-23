@@ -44,10 +44,6 @@ static uint8_t displayoff;
 static uint8_t cursorpos;//display cursors
 static uint8_t folderselect;
 static uint8_t trackselect;
-static uint8_t monthselect;
-static uint8_t dayselect;
-static uint8_t Stimeselect;
-static uint8_t Etimeselect;
 //----------------------------------------Private Functions--------------------------------------
 
 void DrawMain(){
@@ -111,19 +107,33 @@ void DrawSetTime(uint8_t cursor, uint8_t month, uint8_t day, uint8_t hour, uint8
 
 }
 
-void DrawSchedule(uint8_t cursor, uint8_t month, uint8_t day, uint8_t start, uint8_t end){
-	char folderselectstring[92];
+void DrawSchedule(uint8_t cursor, uint8_t month, uint8_t daystart, uint8_t dayend, uint8_t start, uint8_t end){
+	char folderselectstring[151];
 	uint8_t hour1 = (start&0b11111000)>>3;
 	uint8_t minute1 = ((start & 0b011)*15);
 	uint8_t hour2 = (end&0b11111000)>>3;
 	uint8_t minute2 = ((end & 0b011)*15);
+	uint8_t month2 = month;
+	if(dayend < daystart){
+		month2 = month+1;
+		if(month2 == 13){
+			month2 = 1;
+		}
+	}
 	sprintf(folderselectstring, "Schedule time to play\n"
-								" %c  %c    %c  %c    %c  %c\n"
-								"%.2d/%.2d S:%.2d:%.2d E:%.2d:%.2d\n"
-								" %c  %c    %c  %c    %c  %c\n",
-								0==TOPCHAR, 1 ==TOPCHAR, 2 ==TOPCHAR, 3==TOPCHAR, 4==TOPCHAR, 5==TOPCHAR,
-								month, day , hour1, minute1, hour2, minute2,
-								0==BOTCHAR, 1 ==BOTCHAR, 2 ==BOTCHAR, 3==BOTCHAR, 4==BOTCHAR, 5==BOTCHAR);
+								" %c  %c        %c\n"
+								"%.2d/%.2d to %.2d/%.2d ...\n"
+								" %c  %c        %c\n"
+								"   %c  %c    %c  %c\n"
+								"S:%.2d:%.2d E:%.2d:%.2d\n"
+								"   %c  %c    %c  %c\n"
+								"month=1 - repeat",
+								0==TOPCHAR, 1==TOPCHAR, 2==TOPCHAR,
+								month, daystart, month2, dayend,
+								0==BOTCHAR, 1==BOTCHAR, 2==BOTCHAR,
+								3==TOPCHAR, 4==TOPCHAR, 5==TOPCHAR, 6==TOPCHAR,
+								hour1, minute1, hour2, minute2,
+								3==BOTCHAR, 4==BOTCHAR, 5==BOTCHAR, 6==BOTCHAR);
 	OledClear(OLED_COLOR_BLACK);
 	OledDrawString(folderselectstring);
 	OledUpdate();
@@ -260,10 +270,6 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 					//discountprintf("moving to schedule day");
 					nextstate = scheduleTime;
 					transition = 1;
-					monthselect = 0;
-					dayselect = 0;
-					Stimeselect = 0;
-					Etimeselect = 0;
 					folderselect = 0;
 					trackselect = 0;
 
@@ -353,9 +359,19 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 			}
 			break;
 		case scheduleTime:
+			static uint8_t monthselect;
+			static uint8_t Sdayselect;
+			static uint8_t Edayselect;
+			static uint8_t Stimeselect;
+			static uint8_t Etimeselect;
 			if(event.status == EVENT_ENTRY){
 				cursorpos = 0;
-				DrawSchedule(cursorpos, monthselect, dayselect+1, Stimeselect, Etimeselect);
+				monthselect=0;
+				Sdayselect=0;
+				Edayselect=0;
+				Stimeselect=0;
+				Etimeselect=0;
+				DrawSchedule(cursorpos, monthselect, Sdayselect+1, Edayselect+1, Stimeselect, Etimeselect);
 			}
 			if(event.status == EVENT_BUTTONS){
 				if(event.data & B1XORMASK && !(event.data & B1MASK)){
@@ -375,19 +391,25 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 						}
 						break;
 					case 1:
-						dayselect--;
-						if (dayselect == 255){
-							dayselect = 30;
+					Sdayselect--;
+						if (Sdayselect == 255){
+							Sdayselect = 30;
 						}
 						break;
 					case 2:
+						Edayselect--;
+						if (Edayselect == 255){
+							Edayselect = 30;
+						}
+						break;
+					case 3:
 						if((Stimeselect&0b11111000) == 0){
 							Stimeselect = 0b10111000 | (Stimeselect&0b11);//23:XX
 						} else {
 							Stimeselect -= 0b00001000;
 						}
 						break;
-					case 3:
+					case 4:
 						if(Stimeselect == 0){
 							Stimeselect = 0b10111011;//23:45
 						} else {
@@ -395,13 +417,13 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 							Stimeselect &= 0b11111011;
 						}
 						break;
-					case 4:
+					case 5:
 						if((Etimeselect&0b11111000) == 0){
 							Etimeselect = 0b10111000 | (Etimeselect&0b11);//23:XX
 						} else {
 							Etimeselect -= 0b00001000;
 						}break;
-					case 5:
+					case 6:
 						if(Etimeselect == 0){
 							Etimeselect = 0b10111011;//23:45
 						} else {
@@ -412,7 +434,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 					default:
 						break;
 					}
-					DrawSchedule(cursorpos, monthselect, dayselect+1, Stimeselect, Etimeselect);
+					DrawSchedule(cursorpos, monthselect, Sdayselect+1, Edayselect+1, Stimeselect, Etimeselect);
 				} else
 				if(event.data & B4XORMASK && !(event.data & B4MASK)){
 					switch(cursorpos){
@@ -421,17 +443,21 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 						monthselect %= 13;
 						break;
 					case 1:
-						dayselect++;
-						dayselect%=31;
+						Sdayselect++;
+						Sdayselect%=31;
 						break;
 					case 2:
+						Edayselect++;
+						Edayselect%=31;
+						break;
+					case 3:
 						if((Stimeselect&0b11111000) == 0b10111000){
 							Stimeselect &= 0b00000011;
 						} else {
 							Stimeselect += 0b00001000;
 						}
 						break;
-					case 3:
+					case 4:
 						if(Stimeselect == 0b10111011){//23:45
 							Stimeselect = 0;//0:00
 						} else {
@@ -441,14 +467,14 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 							}
 						}
 						break;
-					case 4:
+					case 5:
 						if((Etimeselect&0b11111000) == 0b10111000){
 							Etimeselect &= 0b00000011;
 						} else {
 							Etimeselect += 0b00001000;
 						}
 						break;
-					case 5:
+					case 6:
 						if(Etimeselect == 0b10111011){//23:45
 							Etimeselect = 0;//0:00
 						} else {
@@ -461,19 +487,19 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 					default:
 						break;
 					}
-					DrawSchedule(cursorpos, monthselect, dayselect+1, Stimeselect, Etimeselect);
+					DrawSchedule(cursorpos, monthselect, Sdayselect+1, Edayselect+1, Stimeselect, Etimeselect);
 				} else
 				if(event.data & B5XORMASK && !(event.data & B5MASK)){
 					cursorpos--;
 					if(cursorpos == 255){
-						cursorpos = 5;
+						cursorpos = 6;
 					}
-					DrawSchedule(cursorpos, monthselect, dayselect+1, Stimeselect, Etimeselect);
+					DrawSchedule(cursorpos, monthselect, Sdayselect+1, Edayselect+1, Stimeselect, Etimeselect);
 				} else
 				if(event.data & B6XORMASK && !(event.data & B6MASK)){
 					cursorpos++;
-					cursorpos %= 6;
-					DrawSchedule(cursorpos, monthselect, dayselect+1, Stimeselect, Etimeselect);
+					cursorpos %= 7;
+					DrawSchedule(cursorpos, monthselect, Sdayselect+1, Edayselect+1, Stimeselect, Etimeselect);
 				}
 			}
 			break;
@@ -492,7 +518,8 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 					//discountprintf("moving to main");
 					scheduleEvent sevent;
 					sevent.month = monthselect;
-					sevent.day = dayselect+1;
+					sevent.daystart = Sdayselect+1;
+					sevent.daystop = Edayselect+1;
 					sevent.start = Stimeselect;
 					sevent.stop = Etimeselect;
 					sevent.track = trackselect+1;
@@ -546,7 +573,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				hour = Scheduler_GetHour();
 				day = Scheduler_GetDay();
 				month = Scheduler_GetMonth();
-				DrawSetTime(cursorpos, month+1, day+1, hour, minute);
+				DrawSetTime(cursorpos, month, day, hour, minute);
 			}
 			if(event.status == EVENT_BUTTONS){
 				if(event.data & B1XORMASK && !(event.data & B1MASK)){
@@ -556,12 +583,12 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				} else
 				if(event.data & B2XORMASK && !(event.data & B2MASK)){
 					//discountprintf("moving to main, select");
-					month++;
-					I2C_Transmit(RTCADDRESS, RTCSECADDR, 0);
-					I2C_Transmit(RTCADDRESS, RTCMINADDR, ((minute/10)<<4)|minute%10);
-					I2C_Transmit(RTCADDRESS, RTCHOURADDR, 0b01000000|((hour/10)<<4)|hour%10);
-					I2C_Transmit(RTCADDRESS, RTCDAYADDR, (((day+1)/10)<<4)|(day+1)%10);
-					I2C_Transmit(RTCADDRESS, RTCMNTHADDR, (((month+1)/10)<<4)|(month+1)%10);
+					I2C_Transmit(RTCADDRESS, RTCSECADDR, 0b10000000);
+					I2C_Transmit(RTCADDRESS, RTCSTATADDR, 0x28);
+					I2C_Transmit(RTCADDRESS, RTCMINADDR, ((((minute/10)<<4))&0b01110000)|minute%10);
+					I2C_Transmit(RTCADDRESS, RTCHOURADDR, ((hour/10)<<4)|hour%10);
+					I2C_Transmit(RTCADDRESS, RTCDAYADDR, (((day)/10)<<4)|(day)%10);
+					I2C_Transmit(RTCADDRESS, RTCMNTHADDR, (((month)/10)<<4)|(month)%10);
 					nextstate = main;
 					transition = 1;
 
@@ -570,14 +597,14 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 					switch(cursorpos){
 					case 0:
 						month--;
-						if(month < 0){
-							month = 11;
+						if(month < 1){
+							month = 12;
 						}
 						break;
 					case 1:
 						day--;
-						if(day < 0){
-							day = 30;
+						if(day < 1){
+							day = 31;
 						}
 						break;
 					case 2:
@@ -597,18 +624,22 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 						}
 						break;
 					}
-					DrawSetTime(cursorpos, month+1, day+1, hour, minute);
+					DrawSetTime(cursorpos, month, day, hour, minute);
 					break;
 				} else
 				if(event.data & B4XORMASK && !(event.data & B4MASK)){
 					switch(cursorpos){
 					case 0:
 						month++;
-						month %= 12;
+						if(month > 12){
+							month = 1;
+						}
 						break;
 					case 1:
 						day++;
-						day%= 31;
+						if(day > 31){
+							day = 1;
+						}
 						break;
 					case 2:
 						hour++;
@@ -622,19 +653,19 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 							hour %= 24;
 						}
 					}
-					DrawSetTime(cursorpos, month+1, day+1, hour, minute);
+					DrawSetTime(cursorpos, month, day, hour, minute);
 				} else
 				if(event.data & B5XORMASK && !(event.data & B5MASK)){
 					cursorpos--;
 					if(cursorpos == 255){
 						cursorpos = 3;
 					}
-					DrawSetTime(cursorpos, month+1, day+1, hour, minute);
+					DrawSetTime(cursorpos, month, day, hour, minute);
 				} else
 				if(event.data & B6XORMASK && !(event.data & B6MASK)){
 					cursorpos++;
 					cursorpos %= 4;
-					DrawSetTime(cursorpos, month+1, day+1, hour, minute);
+					DrawSetTime(cursorpos, month, day , hour, minute);
 				}
 			}
 			break;
@@ -685,7 +716,6 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 						}
 						break;
 					case 1:
-						uint8_t accumulation = 0;
 						MP3_Event_Post(((Event_t){EVENT_PLAY, MP3_GetCurrentFile()-1}));
 						break;
 					default:

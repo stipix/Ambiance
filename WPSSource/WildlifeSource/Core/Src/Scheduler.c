@@ -30,22 +30,27 @@ static uint8_t minute;
 
 static uint8_t logging;//logging
 static uint8_t playdata;
+
+static int16_t curschedule;//contains the current schedule being followed, -1 if no schedule active
 //----------------------------------------Private Functions--------------------------------------
 void CompareTime(){
 	if(logging){
 		scheduleEvent event;
 
 		event.month = month;
-		event.day = day;
 		if(playdata){
 			event.start = ((hour & 0b11111) << 3) & ((uint8_t)(minute/15));
+			event.daystart = day;
 			event.stop = 0;
+			event.daystop = 0;
 			event.folder = (playdata>>8)&0xFF;
 			event.track = playdata&0xFF;
 		} else {
 			scheduleEvent prevevent = FLASH_ReadLogs(FLASH_GetLogsSize()-1);
 			event.start = 0;
+			event.daystart = 0;
 			event.stop = ((hour & 0b11111) << 3) & ((uint8_t)(minute/15));
+			event.daystop = day;
 			event.folder = prevevent.folder;
 			event.track = prevevent.track;
 		}
@@ -54,37 +59,81 @@ void CompareTime(){
 	} else {
 		scheduleEvent event;
 		Event_t play = (Event_t){EVENT_PLAY, 0};
-		for(uint16_t i = 0; i < FLASH_GetScheduleSize(); i++){
-			event = FLASH_ReadSchedule(i);
-			if(event.month == month && event.day == day){//if the scheduled event has the right day
-				if((event.start&0b11111000)>>3 <= hour && (event.stop&0b11111000)>>3 > hour){//if the current min is within when the schedule should be playing
-					if((event.start & 0b011)*15 <= minute && (event.stop & 0b011)*15 > minute){//repeat for minute
-						if(event.folder != (MP3_GetCurrentFile()>>8)){//if we have not already sent this event
-							play.data = (event.folder<<8) + event.track;//Update the MP3
-							MP3_Event_Post(play);
+		//allows for a double check to allow one schedule to end the same minute a second schedule starts
+		//this is done with the manipulation of reset
+		for(int reset = 0; reset < 1; reset++){
+			if(curschedule == -1){//no active schedule
+				//this section is designed to allow for the device to reboot inside of a scheduled time and pick up seamlessly
+				for(uint16_t i = 0; i < FLASH_GetScheduleSize(); i++){
+					event = FLASH_ReadSchedule(i);
+					uint8_t secondmonth = event.month;
+					//unpack the stored start and stop hour/minute
+					uint8_t Shour = (event.start&0b11111000)>>3;
+					uint8_t Ehour = (event.stop &0b11111000)>>3;
+					uint8_t Smin  = (event.start&0b00000011)*15;
+					uint8_t Emin  = (event.stop &0b00000011)*15;
+					//if the stop day is before the start day, the schedule will run into the nest month
+					//If the event runs over to the next month, set up second month so the time in the next month is handled
+					if(event.daystart > event.daystop){
+						secondmonth = event.month+1;
+						//loop from December to January
+						if(secondmonth == 13){
+							secondmonth = 1;
 						}
+					}
+					//tests if the current time is inside the period this schedule event says to play in
+					if((
+							event.month == month || secondmonth == month
+					   )&& //if within the month period
+					   (
+							( (event.daystart <= day && event.daystop >= day) && event.daystart >= event.daystop)||//within the period in single month mode
+							( (event.daystart <= day || event.daystop >= day) && event.daystart >  event.daystop)  //if within the day period in multi-month mode
+					   )&&
+					   (
+							(Shour < hour && Ehour> hour)||   //fully within the period
+							(Shour == hour&& Smin <= minute)|| //In the start hour, after or on the start minute
+							(Ehour == hour&& Emin > minute)   //In the end hour, before the stop minute
+					   )
+					  ){
+
+						play.data = (event.folder<<8) + event.track;//Update the MP3
+						MP3_Event_Post(play);
+						curschedule = i;
 						break;
 					}
 				}
-				if ((event.stop&0b11111000)>>3 == hour && (event.stop & 0b011)*15 == minute){
-					play.data = 0;
+			}
+			if(curschedule != -1){//active schedule
+				event = FLASH_ReadSchedule(curschedule);
+				//unpack the stored stop hour/minute
+				uint8_t Ehour = (event.stop &0b11111000)>>3;
+				uint8_t Emin  = (event.stop &0b00000011)*15;
+				//only check the hour and minute as this should happen at the end of every day's schedule to allow for overlapping schedules
+				if((hour == Ehour && minute >= Emin )||(hour > Ehour)){
+					play.data = 0;//indicate a pause to the MP3 module
 					MP3_Event_Post(play);
+					curschedule = -1;//no active schedule
+					reset = 0;// run the schedule start code again
+							  //this section should not be reentered unless the second schedule event starts and ends on the same minute as the first ends
 				}
 			}
 		}
 	}
-	newdata = 0;
 }
 uint8_t Scheduler_GetMonth(){
+	I2C_Recieve(RTCADDRESS, RTCMNTHADDR, 1);
 	return month;
 }
 uint8_t Scheduler_GetDay(){
+	I2C_Recieve(RTCADDRESS, RTCDAYADDR, 1);
 	return day;
 }
 uint8_t Scheduler_GetHour(){
+	I2C_Recieve(RTCADDRESS, RTCHOURADDR, 1);
 	return hour;
 }
 uint8_t Scheduler_GetMinute(){
+	I2C_Recieve(RTCADDRESS, RTCMINADDR, 1);
 	return minute;
 }
 
@@ -102,6 +151,7 @@ uint8_t Scheduler_Event_Init(FIFO Queue){
     I2C_Transmit(RTCADDRESS, RTCSECADDR, 0x80);//enable the clock
 	I2C_Transmit(RTCADDRESS, RTCSTATADDR, 0x28);//enables the use of backup battery
     starttime = -1;//force check time on wake-up
+    curschedule = -1;//no active schedule
     return INIT_OK;
 }
 /*
