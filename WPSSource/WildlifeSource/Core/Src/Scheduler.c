@@ -17,7 +17,7 @@
 #include "TIMERS.h"
 #include "discountIO.h"
 //----------------------------------------Private Defines----------------------------------------
-#define REFRESHRATE (1/*minutes*/*60000/*milliseconds/minute*/)
+#define REFRESHRATE (.5/*minutes*/*60000/*milliseconds/minute*/)
 #define NULLDATE    0xFF
 //----------------------------------------Private Variables--------------------------------------
 FIFO Schedulerqueue;

@@ -44,17 +44,25 @@ static uint8_t displayoff;
 static uint8_t cursorpos;//display cursors
 static uint8_t folderselect;
 static uint8_t trackselect;
+
+
+static int8_t minute;
+static int8_t hour;
+static int8_t day;
+static int8_t month;
 //----------------------------------------Private Functions--------------------------------------
 
-void DrawMain(){
+void DrawMain(uint8_t month, uint8_t day, uint8_t hour, uint8_t minute){
 	char maintext[176];
-	sprintf(maintext, "Main menu\n"
+	sprintf(maintext, "Main menu %.2d/%.2d %.2d:%.2d\n"
 					  "Back:play track\n"
 			   	   	  "Sel:append schedule\n"
 	   	   	  	  	  "%c:Set Date/time\n"
 					  "%c:more options\n"
 					  "Volume: %c%.3d%c\n"
-					  "Current song %d-%d",DOWN_ARROW_OFF, UP_ARROW_OFF, LEFT_ARROW_ON, FLASH_GetVolume(), RIGHT_ARROW_ON, MP3_GetCurrentFile()>>8, MP3_GetCurrentFile()&0xFF);
+					  "Current song %d-%d",
+					  month, day, hour, minute,
+					  DOWN_ARROW_OFF, UP_ARROW_OFF, LEFT_ARROW_ON, FLASH_GetVolume(), RIGHT_ARROW_ON, MP3_GetCurrentFile()>>8, MP3_GetCurrentFile()&0xFF);
 	OledClear(OLED_COLOR_BLACK);
 	OledDrawString(maintext);
 	OledUpdate();
@@ -228,6 +236,15 @@ Event_t ButtonsMenuSM_Event_Updater(void){
     	ButtonsMenuSM_Event_Post(event);
 
     }
+    if(!displayoff && BMState == main)
+		if(TIMERS_GetMilliSeconds() % 1000 == 0){//updates the date and time on the main menu
+			minute = Scheduler_GetMinute();
+			hour = Scheduler_GetHour();
+			day = Scheduler_GetDay();
+			month = Scheduler_GetMonth();
+			event.status = EVENT_ENTRY;
+	    	ButtonsMenuSM_Event_Post(event);
+		}
     return event;
 }
 
@@ -240,7 +257,7 @@ Event_t ButtonsMenuSM_Event_Updater(void){
 uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 	uint8_t transition = 0;
 	ButtonsMenuStates_t nextstate = BMState;
-	if(event.status == EVENT_TIMEOUT){
+	if(event.status == EVENT_TIMEOUT && event.data == 0){
 		displayoff = 1;
 		OledOff();
 	}
@@ -250,13 +267,18 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 			nextstate = main;
 			transition = 1;
 			OledOn();
+
+			minute = Scheduler_GetMinute();
+			hour = Scheduler_GetHour();
+			day = Scheduler_GetDay();
+			month = Scheduler_GetMonth();
 		}
 	} else {
 
 		switch (BMState){
 		case main:
 			if(event.status == EVENT_ENTRY){
-				DrawMain();
+				DrawMain(month, day, hour, minute);
 			}
 			if(event.status == EVENT_BUTTONS){
 				if(event.data & B1XORMASK && !(event.data & B1MASK)){
@@ -291,7 +313,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 					if(vol >= 0){
 						FLASH_SetDCVol(vol, FLASH_GetDutyCycle());
 					}
-					DrawMain();
+					DrawMain(month, day, hour, minute);
 
 				} else
 				if(event.data & B6XORMASK && !(event.data & B6MASK)){
@@ -300,7 +322,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 					if(vol <= 100){
 						FLASH_SetDCVol(vol, FLASH_GetDutyCycle());
 					}
-					DrawMain();
+					DrawMain(month, day, hour, minute);
 
 				}
 
@@ -563,17 +585,8 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 			}
 			break;
 		case setTime:
-			static int8_t minute;
-			static int8_t hour;
-			static int8_t day;
-			static int8_t month;
 			if(event.status == EVENT_ENTRY){
 				cursorpos = 0;
-				minute = Scheduler_GetMinute();
-				hour = Scheduler_GetHour();
-				day = Scheduler_GetDay();
-				month = Scheduler_GetMonth();
-				HAL_Delay(10);
 				minute = Scheduler_GetMinute();
 				hour = Scheduler_GetHour();
 				day = Scheduler_GetDay();
@@ -594,6 +607,11 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 					I2C_Transmit(RTCADDRESS, RTCHOURADDR, ((hour/10)<<4)|hour%10);
 					I2C_Transmit(RTCADDRESS, RTCDAYADDR, (((day)/10)<<4)|(day)%10);
 					I2C_Transmit(RTCADDRESS, RTCMNTHADDR, (((month)/10)<<4)|(month)%10);
+
+					minute = Scheduler_GetMinute();
+					hour = Scheduler_GetHour();
+					day = Scheduler_GetDay();
+					month = Scheduler_GetMonth();
 					nextstate = main;
 					transition = 1;
 
