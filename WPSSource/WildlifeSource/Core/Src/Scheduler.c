@@ -149,7 +149,7 @@ uint8_t Scheduler_Event_Init(FIFO Queue){
     I2C_Init();
     TIMERS_Init();
     I2C_Transmit(RTCADDRESS, RTCSECADDR, 0x80);//enable the clock
-	I2C_Transmit(RTCADDRESS, RTCSTATADDR, 0x28);//enables the use of backup battery
+	I2C_Transmit(RTCADDRESS, RTCSTATADDR, 0x08);//enables the use of backup battery
     starttime = -1;//force check time on wake-up
     curschedule = -1;//no active schedule
     return INIT_OK;

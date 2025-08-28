@@ -573,6 +573,11 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				hour = Scheduler_GetHour();
 				day = Scheduler_GetDay();
 				month = Scheduler_GetMonth();
+				HAL_Delay(10);
+				minute = Scheduler_GetMinute();
+				hour = Scheduler_GetHour();
+				day = Scheduler_GetDay();
+				month = Scheduler_GetMonth();
 				DrawSetTime(cursorpos, month, day, hour, minute);
 			}
 			if(event.status == EVENT_BUTTONS){
@@ -584,7 +589,7 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				if(event.data & B2XORMASK && !(event.data & B2MASK)){
 					//discountprintf("moving to main, select");
 					I2C_Transmit(RTCADDRESS, RTCSECADDR, 0b10000000);
-					I2C_Transmit(RTCADDRESS, RTCSTATADDR, 0x28);
+					I2C_Transmit(RTCADDRESS, RTCSTATADDR, 0x08);
 					I2C_Transmit(RTCADDRESS, RTCMINADDR, ((((minute/10)<<4))&0b01110000)|minute%10);
 					I2C_Transmit(RTCADDRESS, RTCHOURADDR, ((hour/10)<<4)|hour%10);
 					I2C_Transmit(RTCADDRESS, RTCDAYADDR, (((day)/10)<<4)|(day)%10);
