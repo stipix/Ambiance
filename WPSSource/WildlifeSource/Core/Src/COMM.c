@@ -273,7 +273,7 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case schedulemonth:
 		if(event.status == EVENT_USART){
 			if(event.data == SCHEDULEEND){
-				//discountprintf("schedule complete");
+				discountprintf("schedule complete");
 				next = idle;
 				transition = true;
 				FLASH_AppendSchedule(sevent);
@@ -284,7 +284,9 @@ uint8_t COMM_Event_Handler(Event_t event){
 				transition = true;
 				USART_WriteTx(SCHEDULEEND);//please stop sending me the schedule
 			}else{
-				FLASH_AppendSchedule(sevent);
+				if(numevents != 0){
+					FLASH_AppendSchedule(sevent);
+				}
 				sevent.month = event.data;
 				//sprintf(text, "Month: %d", event.data);
 				//discountprintf(text);
@@ -361,8 +363,16 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case timeminute:
 		if(event.status == EVENT_USART){
 			if(event.data < 60){
-				I2C_Transmit(RTCADDRESS, RTCMINADDR, ((event.data/10)<<4) + event.data%10);
+				I2C_Transmit(RTCADDRESS, RTCMINADDR, ((event.data/10)<<4) | event.data%10);
+				char send[30];
+				sprintf(send, "minute set: %d", ((event.data/10)<<4) | event.data%10);
+				discountprintf(send);
 				next = timehour;
+				transition = true;
+			}else{
+
+				discountprintf("failed set time: minute");
+				next = idle;
 				transition = true;
 			}
 		}
@@ -371,8 +381,15 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case timehour:
 		if(event.status == EVENT_USART){
 			if(event.data < 24){
-				I2C_Transmit(RTCADDRESS, RTCHOURADDR, ((event.data/10)<<4) + event.data%10);
+				I2C_Transmit(RTCADDRESS, RTCHOURADDR, ((event.data/10)<<4) | event.data%10);
+				char send[30];
+				sprintf(send, "hour set: %d", event.data);
+				discountprintf(send);
 				next = timeday;
+				transition = true;
+			}else{
+				discountprintf("failed set time: hour");
+				next = idle;
 				transition = true;
 			}
 		}
@@ -381,15 +398,30 @@ uint8_t COMM_Event_Handler(Event_t event){
 	case timeday:
 		if(event.status == EVENT_USART){
 			if(event.data <= 31){
-				I2C_Transmit(RTCADDRESS, RTCDAYADDR, ((event.data/10)<<4) + event.data%10);
+				I2C_Transmit(RTCADDRESS, RTCDAYADDR, ((event.data/10)<<4) | event.data%10);
+				char send[30];
+				sprintf(send, "day set: %d",  event.data);
+				discountprintf(send);
 				next = timemonth;
+				transition = true;
+			}else{
+				discountprintf("failed set time: day");
+				next = idle;
 				transition = true;
 			}
 		}
+		break;
 	case timemonth:
 		if(event.status == EVENT_USART){
 			if(event.data <= 12){
-				I2C_Transmit(RTCADDRESS, RTCMNTHADDR, ((event.data/10)<<4) + event.data%10);
+				I2C_Transmit(RTCADDRESS, RTCMNTHADDR, ((event.data/10)<<4) | event.data%10);
+				char send[30];
+				sprintf(send, "month set: %d",  event.data);
+				discountprintf(send);
+				next = idle;
+				transition = true;
+			}else{
+				discountprintf("failed set time: month");
 				next = idle;
 				transition = true;
 			}

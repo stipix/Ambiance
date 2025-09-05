@@ -9,4 +9,4 @@
 ../Core/Src/FLASH.c:197:9:FLASH_AppendSchedule	5
 ../Core/Src/FLASH.c:219:10:FLASH_GetScheduleSize	2
 ../Core/Src/FLASH.c:230:15:FLASH_ReadSchedule	3
-../Core/Src/FLASH.c:252:9:FLASH_ClearSchedule	1
+../Core/Src/FLASH.c:254:9:FLASH_ClearSchedule	1

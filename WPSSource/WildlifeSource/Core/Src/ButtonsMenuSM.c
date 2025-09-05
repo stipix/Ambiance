@@ -34,6 +34,7 @@ typedef enum ButtonsMenuStates{
 	scheduleFolder,
 	setTime,
 	options,
+	viewschedule,
 }ButtonsMenuStates_t;
 //----------------------------------------Private Variables--------------------------------------
 FIFO ButtonsMenuSMqueue;
@@ -88,10 +89,14 @@ void DrawOptions(uint8_t cursor, uint8_t dutycycle){
 	sprintf(folderselectstring, "Options\n"
 								" Duty Cycle: %c%.2d%c\n"
 								" Song:%c%c\n"
-								"%cClear Schedule%c",
+								"%cView Schedule%c\n"
+								"%cClear Schedule%c\n"
+								"%cClear Logs%c\n",
 								0==cursor?LEFT_ARROW_ON:LEFT_ARROW_OFF, dutycycle,0==cursor?RIGHT_ARROW_ON:RIGHT_ARROW_OFF,
 								1==cursor?LEFT_ARROW_ON:LEFT_ARROW_OFF,           1==cursor?RIGHT_ARROW_ON:RIGHT_ARROW_OFF,
-								2==cursor?RIGHT_ARROW_ON:RIGHT_ARROW_OFF, 		  2==cursor?LEFT_ARROW_ON:LEFT_ARROW_OFF);
+								2==cursor?RIGHT_ARROW_ON:RIGHT_ARROW_OFF, 		  2==cursor?LEFT_ARROW_ON:LEFT_ARROW_OFF,
+								3==cursor?RIGHT_ARROW_ON:RIGHT_ARROW_OFF, 		  3==cursor?LEFT_ARROW_ON:LEFT_ARROW_OFF,
+								4==cursor?RIGHT_ARROW_ON:RIGHT_ARROW_OFF, 		  4==cursor?LEFT_ARROW_ON:LEFT_ARROW_OFF);
 	OledClear(OLED_COLOR_BLACK);
 	OledDrawString(folderselectstring);
 	OledUpdate();
@@ -147,7 +152,36 @@ void DrawSchedule(uint8_t cursor, uint8_t month, uint8_t daystart, uint8_t dayen
 	OledUpdate();
 
 }
-
+void DrawViewSchedule(int16_t index){
+	char viewschedulestring[151];
+	if(FLASH_GetScheduleSize() == 0){
+		sprintf(viewschedulestring,
+				"the schedule is empty\n"
+				"press back to leave");
+	}else if(index < FLASH_GetScheduleSize() && index >= 0){
+		scheduleEvent cur = FLASH_ReadSchedule(index);
+		sprintf(viewschedulestring,
+				"%c                   %c\n"
+				"schedule #%d\n"
+				"month: %d\n"
+				"days: %d-%d\n"
+				"time %.2d:%.2d-%.2d:%.2d\n"
+				"folder: %d, track: %d",
+				(index<=0)?LEFT_ARROW_OFF:LEFT_ARROW_ON, (index>=(FLASH_GetScheduleSize()-1))?RIGHT_ARROW_OFF:RIGHT_ARROW_ON,//disable keys when at end of schedule
+				index,
+				cur.month,
+				cur.daystart, cur.daystop,
+				(cur.start &0b11111000)>>3, (cur.start&0b00000011)*15,(cur.stop &0b11111000)>>3, (cur.stop&0b00000011)*15,
+				cur.folder, cur.track);
+	}else{
+		sprintf(viewschedulestring,
+				"an error occurred\n"
+				"press back to recover");
+	}
+	OledClear(OLED_COLOR_BLACK);
+	OledDrawString(viewschedulestring);
+	OledUpdate();
+}
 
 //----------------------------------------Public Functions---------------------------------------
 /*
@@ -544,8 +578,8 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 					sevent.daystop = Edayselect+1;
 					sevent.start = Stimeselect;
 					sevent.stop = Etimeselect;
-					sevent.track = trackselect+1;
-					sevent.folder = folderselect+1;
+					sevent.track = trackselect;
+					sevent.folder = folderselect;
 					FLASH_AppendSchedule(sevent);
 					nextstate = main;
 					transition = 1;
@@ -706,21 +740,38 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				} else
 				if(event.data & B2XORMASK && !(event.data & B2MASK)){
 					//discountprintf("moving to main");
-					if(cursorpos == 2){
+					switch(cursorpos){
+					case 0:
+						break;
+					case 1:
+						break;
+					case 2:
+						nextstate = viewschedule;
+						transition = 1;
+						break;
+					case 3:
 						FLASH_ClearSchedule();
+						nextstate = main;
+						transition = 1;
+						break;
+					case 4:
+						FLASH_ClearLogs();
+						nextstate = main;
+						transition = 1;
+						break;
+					default:
+						break;
 					}
-					nextstate = main;
-					transition = 1;
 				} else
 				if(event.data & B3XORMASK && !(event.data & B3MASK)){
 					cursorpos++;
-					cursorpos %= 3;
+					cursorpos %= 5;
 					DrawOptions(cursorpos, FLASH_GetDutyCycle());
 				} else
 				if(event.data & B4XORMASK && !(event.data & B4MASK)){
 					cursorpos--;
 					if(cursorpos == 255){
-						cursorpos = 2;
+						cursorpos = 4;
 					}
 					DrawOptions(cursorpos, FLASH_GetDutyCycle());
 					break;
@@ -767,6 +818,45 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				}
 			}
 
+			break;
+		case viewschedule:
+			static int16_t index = 0;
+			if(event.status == EVENT_ENTRY){
+				index = 0;
+				DrawViewSchedule(index);
+			}
+			if(event.status == EVENT_BUTTONS){
+				if(event.data & B1XORMASK && !(event.data & B1MASK)){//back button
+					nextstate = options;
+					transition = 1;
+					index = 0;
+				} else
+				if(event.data & B2XORMASK && !(event.data & B2MASK)){//select
+					nextstate = options;
+					transition = 1;
+					index = 0;
+
+				}else
+				if(event.data & B3XORMASK && !(event.data & B3MASK)){//down arrow
+				} else
+				if(event.data & B4XORMASK && !(event.data & B4MASK)){//up arrow
+				} else
+				if(event.data & B5XORMASK && !(event.data & B5MASK)){//left arrow
+					if(index > 0){
+						index--;
+						DrawViewSchedule(index);
+					}
+
+				} else
+				if(event.data & B6XORMASK && !(event.data & B6MASK)){//right arrow
+					if(index < FLASH_GetScheduleSize()-1){
+						index++;
+						DrawViewSchedule(index);
+					}
+
+				}
+
+			}
 			break;
 		default:
 			break;

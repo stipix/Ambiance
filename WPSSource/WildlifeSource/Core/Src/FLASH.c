@@ -231,13 +231,15 @@ scheduleEvent FLASH_ReadSchedule(uint16_t index){
 	scheduleEvent event = (scheduleEvent){0, 0, 0, 0, 0, 0};
 	if(!initialized){return event;}
 	if(index >= 0 && index < ScheduleSize){
-		event.month = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE));
-		event.daystart = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+1));
-		event.start = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+2));
-		event.stop = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+3));
-		event.daystop = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+4));
-		event.folder = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+5));
-		event.track = *((uint8_t*)(LOGSADDRESS+index*SCHEDULEEVENTSIZE+6));
+		uint32_t Data1 = *((uint32_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE));
+		uint32_t Data2 = *((uint32_t*)(SCHEDULEADDRESS+index*SCHEDULEEVENTSIZE+4));
+		event.month = (Data1>>0)&0xFF;
+		event.daystart = (Data1>>8)&0xFF;
+		event.start = (Data1>>16)&0xFF;
+		event.stop = (Data1>>24)&0xFF;
+		event.daystop = (Data2>>0)&0xFF;
+		event.folder = (Data2>>8)&0xFF;;
+		event.track = (Data2>>16)&0xFF;;
 
 	}
 	return event;
