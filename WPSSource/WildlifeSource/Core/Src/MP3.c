@@ -225,7 +225,7 @@ Event_t MP3_Event_Updater(void){
 	}
 	//checks a timer to un-pause the speaker to adhere to the duty cycle
 	if(pause == 1){
-		uint32_t waittime = (endtime-starttime)*((double)(100/DC)-1);//Pause time = Active time * (1/DC-1)
+		uint32_t waittime = (endtime-starttime)*((100.0/((double)DC))-1);//Pause time = Active time * (1/DC-1)
 		uint32_t curtime = TIMERS_GetMilliSeconds();
 		if(curtime >= starttime+waittime){
 			event.status = EVENT_TIMEOUT;
@@ -377,15 +377,15 @@ uint8_t MP3_Event_Handler(Event_t event){
 			if(Packet.Param2 != lastplayed){//prevent the mp3 play from sending the same command twice
 				lastplayed = Packet.Param2;
 				endtime = TIMERS_GetMilliSeconds();
-				if(folder && track){
+				if(folder){
 					uint32_t rand = 0;
 					HAL_RNG_GenerateRandomNumber(&hrng, &rand);
 					rand &= 0xFF;//convert it to one byte of random data
 					rand = (rand*(folders[folder-1])-1)/0xFF;//convert the one bye to the range of 0-max tracks-1
 					nexttrack = rand+1;
-					if(track > folders[folder-1]){
-						nexttrack = 1;
-					}
+//					if(track > folders[folder-1]){
+//						nexttrack = 1;
+//					}
 					track = 0;
 					folder = 0;
 					pause = 1;//entering duty cycle pause

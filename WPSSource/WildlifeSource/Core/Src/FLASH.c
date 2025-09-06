@@ -27,22 +27,7 @@ static int16_t ScheduleSize;
 static int16_t LogsSize;
 static uint8_t initialized = 0;
 
-static void FLASH_Program_Burst(uint32_t Address, uint32_t Data)
-{
 
-  /* Clear All Flags */
-  __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_CMDDONE | FLASH_FLAG_CMDSTART | FLASH_FLAG_CMDERR | FLASH_FLAG_ILLCMD);
-
-  /* Load the word address */
-  FLASH->ADDRESS = (((Address - FLASH_START_ADDR) >> 2) & FLASH_SIZE_MASK);
-  FLASH->DATA0 = (Data>>0)&0xFF;
-  FLASH->DATA1 = (Data>>8)&0xFF;
-  FLASH->DATA2 = (Data>>16)&0xFF;
-  FLASH->DATA3 = (Data>>24)&0xFF;
-
-  /* Load the BURST WRITE command */
-  FLASH->COMMAND = FLASH_CMD_BURSTWRITE;
-}
 /*
  * @function: FLASH_Init()
  * @brief: initialize the flash access library

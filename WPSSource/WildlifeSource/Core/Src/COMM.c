@@ -406,7 +406,6 @@ uint8_t COMM_Event_Handler(Event_t event){
 		if(event.status == EVENT_USART){
 			if(event.data <= 12){
 				I2C_Transmit(RTCADDRESS, RTCMNTHADDR, ((event.data/10)<<4) | event.data%10);
-				discountprintf(send);
 				next = idle;
 				transition = true;
 			}else{

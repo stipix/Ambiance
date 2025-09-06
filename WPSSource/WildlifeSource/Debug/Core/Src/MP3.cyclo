@@ -3,5 +3,5 @@
 ../Core/Src/MP3.c:180:9:MP3_Event_Init	1
 ../Core/Src/MP3.c:203:6:MP3_Event_Post	1
 ../Core/Src/MP3.c:214:9:MP3_Event_Updater	9
-../Core/Src/MP3.c:277:9:MP3_Event_Handler	24
+../Core/Src/MP3.c:277:9:MP3_Event_Handler	22
 ../Core/Src/MP3.c:409:10:MP3_GetCurrentFile	1
