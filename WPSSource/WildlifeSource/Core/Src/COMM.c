@@ -364,9 +364,6 @@ uint8_t COMM_Event_Handler(Event_t event){
 		if(event.status == EVENT_USART){
 			if(event.data < 60){
 				I2C_Transmit(RTCADDRESS, RTCMINADDR, ((event.data/10)<<4) | event.data%10);
-				char send[30];
-				sprintf(send, "minute set: %d", ((event.data/10)<<4) | event.data%10);
-				discountprintf(send);
 				next = timehour;
 				transition = true;
 			}else{
@@ -382,9 +379,6 @@ uint8_t COMM_Event_Handler(Event_t event){
 		if(event.status == EVENT_USART){
 			if(event.data < 24){
 				I2C_Transmit(RTCADDRESS, RTCHOURADDR, ((event.data/10)<<4) | event.data%10);
-				char send[30];
-				sprintf(send, "hour set: %d", event.data);
-				discountprintf(send);
 				next = timeday;
 				transition = true;
 			}else{
@@ -399,9 +393,6 @@ uint8_t COMM_Event_Handler(Event_t event){
 		if(event.status == EVENT_USART){
 			if(event.data <= 31){
 				I2C_Transmit(RTCADDRESS, RTCDAYADDR, ((event.data/10)<<4) | event.data%10);
-				char send[30];
-				sprintf(send, "day set: %d",  event.data);
-				discountprintf(send);
 				next = timemonth;
 				transition = true;
 			}else{
@@ -415,8 +406,6 @@ uint8_t COMM_Event_Handler(Event_t event){
 		if(event.status == EVENT_USART){
 			if(event.data <= 12){
 				I2C_Transmit(RTCADDRESS, RTCMNTHADDR, ((event.data/10)<<4) | event.data%10);
-				char send[30];
-				sprintf(send, "month set: %d",  event.data);
 				discountprintf(send);
 				next = idle;
 				transition = true;

@@ -197,9 +197,27 @@ uint8_t ButtonsMenuSM_Event_Init(FIFO Queue){
     GPIO_Init();
     I2C_Init();
 	TIMERS_Init();
+	FLASH_Init();
 	OledInit();
 	BSP_LED_Init(LED_BLUE);
 	BSP_LED_Init(LED_RED);
+
+//	uint8_t monthselect = 9;
+//	uint8_t Sdayselect = 6;
+//	uint8_t Edayselect = 7;
+//	uint8_t Stimeselect = 10;
+//	uint8_t Etimeselect = 13;
+//	uint8_t trackselect = 2;
+//	uint8_t folderselect = 1;
+//	scheduleEvent sevent;
+//	sevent.month = monthselect;
+//	sevent.daystart = Sdayselect+1;
+//	sevent.daystop = Edayselect+1;
+//	sevent.start = Stimeselect;
+//	sevent.stop = Etimeselect;
+//	sevent.track = trackselect;
+//	sevent.folder = folderselect;
+//	FLASH_AppendSchedule(sevent);
     return INIT_OK;
 }
 /*
@@ -593,7 +611,6 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 						}
 					} else {
 						trackselect--;
-						trackselect %= 256;
 					}
 					DrawFolder(cursorpos, folderselect, trackselect);
 
@@ -636,7 +653,6 @@ uint8_t ButtonsMenuSM_Event_Handler(Event_t event){
 				if(event.data & B2XORMASK && !(event.data & B2MASK)){
 					//discountprintf("moving to main, select");
 					I2C_Transmit(RTCADDRESS, RTCSECADDR, 0b10000000);
-					I2C_Transmit(RTCADDRESS, RTCSTATADDR, 0x08);
 					I2C_Transmit(RTCADDRESS, RTCMINADDR, ((((minute/10)<<4))&0b01110000)|minute%10);
 					I2C_Transmit(RTCADDRESS, RTCHOURADDR, ((hour/10)<<4)|hour%10);
 					I2C_Transmit(RTCADDRESS, RTCDAYADDR, (((day)/10)<<4)|(day)%10);

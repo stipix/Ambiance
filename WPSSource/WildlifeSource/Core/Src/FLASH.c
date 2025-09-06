@@ -27,6 +27,22 @@ static int16_t ScheduleSize;
 static int16_t LogsSize;
 static uint8_t initialized = 0;
 
+static void FLASH_Program_Burst(uint32_t Address, uint32_t Data)
+{
+
+  /* Clear All Flags */
+  __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_CMDDONE | FLASH_FLAG_CMDSTART | FLASH_FLAG_CMDERR | FLASH_FLAG_ILLCMD);
+
+  /* Load the word address */
+  FLASH->ADDRESS = (((Address - FLASH_START_ADDR) >> 2) & FLASH_SIZE_MASK);
+  FLASH->DATA0 = (Data>>0)&0xFF;
+  FLASH->DATA1 = (Data>>8)&0xFF;
+  FLASH->DATA2 = (Data>>16)&0xFF;
+  FLASH->DATA3 = (Data>>24)&0xFF;
+
+  /* Load the BURST WRITE command */
+  FLASH->COMMAND = FLASH_CMD_BURSTWRITE;
+}
 /*
  * @function: FLASH_Init()
  * @brief: initialize the flash access library
@@ -51,6 +67,7 @@ uint8_t FLASH_Init(){
 			break;
 		}
 	}
+	FLASH->IRQRAW |= FLASH_FLAG_CMDDONE;
 	initialized = 1;
 	//load default values into the duty cycle and volume if they are not initialized
 	if(FLASH_GetVolume() == FLASHEMPTY ||FLASH_GetDutyCycle() == FLASHEMPTY){
@@ -200,6 +217,12 @@ uint8_t FLASH_AppendSchedule(scheduleEvent event){
 	uint32_t Data1 = (event.month)|(event.daystart<<8)|(event.start<<16)|(event.stop<<24);
 	uint32_t Data2 = (event.daystop)|(event.folder<<8)|(event.track<<16);
 	//this isn't blocking code officer I swear! (this is blocking code)
+	uint32_t status = FLASH->IRQRAW;
+	status &= FLASH_FLAG_CMDDONE ;
+//	while(!(FLASH->IRQRAW&FLASH_FLAG_CMDDONE) && FLASH->IRQRAW&FLASH_FLAG_CMDSTART);
+//	FLASH_Program_Burst(SCHEDULEADDRESS+ScheduleSize*SCHEDULEEVENTSIZE,Data1);
+//	while(!(FLASH->IRQRAW&FLASH_FLAG_CMDDONE) && FLASH->IRQRAW&FLASH_FLAG_CMDSTART);
+//	FLASH_Program_Burst(SCHEDULEADDRESS+ScheduleSize+4*SCHEDULEEVENTSIZE,Data2);
 	if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, SCHEDULEADDRESS+ScheduleSize*SCHEDULEEVENTSIZE, Data1) != HAL_OK ){
 		return 0;
 	}

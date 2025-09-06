@@ -59,6 +59,7 @@ void CompareTime(){
 	} else {
 		scheduleEvent event;
 		Event_t play = (Event_t){EVENT_PLAY, 0};
+
 		//allows for a double check to allow one schedule to end the same minute a second schedule starts
 		//this is done with the manipulation of reset
 		for(int reset = 0; reset < 1; reset++){
@@ -83,16 +84,26 @@ void CompareTime(){
 					}
 					//tests if the current time is inside the period this schedule event says to play in
 					if((
-							event.month == month || secondmonth == month
+							event.month == month || secondmonth == month || event.month == 0
 					   )&& //if within the month period
 					   (
-							( (event.daystart <= day && event.daystop >= day) && event.daystart >= event.daystop)||//within the period in single month mode
+							( (event.daystart <= day && event.daystop >= day) && event.daystart <= event.daystop)||//within the period in single month mode
 							( (event.daystart <= day || event.daystop >= day) && event.daystart >  event.daystop)  //if within the day period in multi-month mode
 					   )&&
 					   (
 							(Shour < hour && Ehour> hour)||   //fully within the period
-							(Shour == hour&& Smin <= minute)|| //In the start hour, after or on the start minute
-							(Ehour == hour&& Emin > minute)   //In the end hour, before the stop minute
+							(
+								(
+								(Shour == hour&& Smin <= minute)|| //In the start hour, after or on the start minute OR
+								(Ehour == hour&& Emin > minute)   //In the end hour, before the stop minute
+								) && (Shour != Ehour)
+							)||
+							(
+								(
+								(Shour == hour&& Smin <= minute)&& //In the start hour, after or on the start minute AND
+								(Ehour == hour&& Emin > minute)   //In the end hour, before the stop minute
+								) && (Shour == Ehour)
+							)
 					   )
 					  ){
 
@@ -105,11 +116,47 @@ void CompareTime(){
 			}
 			if(curschedule != -1){//active schedule
 				event = FLASH_ReadSchedule(curschedule);
-				//unpack the stored stop hour/minute
+				uint8_t secondmonth = event.month;
+				//unpack the stored start and stop hour/minute
+				uint8_t Shour = (event.start&0b11111000)>>3;
 				uint8_t Ehour = (event.stop &0b11111000)>>3;
+				uint8_t Smin  = (event.start&0b00000011)*15;
 				uint8_t Emin  = (event.stop &0b00000011)*15;
+				//if the stop day is before the start day, the schedule will run into the nest month
+				//If the event runs over to the next month, set up second month so the time in the next month is handled
+				if(event.daystart > event.daystop){
+					secondmonth = event.month+1;
+					//loop from December to January
+					if(secondmonth == 13){
+						secondmonth = 1;
+					}
+				}
 				//only check the hour and minute as this should happen at the end of every day's schedule to allow for overlapping schedules
-				if((hour == Ehour && minute >= Emin )||(hour > Ehour)){
+				if(!(
+					   (
+							event.month == month || secondmonth == month || event.month == 0
+					   )&& //if within the month period
+					   (
+							( (event.daystart <= day && event.daystop >= day) && event.daystart <= event.daystop)||//within the period in single month mode
+							( (event.daystart <= day || event.daystop >= day) && event.daystart >  event.daystop)  //if within the day period in multi-month mode
+					   )&&
+					   (
+							(Shour < hour && Ehour> hour)||   //fully within the period
+							(
+								(
+								(Shour == hour&& Smin <= minute)|| //In the start hour, after or on the start minute OR
+								(Ehour == hour&& Emin > minute)   //In the end hour, before the stop minute
+								)&& (Shour != Ehour)
+							)||
+							(
+								(
+								(Shour == hour&& Smin <= minute)&& //In the start hour, after or on the start minute AND
+								(Ehour == hour&& Emin > minute)   //In the end hour, before the stop minute
+								)&& (Shour == Ehour)
+							)
+					    )
+				    )
+				  ){
 					play.data = 0;//indicate a pause to the MP3 module
 					MP3_Event_Post(play);
 					curschedule = -1;//no active schedule
@@ -150,7 +197,12 @@ uint8_t Scheduler_Event_Init(FIFO Queue){
     TIMERS_Init();
     I2C_Transmit(RTCADDRESS, RTCSECADDR, 0x80);//enable the clock
 	I2C_Transmit(RTCADDRESS, RTCSTATADDR, 0x08);//enables the use of backup battery
-    starttime = -1;//force check time on wake-up
+    starttime = 0;
+    Event_t event = (Event_t){EVENT_NONE, 0};
+	event.status = EVENT_TIMEOUT;
+	event.data = 0;
+	starttime = TIMERS_GetMilliSeconds();//force check time on wake-up
+	Scheduler_Event_Post(event);
     curschedule = -1;//no active schedule
     return INIT_OK;
 }
@@ -203,6 +255,7 @@ uint8_t Scheduler_Event_Handler(Event_t event){
 		I2C_Recieve(RTCADDRESS, RTCDAYADDR, 1);
 		I2C_Recieve(RTCADDRESS, RTCHOURADDR, 1);
 		I2C_Recieve(RTCADDRESS, RTCMINADDR, 1);
+		logging = 0;
 	}
 	if(event.status == EVENT_I2C){
 		switch (event.data>>8){
@@ -221,7 +274,7 @@ uint8_t Scheduler_Event_Handler(Event_t event){
 			break;
 		case RTCMINADDR:
 			//MINTEN2 MINTEN1 MINTEN0 MINONE3 MINONE2 MINONE1 MINONE0
-			minute = 10*((event.data & 0x30)>>4) +((event.data &0x0F));
+			minute = 10*((event.data & 0x70)>>4) +((event.data &0x0F));
 			CompareTime();
 
 			break;
