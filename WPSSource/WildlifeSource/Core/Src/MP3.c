@@ -156,7 +156,16 @@ uint8_t parsePacket(char rx){
 		if(rx == 0xEF){
 			if(Packet.command == 0x40){
 				if(Packet.Param2 == 0x04){
-					MP3_SendData(lastsent);
+					if(lastsent[0]==0x03){
+						uint32_t rand = 0;
+						HAL_RNG_GenerateRandomNumber(&hrng, &rand);
+						rand &= 0xFF;//convert it to one byte of random data
+						rand = (rand*(folders[folder-1])-1)/0xFF;//convert the one bye to the range of 0-max tracks-1
+						char send[4] = {0x03, 0x00, 0x00, firsttrack+rand};
+						MP3_SendData(send);
+					}else {
+						MP3_SendData(lastsent);
+					}
 
 					PacketSM = Start;
 					return 0;
