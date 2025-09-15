@@ -4,4 +4,4 @@
 ../Core/Src/MP3.c:220:6:MP3_Event_Post	16	static
 ../Core/Src/MP3.c:231:9:MP3_Event_Updater	56	static
 ../Core/Src/MP3.c:282:9:MP3_Event_Handler	128	static
-../Core/Src/MP3.c:471:10:MP3_GetCurrentFile	8	static
+../Core/Src/MP3.c:469:10:MP3_GetCurrentFile	8	static

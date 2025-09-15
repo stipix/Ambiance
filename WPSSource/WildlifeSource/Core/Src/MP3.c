@@ -375,7 +375,7 @@ uint8_t MP3_Event_Handler(Event_t event){
 		pause = 0;
 		starttime = TIMERS_GetMilliSeconds();
 		track = nexttrack;
-
+		lastplayed = 0;//removes the devices memory of the last played track to allow repeat songs
 		char send[4] = {0x03, 0x00, 0x00, firsttrack+nexttrack-1};
 		MP3_SendData(send);
 
@@ -446,7 +446,7 @@ uint8_t MP3_Event_Handler(Event_t event){
 						rand &= 0xFF;//convert it to one byte of random data
 						rand = (rand*(folders[folder-1])-1)/0xFF;//convert the one bye to the range of 0-max tracks-1
 						nexttrack = rand+1;
-					}while(nexttrack > folders[folder-1] && nexttrack != track);//prevent repeat tracks to avoid confusion the same command twice code above
+					}while(nexttrack > folders[folder-1]);//prevent repeat tracks to avoid confusion the same command twice code above
 					track = 0;
 					pause = 1;//entering duty cycle pause
 					char send[4] = {0x0E, 0x00, 0x00, 0x00};//pause
