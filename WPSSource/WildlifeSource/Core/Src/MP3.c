@@ -22,6 +22,7 @@
 //----------------------------------------Private Defines----------------------------------------
 #define CYCLELENGTH (10/*minutes*/*60000/*milliseconds/minute*/)//duty cycle time in milliseconds
 #define RESETTIMER 2000
+#define FAILEDTRACKRECOVERY (10/*minutes*/*60000/*milliseconds/minute*/)
 
 
 //----------------------------------------Private Typedefs---------------------------------------
@@ -162,6 +163,8 @@ uint8_t parsePacket(char rx){
 	case Checksum2:
 		if(rx == 0xEF){
 			if(Packet.command == 0x40){
+				BSP_LED_On(LED_RED);
+				discountprintf("%X %X",Packet.Param1, Packet.Param2);
 				if(Packet.Param2 == 0x04){
 //					if(lastsent[0]==0x03){
 //						uint32_t rand = 0;
@@ -254,6 +257,17 @@ Event_t MP3_Event_Updater(void){
 			event.status = EVENT_TIMEOUT;
 			MP3_Event_Post(event);
 
+		}
+
+	}
+	//error recover, the MP3 Player should have finished the track by now
+	if(pause == 0 && initialized){
+		if(TIMERS_GetMilliSeconds() > FAILEDTRACKRECOVERY){
+			Packet.command = 0x3D;//hijack the system to pretend like the track ended
+			Packet.Param2 = track;
+			starttime = TIMERS_GetMilliSeconds();
+			event.status = EVENT_LPUART;
+			MP3_Event_Post(event);
 		}
 	}
 
